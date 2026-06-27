@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DashboardHeader from '../components/dashboard/DashboardHeader';
@@ -7,6 +7,7 @@ import QuickActions from '../components/dashboard/QuickActions';
 import RecentPolls from '../components/dashboard/RecentPolls';
 import EmptyState from '../components/dashboard/EmptyState';
 import { getDashboardStats, getRecentPolls } from '../api/dashboard.api';
+import useSocket from '../hooks/useSocket';
 
 /**
  * Premium Dashboard Overview Page
@@ -21,31 +22,62 @@ const DashboardPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch Dashboard Data on Mount
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        
-        // Fetch both endpoints concurrently for optimal performance
-        const [statsResponse, pollsResponse] = await Promise.all([
-          getDashboardStats(),
-          getRecentPolls(5)
-        ]);
-        
-        setStats(statsResponse?.data || null);
-        setPolls(pollsResponse?.data || []);
-        
-      } catch (err) {
+  const socket = useSocket();
+
+  // ---------------------------------------------------------------------------
+  // DATA FETCHING
+  // ---------------------------------------------------------------------------
+  const fetchDashboardData = useCallback(async (showLoader = true) => {
+    try {
+      if (showLoader) setIsLoading(true);
+      setError(null);
+      
+      // Fetch both endpoints concurrently for optimal performance
+      const [statsResponse, pollsResponse] = await Promise.all([
+        getDashboardStats(),
+        getRecentPolls(5)
+      ]);
+      
+      setStats(statsResponse?.data || null);
+      setPolls(pollsResponse?.data || []);
+      
+    } catch (err) {
+      if (showLoader) {
         setError(err.message || 'Failed to load dashboard data. Please try again.');
-      } finally {
-        setIsLoading(false);
       }
+    } finally {
+      if (showLoader) setIsLoading(false);
+    }
+  }, []);
+
+  // Initial fetch on mount
+  useEffect(() => {
+    fetchDashboardData(true);
+  }, [fetchDashboardData]);
+
+  // ---------------------------------------------------------------------------
+  // REAL-TIME SOCKET INTEGRATION
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleDashboardUpdate = () => {
+      // Data changed remotely (new poll, response, etc.) -> Silently refetch
+      fetchDashboardData(false);
     };
 
-    fetchDashboardData();
-  }, []);
+    // Attach listeners for all relevant dashboard events
+    socket.on('pollCreated', handleDashboardUpdate);
+    socket.on('pollUpdated', handleDashboardUpdate);
+    socket.on('responseSubmitted', handleDashboardUpdate);
+
+    // Cleanup listeners on unmount
+    return () => {
+      socket.off('pollCreated', handleDashboardUpdate);
+      socket.off('pollUpdated', handleDashboardUpdate);
+      socket.off('responseSubmitted', handleDashboardUpdate);
+    };
+  }, [socket, fetchDashboardData]);
 
   // ---------------------------------------------------------------------------
   // RENDER: Loading State

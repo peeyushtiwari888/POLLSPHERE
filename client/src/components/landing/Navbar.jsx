@@ -80,12 +80,11 @@ const Navbar = () => {
         <div className="flex items-center justify-between">
           
           {/* Logo Section */}
-          <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center">
-              <span className="text-white font-bold text-xl leading-none">P</span>
-            </div>
-            <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white">
-              PollSphere
+          <div className="flex-shrink-0 flex items-center gap-2.5 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            <img src="/logo.png" alt="PollSphere Icon" className="h-8 w-auto object-contain rounded-lg shadow-sm" />
+            <span className="font-extrabold text-2xl tracking-tighter">
+              <span className="text-gray-900 dark:text-white">Poll</span>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500">Sphere</span>
             </span>
           </div>
 

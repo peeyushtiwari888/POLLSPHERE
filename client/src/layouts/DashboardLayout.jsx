@@ -39,15 +39,15 @@ const DashboardLayout = () => {
       {/* Dynamic left margin based on the desktop sidebar state */}
       <div 
         className={`
-          flex flex-col min-h-screen transition-all duration-300 ease-in-out
-          lg:${isSidebarCollapsed ? 'ml-20' : 'ml-64'}
+          flex flex-col min-h-screen w-full transition-all duration-300 ease-in-out
+          ${isSidebarCollapsed ? 'lg:ml-20 lg:w-[calc(100%-5rem)]' : 'lg:ml-64 lg:w-[calc(100%-16rem)]'}
         `}
       >
         {/* Sticky Top Navigation */}
         <TopNavbar onMenuClick={() => setIsSidebarOpen(true)} />
 
         {/* Dynamic Page Content */}
-        <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 overflow-x-hidden">
           
           {/* 
             React Router Outlet 

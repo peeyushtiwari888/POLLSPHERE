@@ -6,6 +6,7 @@ import { Toaster } from 'react-hot-toast';
 // Providers
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import { SocketProvider } from './socket/SocketProvider';
 
 // Import global font (Make sure @fontsource/inter is installed, or remove if using Google Fonts in index.html)
 import '@fontsource/inter';
@@ -27,19 +28,21 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <ThemeProvider>
         {/* AuthProvider makes authentication state globally accessible */}
         <AuthProvider>
-        <App />
-        
-        {/* Toaster renders the global toast notifications (success/error popups) */}
-        <Toaster 
-          position="bottom-right"
-          toastOptions={{
-            // Premium SaaS aesthetic tweaks for toasts
-            className: 'dark:bg-zinc-900 dark:text-white',
-            style: {
-              borderRadius: '12px',
-            },
-          }} 
-        />
+          <SocketProvider>
+            <App />
+            
+            {/* Toaster renders the global toast notifications (success/error popups) */}
+            <Toaster 
+              position="bottom-right"
+              toastOptions={{
+                // Premium SaaS aesthetic tweaks for toasts
+                className: 'dark:bg-zinc-900 dark:text-white',
+                style: {
+                  borderRadius: '12px',
+                },
+              }} 
+            />
+          </SocketProvider>
         </AuthProvider>
       </ThemeProvider>
     </BrowserRouter>

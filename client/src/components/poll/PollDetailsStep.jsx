@@ -1,9 +1,14 @@
 import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Type, AlignLeft, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
+
+// Child Components
+import ThumbnailUploader from './ThumbnailUploader';
 
 // Zod validation schema
 const pollDetailsSchema = z.object({
@@ -12,7 +17,7 @@ const pollDetailsSchema = z.object({
     .max(100, "Title cannot exceed 100 characters")
     .nonempty("Poll title is required"),
   description: z.string()
-    .max(500, "Description cannot exceed 500 characters")
+    .max(5000, "Description cannot exceed 5000 characters")
     .optional(),
 });
 
@@ -25,6 +30,7 @@ const pollDetailsSchema = z.object({
 const PollDetailsStep = ({ data, updateData }) => {
   const { 
     register, 
+    control,
     formState: { errors }, 
     watch 
   } = useForm({
@@ -36,6 +42,9 @@ const PollDetailsStep = ({ data, updateData }) => {
     mode: 'onChange', // Validate instantly as the user types
   });
 
+  // Since thumbnailUrl is not managed by hook-form (it's custom), we track it via parent data or local state
+  const thumbnailUrl = data?.thumbnailUrl || '';
+
   // Watch fields to sync them back to the master wizard state
   const titleValue = watch('title');
   const descriptionValue = watch('description');
@@ -45,18 +54,19 @@ const PollDetailsStep = ({ data, updateData }) => {
   useEffect(() => {
     updateData({
       title: titleValue,
+      thumbnailUrl: thumbnailUrl,
       description: descriptionValue,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [titleValue, descriptionValue]);
+  }, [titleValue, descriptionValue, thumbnailUrl]);
 
   return (
     <div className="max-w-2xl mx-auto flex flex-col space-y-8">
       
-      <div className="text-center space-y-2 mb-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">What is your poll about?</h2>
+      <div className="space-y-1.5 mb-6">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">Poll Details</h2>
         <p className="text-gray-500 dark:text-gray-400 text-sm">
-          Give your poll a clear, engaging title and optionally add some context in the description.
+          Provide a clear title and optional context for your poll.
         </p>
       </div>
 
@@ -97,23 +107,42 @@ const PollDetailsStep = ({ data, updateData }) => {
           </AnimatePresence>
         </div>
 
-        {/* Description Textarea */}
+        {/* Thumbnail Uploader */}
+        <ThumbnailUploader 
+          currentThumbnail={thumbnailUrl} 
+          onUploadSuccess={(url) => updateData({ ...data, thumbnailUrl: url })}
+          onRemove={() => updateData({ ...data, thumbnailUrl: '' })}
+        />
+
+        {/* Description ReactQuill */}
         <div className="space-y-2">
           <label htmlFor="description" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
             Description <span className="text-gray-400 font-normal ml-1">(Optional)</span>
           </label>
-          <div className="relative">
-            <div className="absolute top-3 left-0 flex items-center pl-4 pointer-events-none text-gray-400">
-              <AlignLeft className="w-5 h-5" />
-            </div>
-            <textarea
-              id="description"
-              placeholder="Add extra context, instructions, or rules for this poll..."
-              rows={4}
-              {...register('description')}
-              className={`w-full pl-11 pr-4 py-3 bg-gray-50 dark:bg-zinc-900/50 border ${
-                errors.description ? 'border-red-500 focus:ring-red-500/20' : 'border-gray-200 dark:border-zinc-800 focus:border-orange-500 focus:ring-orange-500/20'
-              } rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 transition-all duration-300 resize-none`}
+          <div className={`relative bg-white dark:bg-zinc-900/50 rounded-xl overflow-hidden border ${
+            errors.description ? 'border-red-500' : 'border-gray-200 dark:border-zinc-800'
+          }`}>
+            <Controller
+              name="description"
+              control={control}
+              render={({ field }) => (
+                <ReactQuill 
+                  theme="snow"
+                  value={field.value || ''} 
+                  onChange={field.onChange}
+                  placeholder="Add extra context, instructions, or rules for this poll..."
+                  className="bg-white dark:bg-transparent text-gray-900 dark:text-white"
+                  modules={{
+                    toolbar: [
+                      ['bold', 'italic'],
+                      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                      ['link'],
+                      [{ 'header': [1, 2, 3, false] }],
+                      ['clean']
+                    ]
+                  }}
+                />
+              )}
             />
           </div>
 
@@ -135,8 +164,8 @@ const PollDetailsStep = ({ data, updateData }) => {
                 <motion.div key="empty" className="text-sm text-transparent">.</motion.div>
               )}
             </AnimatePresence>
-            <span className={`text-xs ${descriptionValue?.length > 500 ? 'text-red-500 font-medium' : 'text-gray-400'}`}>
-              {descriptionValue?.length || 0} / 500
+            <span className={`text-xs ${descriptionValue?.length > 5000 ? 'text-red-500 font-medium' : 'text-gray-400'}`}>
+              {descriptionValue?.length || 0} / 5000
             </span>
           </div>
         </div>

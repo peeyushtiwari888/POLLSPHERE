@@ -48,7 +48,7 @@ const pollSchema = new mongoose.Schema(
     description: {
       type: String,
       trim: true,
-      maxlength: [500, 'Description cannot exceed 500 characters'],
+      maxlength: [5000, 'Description cannot exceed 5000 characters'],
     },
     creatorId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -62,6 +62,19 @@ const pollSchema = new mongoose.Schema(
     isResultsPublished: {
       type: Boolean,
       default: false, // Controls whether public users can see the analytics dashboard
+    },
+    status: {
+      type: String,
+      enum: ['DRAFT', 'SCHEDULED', 'PUBLISHED'],
+      default: 'DRAFT',
+    },
+    scheduledPublishDate: {
+      type: Date,
+      // If status is SCHEDULED, this should be populated.
+    },
+    isArchived: {
+      type: Boolean,
+      default: false, // Soft delete/archive status
     },
     expiryDate: {
       type: Date,

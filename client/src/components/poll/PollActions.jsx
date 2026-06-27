@@ -3,9 +3,10 @@ import { MoreVertical, Eye, Edit3, BarChart3, Share2, Trash2 } from 'lucide-reac
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
-import { deletePoll } from '../../api/poll.api';
+import { deletePoll, archivePoll, restorePoll, duplicatePoll, publishPoll } from '../../api/poll.api';
 import DeletePollModal from './DeletePollModal';
 import SharePollModal from './SharePollModal';
+import PublishPollModal from './PublishPollModal';
 
 /**
  * Poll Actions Menu
@@ -17,7 +18,10 @@ const PollActions = ({ poll, onRefresh }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
   const menuRef = useRef(null);
   const navigate = useNavigate();
 
@@ -44,7 +48,7 @@ const PollActions = ({ poll, onRefresh }) => {
     };
   }, [isOpen]);
 
-  const handleAction = (e, actionName) => {
+  const handleAction = async (e, actionName) => {
     e.preventDefault();
     e.stopPropagation();
     setIsOpen(false);
@@ -55,6 +59,41 @@ const PollActions = ({ poll, onRefresh }) => {
       navigate(`/polls/${poll._id}/edit`);
     } else if (actionName === 'Share') {
       setIsShareModalOpen(true);
+    } else if (actionName === 'Publish') {
+      setIsPublishModalOpen(true);
+    } else if (actionName === 'Archive') {
+      setIsProcessing(true);
+      try {
+        await archivePoll(poll._id);
+        toast.success('Poll archived successfully');
+        if (onRefresh) onRefresh();
+      } catch (error) {
+        toast.error(error.message || 'Failed to archive poll');
+      } finally {
+        setIsProcessing(false);
+      }
+    } else if (actionName === 'Restore') {
+      setIsProcessing(true);
+      try {
+        await restorePoll(poll._id);
+        toast.success('Poll restored successfully');
+        if (onRefresh) onRefresh();
+      } catch (error) {
+        toast.error(error.message || 'Failed to restore poll');
+      } finally {
+        setIsProcessing(false);
+      }
+    } else if (actionName === 'Duplicate') {
+      setIsProcessing(true);
+      try {
+        await duplicatePoll(poll._id);
+        toast.success('Poll duplicated successfully');
+        if (onRefresh) onRefresh();
+      } catch (error) {
+        toast.error(error.message || 'Failed to duplicate poll');
+      } finally {
+        setIsProcessing(false);
+      }
     } else {
       console.log(`Action triggered: ${actionName} on poll ${poll?._id}`);
       // Future: trigger Analytics navigation here
@@ -75,6 +114,20 @@ const PollActions = ({ poll, onRefresh }) => {
     }
   };
 
+  const handleConfirmPublish = async (publishData) => {
+    setIsPublishing(true);
+    try {
+      await publishPoll(poll._id, publishData);
+      toast.success(publishData.scheduledPublishDate ? 'Poll scheduled successfully' : 'Poll published successfully');
+      setIsPublishModalOpen(false);
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      toast.error(error.message || 'Failed to publish poll');
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
   return (
     <>
       <div className="relative" ref={menuRef}>
@@ -86,11 +139,12 @@ const PollActions = ({ poll, onRefresh }) => {
         onClick={toggleMenu}
         aria-label="Open actions menu"
         aria-expanded={isOpen}
+        disabled={isProcessing}
         className={`p-2 rounded-xl transition-colors focus:outline-none ${
           isOpen 
             ? 'bg-gray-100 dark:bg-zinc-800 text-gray-900 dark:text-white' 
             : 'text-gray-400 hover:text-gray-900 hover:bg-gray-50 dark:hover:text-white dark:hover:bg-zinc-800'
-        }`}
+        } ${isProcessing ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
         <MoreVertical className="w-5 h-5" />
       </button>
@@ -110,6 +164,13 @@ const PollActions = ({ poll, onRefresh }) => {
             <div className="p-1.5 flex flex-col gap-0.5">
               
               {/* Primary Actions */}
+              {poll?.status === 'DRAFT' && (
+                <button onClick={(e) => handleAction(e, 'Publish')} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-white bg-orange-500 hover:bg-orange-600 rounded-xl transition-colors text-left group mb-1">
+                  <Globe className="w-4 h-4 text-white" />
+                  Publish
+                </button>
+              )}
+
               <button onClick={(e) => handleAction(e, 'View')} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-xl transition-colors text-left group">
                 <Eye className="w-4 h-4 text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300" />
                 View Poll
@@ -125,14 +186,41 @@ const PollActions = ({ poll, onRefresh }) => {
                 Share
               </button>
 
-              <div className="h-px bg-gray-100 dark:bg-zinc-800 my-1 mx-2" />
-
-              {/* Destructive Actions */}
-              <button onClick={(e) => handleAction(e, 'Edit')} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-xl transition-colors text-left group">
-                <Edit3 className="w-4 h-4 text-gray-400 group-hover:text-orange-500" />
-                Edit
+              <button onClick={(e) => handleAction(e, 'Duplicate')} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-xl transition-colors text-left group">
+                {/* using Edit3 as a placeholder for duplicate icon, since lucide Copy/Files might not be imported, let's just use Edit3 or Share2, actually we can just use a plain svg or nothing, or let's use an empty span for now */}
+                <span className="w-4 h-4 flex items-center justify-center text-gray-400 group-hover:text-indigo-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </span>
+                Duplicate
               </button>
 
+              <div className="h-px bg-gray-100 dark:bg-zinc-800 my-1 mx-2" />
+
+              {/* Editing / Archiving Actions */}
+              {poll?.status === 'DRAFT' && (
+                <button onClick={(e) => handleAction(e, 'Edit')} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-xl transition-colors text-left group">
+                  <Edit3 className="w-4 h-4 text-gray-400 group-hover:text-orange-500" />
+                  Edit
+                </button>
+              )}
+
+              {poll?.isArchived ? (
+                <button onClick={(e) => handleAction(e, 'Restore')} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-xl transition-colors text-left group">
+                  <span className="w-4 h-4 flex items-center justify-center text-gray-400 group-hover:text-emerald-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                  </span>
+                  Restore
+                </button>
+              ) : (
+                <button onClick={(e) => handleAction(e, 'Archive')} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-xl transition-colors text-left group">
+                  <span className="w-4 h-4 flex items-center justify-center text-gray-400 group-hover:text-amber-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="21 8 21 21 3 21 3 8"></polyline><rect x="1" y="3" width="22" height="5"></rect><line x1="10" y1="12" x2="14" y2="12"></line></svg>
+                  </span>
+                  Archive
+                </button>
+              )}
+
+              {/* Destructive Actions */}
               <button onClick={(e) => handleAction(e, 'Delete')} className="w-full flex items-center gap-3 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-xl transition-colors text-left group">
                 <Trash2 className="w-4 h-4 text-red-400 group-hover:text-red-600 dark:group-hover:text-red-400" />
                 Delete
@@ -157,6 +245,14 @@ const PollActions = ({ poll, onRefresh }) => {
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         pollId={poll?._id}
+      />
+
+      <PublishPollModal
+        isOpen={isPublishModalOpen}
+        onClose={() => setIsPublishModalOpen(false)}
+        onConfirm={handleConfirmPublish}
+        isPublishing={isPublishing}
+        pollTitle={poll?.title}
       />
     </>
   );

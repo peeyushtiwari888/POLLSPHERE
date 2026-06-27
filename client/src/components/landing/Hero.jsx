@@ -30,14 +30,7 @@ const Hero = () => {
             }}
             className="max-w-2xl mx-auto lg:mx-0 text-center lg:text-left"
           >
-            {/* Badge */}
-            <motion.div variants={fadeUp} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 text-orange-600 dark:text-orange-400 text-sm font-medium mb-6">
-              <span className="flex h-2 w-2 relative">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
-              </span>
-              PollSphere v1.0 is live
-            </motion.div>
+
 
             {/* Heading */}
             <motion.div variants={fadeUp}>

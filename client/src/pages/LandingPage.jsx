@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import Navbar from '../components/landing/Navbar';
 import Hero from '../components/landing/Hero';
-import BuiltWith from '../components/landing/BuiltWith';
+import Testimonials from '../components/landing/Testimonials';
 import Features from '../components/landing/Features';
 import HowItWorks from '../components/landing/HowItWorks';
 import LivePreview from '../components/landing/LivePreview';
@@ -24,7 +24,7 @@ const LandingPage = () => {
       {/* Main Page Content */}
       <main className="w-full flex flex-col">
         <Hero />
-        <BuiltWith />
+        <Testimonials />
         <Features />
         <HowItWorks />
         <LivePreview />

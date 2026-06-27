@@ -13,7 +13,9 @@ import {
 const ReviewStep = ({ data }) => {
   // Gracefully fallback to empty structures if data is missing during dev
   const { 
-    details = { title: '', description: '' }, 
+    title = '',
+    description = '',
+    thumbnailUrl = '',
     questions = [], 
     settings = { isAnonymous: false, requireAuth: false, expiryDate: '', expiryTime: '' } 
   } = data || {};
@@ -22,13 +24,13 @@ const ReviewStep = ({ data }) => {
     <div className="max-w-3xl mx-auto flex flex-col space-y-10">
       
       {/* Header */}
-      <div className="text-center space-y-2 mb-2">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white flex items-center justify-center gap-2">
+      <div className="space-y-1.5 mb-4">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white flex items-center gap-2 tracking-tight">
           <Sparkles className="w-6 h-6 text-orange-500" />
           Review & Publish
         </h2>
         <p className="text-gray-500 dark:text-gray-400 text-sm">
-          Double-check your poll details. Once published, you cannot edit the questions.
+          Verify your configuration. Questions cannot be edited after publishing.
         </p>
       </div>
 
@@ -49,14 +51,22 @@ const ReviewStep = ({ data }) => {
             <div>
               <p className="text-xs font-semibold tracking-wider text-gray-500 dark:text-gray-400 uppercase mb-1">Poll Title</p>
               <p className="text-base font-medium text-gray-900 dark:text-white">
-                {details.title || <span className="text-red-500 flex items-center gap-1"><AlertCircle className="w-4 h-4" /> Missing Title</span>}
+                {title || <span className="text-red-500 flex items-center gap-1"><AlertCircle className="w-4 h-4" /> Missing Title</span>}
               </p>
             </div>
-            {details.description && (
+            {thumbnailUrl && (
+              <div>
+                <p className="text-xs font-semibold tracking-wider text-gray-500 dark:text-gray-400 uppercase mb-1">Thumbnail</p>
+                <div className="w-full sm:w-48 aspect-video rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-800">
+                  <img src={thumbnailUrl} alt="Thumbnail" className="w-full h-full object-cover" />
+                </div>
+              </div>
+            )}
+            {description && (
               <div>
                 <p className="text-xs font-semibold tracking-wider text-gray-500 dark:text-gray-400 uppercase mb-1">Description</p>
                 <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-wrap">
-                  {details.description}
+                  {description}
                 </p>
               </div>
             )}

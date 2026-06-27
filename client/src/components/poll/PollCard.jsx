@@ -27,9 +27,29 @@ const PollCard = ({ poll, onRefresh }) => {
 
   // Determine Status
   const isExpired = expiryDate ? isPast(new Date(expiryDate)) : false;
-  const statusColor = isExpired 
-    ? 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-500 border-red-100 dark:border-red-900/30' 
-    : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30';
+  const currentStatus = isExpired ? 'EXPIRED' : (poll.status || 'DRAFT');
+
+  let statusColor = '';
+  let statusLabel = '';
+
+  switch (currentStatus) {
+    case 'EXPIRED':
+      statusColor = 'bg-red-50 text-red-600 dark:bg-red-500/10 dark:text-red-500 border-red-100 dark:border-red-900/30';
+      statusLabel = 'Expired';
+      break;
+    case 'PUBLISHED':
+      statusColor = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30';
+      statusLabel = 'Active';
+      break;
+    case 'SCHEDULED':
+      statusColor = 'bg-indigo-50 text-indigo-600 dark:bg-indigo-500/10 dark:text-indigo-400 border-indigo-100 dark:border-indigo-900/30';
+      statusLabel = 'Scheduled';
+      break;
+    default:
+      statusColor = 'bg-gray-50 text-gray-600 dark:bg-gray-500/10 dark:text-gray-400 border-gray-200 dark:border-gray-800';
+      statusLabel = 'Draft';
+      break;
+  }
 
   // Format Dates safely
   const formattedCreated = createdAt ? format(new Date(createdAt), 'MMM d, yyyy') : 'Unknown';
@@ -58,7 +78,7 @@ const PollCard = ({ poll, onRefresh }) => {
         <div className="flex flex-wrap items-center gap-2">
           {/* Status Badge */}
           <div className={`px-2.5 py-1 text-xs font-bold uppercase tracking-wider rounded-lg border ${statusColor}`}>
-            {isExpired ? 'Expired' : 'Active'}
+            {statusLabel}
           </div>
           
           {/* Date Badge */}

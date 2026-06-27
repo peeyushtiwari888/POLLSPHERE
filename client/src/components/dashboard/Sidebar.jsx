@@ -5,6 +5,8 @@ import {
   LineChart, User, LogOut, ChevronLeft, ChevronRight 
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+import { toast } from 'react-hot-toast';
 
 /**
  * Premium SaaS Sidebar Component
@@ -19,6 +21,17 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const Sidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success('Logged out successfully');
+      navigate('/login');
+    } catch (error) {
+      toast.error('Failed to log out');
+    }
+  };
 
   const navItems = [
     { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
@@ -63,11 +76,8 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
       >
         {/* Brand / Logo Header */}
         <div className="h-16 flex items-center justify-between px-4 lg:px-6 border-b border-gray-200 dark:border-zinc-800">
-          <div className="flex items-center gap-3 overflow-hidden whitespace-nowrap cursor-pointer">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-amber-500 flex-shrink-0 flex items-center justify-center shadow-lg shadow-orange-500/20">
-              <span className="text-white font-bold text-xl leading-none">P</span>
-            </div>
-            
+          <div className="flex items-center gap-3 overflow-hidden whitespace-nowrap cursor-pointer" onClick={() => navigate('/dashboard')}>
+            <img src="/logo.png" alt="PollSphere Icon" className="h-8 w-auto max-w-[40px] object-contain flex-shrink-0 rounded-lg shadow-sm" />
             <AnimatePresence mode="wait">
               {!isCollapsed && (
                 <motion.span 
@@ -75,9 +85,10 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -10 }}
                   transition={{ duration: 0.2 }}
-                  className="font-bold text-xl tracking-tight text-gray-900 dark:text-white"
+                  className="font-extrabold text-2xl tracking-tighter"
                 >
-                  PollSphere
+                  <span className="text-gray-900 dark:text-white">Poll</span>
+                  <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500">Sphere</span>
                 </motion.span>
               )}
             </AnimatePresence>
@@ -141,6 +152,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
           
           {/* Logout Button */}
           <button
+            onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 font-medium transition-all group relative"
             aria-label="Logout"
           >

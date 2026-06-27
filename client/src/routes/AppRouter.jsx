@@ -8,15 +8,20 @@ import ProtectedRoute from '../components/auth/ProtectedRoute.jsx';
 const Home = lazy(() => import('../pages/LandingPage.jsx'));
 const Login = lazy(() => import('../pages/Login.jsx'));
 const Signup = lazy(() => import('../pages/SignupPage.jsx'));
+const ForgotPassword = lazy(() => import('../pages/ForgotPasswordPage.jsx'));
+const ResetPassword = lazy(() => import('../pages/ResetPasswordPage.jsx'));
 
 // Dashboard & Layout
 const DashboardLayout = lazy(() => import('../layouts/DashboardLayout.jsx'));
 const DashboardPage = lazy(() => import('../pages/DashboardPage.jsx'));
+const ProfilePage = lazy(() => import('../pages/ProfilePage.jsx'));
+const SettingsPage = lazy(() => import('../pages/SettingsPage.jsx'));
 
 // Other App Pages
 const CreatePoll = lazy(() => import('../pages/CreatePollPage.jsx'));
-const MyPolls = lazy(() => import('../pages/MyPolls.jsx'));
-const ViewPoll = lazy(() => import('../pages/ViewPoll.jsx'));
+const MyPolls = lazy(() => import('../pages/MyPollsPage.jsx'));
+const ViewPoll = lazy(() => import('../pages/PublicPollPage.jsx'));
+const PollSubmitted = lazy(() => import('../pages/PollSubmittedPage.jsx'));
 const Analytics = lazy(() => import('../pages/Analytics.jsx'));
 const PublicResults = lazy(() => import('../pages/PublicResults.jsx'));
 const NotFound = lazy(() => import('../pages/NotFound.jsx'));
@@ -40,11 +45,14 @@ const AppRouter = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
         
         {/* ==============================
             Poll Participation Routes 
             ============================== */}
         <Route path="/poll/:pollId" element={<ViewPoll />} />
+        <Route path="/poll/:pollId/success" element={<PollSubmitted />} />
         <Route path="/results/:pollId" element={<PublicResults />} />
 
         {/* ==============================
@@ -64,6 +72,8 @@ const AppRouter = () => {
           <Route path="/polls/create" element={<CreatePoll />} />
           <Route path="/polls/:id/edit" element={<CreatePoll />} />
           <Route path="/analytics/:pollId" element={<Analytics />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/settings" element={<SettingsPage />} />
         </Route>
 
         {/* ==============================

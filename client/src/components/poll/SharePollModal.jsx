@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Share2, X, Copy, Check, Globe, Share } from 'lucide-react';
+import { Share2, X, Copy, Check, Globe, Share, Download } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { QRCodeCanvas } from 'qrcode.react';
 
 /**
  * Share Poll Modal
@@ -48,6 +49,24 @@ const SharePollModal = ({ isOpen, onClose, pollId }) => {
     } else {
       // Fallback to clipboard if Native API is unsupported
       handleCopy();
+    }
+  };
+
+  const downloadQRCode = () => {
+    const canvas = document.getElementById('qr-code-canvas');
+    if (canvas) {
+      const pngUrl = canvas
+        .toDataURL('image/png')
+        .replace('image/png', 'image/octet-stream');
+      let downloadLink = document.createElement('a');
+      downloadLink.href = pngUrl;
+      downloadLink.download = `poll_${pollId}_qrcode.png`;
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+      document.body.removeChild(downloadLink);
+      toast.success('QR Code downloaded!');
+    } else {
+      toast.error('Failed to generate QR Code');
     }
   };
 
@@ -144,6 +163,28 @@ const SharePollModal = ({ isOpen, onClose, pollId }) => {
                     )}
                   </button>
                 </div>
+              </div>
+
+              {/* QR Code Section */}
+              <div className="flex flex-col items-center justify-center p-6 bg-gray-50 dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800 rounded-2xl mb-8">
+                <div className="bg-white p-3 rounded-2xl shadow-sm mb-4">
+                  <QRCodeCanvas 
+                    id="qr-code-canvas"
+                    value={publicUrl} 
+                    size={160}
+                    level={"H"}
+                    includeMargin={true}
+                    bgColor={"#ffffff"}
+                    fgColor={"#000000"}
+                  />
+                </div>
+                <button
+                  onClick={downloadQRCode}
+                  className="flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                >
+                  <Download className="w-4 h-4" />
+                  Download QR Code
+                </button>
               </div>
 
               {/* Social Share Placeholders / Native Share */}

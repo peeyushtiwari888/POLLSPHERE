@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import PDFDocument from 'pdfkit';
 import Poll from '../poll/poll.model.js';
 import Response from '../response/response.model.js';
 
@@ -213,5 +214,71 @@ export const getPublicPollResults = async (pollId) => {
     },
     results: questionAnalytics
   };
+};
+
+/**
+ * Generate CSV data for export
+ */
+export const exportAnalyticsCSV = async (pollId, userId) => {
+  const overview = await getPollAnalyticsOverview(pollId, userId);
+  const questions = await getQuestionWiseAnalytics(pollId, userId);
+
+  let csv = 'Poll Title,Total Responses,Question,Option,Votes,Percentage\n';
+  
+  questions.forEach(q => {
+    q.options.forEach(opt => {
+      // Escape commas and quotes for CSV safety
+      const title = `"${overview.pollMetadata.title.replace(/"/g, '""')}"`;
+      const qText = `"${q.text.replace(/"/g, '""')}"`;
+      const optText = `"${opt.text.replace(/"/g, '""')}"`;
+      
+      csv += `${title},${overview.engagement.totalResponses},${qText},${optText},${opt.votes},${opt.percentage}%\n`;
+    });
+  });
+
+  return csv;
+};
+
+/**
+ * Generate PDF buffer for export
+ */
+export const exportAnalyticsPDF = async (pollId, userId) => {
+  const overview = await getPollAnalyticsOverview(pollId, userId);
+  const questions = await getQuestionWiseAnalytics(pollId, userId);
+
+  return new Promise((resolve, reject) => {
+    try {
+      const doc = new PDFDocument({ margin: 50 });
+      const buffers = [];
+      doc.on('data', buffers.push.bind(buffers));
+      doc.on('end', () => resolve(Buffer.concat(buffers)));
+      doc.on('error', reject);
+      
+      // Title
+      doc.fontSize(24).font('Helvetica-Bold').text(overview.pollMetadata.title, { align: 'center' });
+      doc.moveDown(0.5);
+      
+      // Meta
+      doc.fontSize(12).font('Helvetica').fillColor('#666666');
+      doc.text(`Status: ${overview.pollMetadata.status} | Total Responses: ${overview.engagement.totalResponses}`, { align: 'center' });
+      doc.moveDown(2);
+      
+      // Questions
+      doc.fillColor('#000000');
+      questions.forEach((q, i) => {
+        doc.fontSize(16).font('Helvetica-Bold').text(`Q${i + 1}: ${q.text}`);
+        doc.moveDown(0.5);
+        
+        q.options.forEach(opt => {
+          doc.fontSize(12).font('Helvetica').text(`• ${opt.text}: ${opt.votes} votes (${opt.percentage}%)`, { indent: 20 });
+        });
+        doc.moveDown(1.5);
+      });
+      
+      doc.end();
+    } catch (error) {
+      reject(error);
+    }
+  });
 };
 

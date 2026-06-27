@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, ChevronRight, ChevronLeft, Loader2 } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -13,10 +13,10 @@ import PollSettingsStep from './PollSettingsStep';
 import ReviewStep from './ReviewStep';
 
 const STEPS = [
-  { id: 1, title: 'Details', description: 'Name and describe your poll' },
-  { id: 2, title: 'Questions', description: 'Add your poll questions' },
-  { id: 3, title: 'Settings', description: 'Configure poll behavior' },
-  { id: 4, title: 'Review', description: 'Verify and publish' }
+  { id: 1, title: 'Details', description: 'Configure basic attributes' },
+  { id: 2, title: 'Questions', description: 'Build your questionnaire' },
+  { id: 3, title: 'Settings', description: 'Manage access & lifecycle' },
+  { id: 4, title: 'Review', description: 'Finalize and deploy' }
 ];
 
 /**
@@ -34,6 +34,7 @@ const CreatePollWizard = () => {
   // Centralized Master Form State
   const [formData, setFormData] = useState({
     title: '',
+    thumbnailUrl: '',
     description: '',
     questions: [], // Array of question objects
     settings: {
@@ -63,6 +64,7 @@ const CreatePollWizard = () => {
         // Map backend response back into form schema
         setFormData({
           title: poll.title || '',
+          thumbnailUrl: poll.thumbnailUrl || '',
           description: poll.description || '',
           questions: poll.questions || [],
           settings: {
@@ -123,6 +125,7 @@ const CreatePollWizard = () => {
       // 2. Transform Data to match Mongoose Schema
       const payload = {
         title: formData.title,
+        thumbnailUrl: formData.thumbnailUrl,
         description: formData.description,
         isAnonymous: formData.settings.isAnonymous,
         expiryDate: finalExpiryDate.toISOString(),
@@ -154,7 +157,12 @@ const CreatePollWizard = () => {
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
-        return <PollDetailsStep data={formData} updateData={(data) => updateFormData('details', data)} />;
+        return (
+          <PollDetailsStep 
+            data={formData} 
+            updateData={(data) => setFormData(prev => ({ ...prev, title: data.title, thumbnailUrl: data.thumbnailUrl, description: data.description }))} 
+          />
+        );
       case 2:
         return <QuestionsStep data={formData.questions} updateData={(data) => updateFormData('questions', data)} />;
       case 3:

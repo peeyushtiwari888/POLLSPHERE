@@ -30,12 +30,11 @@ const AuthCard = ({ children }) => {
           
           {/* Logo Section */}
           <div className="flex justify-center mb-8">
-            <Link to="/" className="flex items-center gap-2 group outline-none">
-              <div className="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center shadow-sm group-hover:shadow-md group-hover:scale-105 transition-all duration-300">
-                <span className="text-white font-bold text-2xl leading-none">P</span>
-              </div>
-              <span className="font-bold text-2xl tracking-tight text-gray-900 dark:text-white">
-                PollSphere
+            <Link to="/" className="flex items-center gap-2.5 group outline-none">
+              <img src="/logo.png" alt="PollSphere Icon" className="h-10 w-auto object-contain group-hover:scale-105 transition-transform duration-300 rounded-xl shadow-sm" />
+              <span className="font-extrabold text-3xl tracking-tighter">
+                <span className="text-gray-900 dark:text-white">Poll</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500">Sphere</span>
               </span>
             </Link>
           </div>

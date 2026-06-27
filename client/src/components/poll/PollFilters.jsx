@@ -9,7 +9,7 @@ import { Filter } from 'lucide-react';
  * Purely presentational; delegates state changes via onFilterChange.
  */
 const PollFilters = ({ activeFilter = 'All', onFilterChange }) => {
-  const filters = ['All', 'Draft', 'Published', 'Expired'];
+  const filters = ['All', 'Draft', 'Published', 'Expired', 'Archived'];
 
   return (
     <div className="flex items-center gap-3">

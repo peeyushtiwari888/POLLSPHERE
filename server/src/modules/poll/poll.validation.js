@@ -32,7 +32,7 @@ export const createPollSchema = z.object({
     description: z
       .string()
       .trim()
-      .max(500, 'Description cannot exceed 500 characters')
+      .max(5000, 'Description cannot exceed 5000 characters')
       .optional(),
     isAnonymous: z.boolean().optional(),
     expiryDate: z
@@ -53,7 +53,7 @@ export const updatePollSchema = z.object({
   }),
   body: z.object({
     title: z.string().trim().min(1).max(100).optional(),
-    description: z.string().trim().max(500).optional(),
+    description: z.string().trim().max(5000).optional(),
     isAnonymous: z.boolean().optional(),
     expiryDate: z
       .string()
@@ -72,4 +72,13 @@ export const publishPollSchema = z.object({
   params: z.object({
     id: z.string().regex(/^[0-9a-fA-F]{24}$/, 'Invalid Poll ID format'),
   }),
+  body: z.object({
+    scheduledPublishDate: z
+      .string()
+      .datetime({ message: 'Invalid datetime format. Expected ISO 8601 string.' })
+      .refine((val) => new Date(val) > new Date(), {
+        message: 'Scheduled date must be in the future',
+      })
+      .optional(),
+  }).optional(),
 });

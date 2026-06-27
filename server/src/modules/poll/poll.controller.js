@@ -27,11 +27,12 @@ export const createPoll = async (req, res) => {
 export const getMyPolls = async (req, res) => {
   try {
     const userId = req.user.id;
-    const polls = await pollService.getMyPolls(userId);
+    const result = await pollService.getMyPolls(userId, req.query);
 
     res.status(200).json({
       success: true,
-      data: polls,
+      data: result.polls,
+      pagination: result.pagination,
     });
   } catch (error) {
     res.status(500).json({
@@ -117,8 +118,9 @@ export const publishPoll = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.id;
+    const publishData = req.body || {};
 
-    const poll = await pollService.publishPoll(id, userId);
+    const poll = await pollService.publishPoll(id, userId, publishData);
 
     res.status(200).json({
       success: true,
@@ -130,6 +132,74 @@ export const publishPoll = async (req, res) => {
     res.status(statusCode).json({
       success: false,
       message: error.message || 'Failed to publish poll',
+    });
+  }
+};
+
+/**
+ * Handle Archive Poll Request
+ */
+export const archivePoll = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const poll = await pollService.archivePoll(id, userId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Poll archived successfully',
+      data: poll,
+    });
+  } catch (error) {
+    const statusCode = error.message.includes('authorized') ? 403 : 400;
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Failed to archive poll',
+    });
+  }
+};
+
+/**
+ * Handle Restore Poll Request
+ */
+export const restorePoll = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const poll = await pollService.restorePoll(id, userId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Poll restored successfully',
+      data: poll,
+    });
+  } catch (error) {
+    const statusCode = error.message.includes('authorized') ? 403 : 400;
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Failed to restore poll',
+    });
+  }
+};
+
+/**
+ * Handle Duplicate Poll Request
+ */
+export const duplicatePoll = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const poll = await pollService.duplicatePoll(id, userId);
+
+    res.status(201).json({
+      success: true,
+      message: 'Poll duplicated successfully',
+      data: poll,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Failed to duplicate poll',
     });
   }
 };

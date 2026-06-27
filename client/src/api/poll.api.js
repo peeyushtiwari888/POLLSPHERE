@@ -25,13 +25,13 @@ export const createPoll = async (pollData) => {
 };
 
 /**
- * Get all polls created by the currently authenticated user.
- * 
- * @returns {Promise<Object>} The list of user's polls
+ * Fetch all polls created by the logged in user
+ * @param {Object} params - Query parameters for pagination, filtering, searching, and sorting
+ * @returns {Promise<Object>} Clean response data with pagination info
  */
-export const getMyPolls = async () => {
+export const getMyPolls = async (params = {}) => {
   try {
-    const response = await api.get('/polls');
+    const response = await api.get('/polls', { params });
     return response.data;
   } catch (error) {
     handleApiError(error);
@@ -95,6 +95,51 @@ export const deletePoll = async (id) => {
 export const publishPoll = async (id, publishData = {}) => {
   try {
     const response = await api.patch(`/polls/${id}/publish`, publishData);
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+/**
+ * Archive a specific poll.
+ * 
+ * @param {string} id - The ID of the poll to archive
+ * @returns {Promise<Object>} Success message/response
+ */
+export const archivePoll = async (id) => {
+  try {
+    const response = await api.patch(`/polls/${id}/archive`);
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+/**
+ * Restore an archived poll.
+ * 
+ * @param {string} id - The ID of the poll to restore
+ * @returns {Promise<Object>} Success message/response
+ */
+export const restorePoll = async (id) => {
+  try {
+    const response = await api.patch(`/polls/${id}/restore`);
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+/**
+ * Duplicate a specific poll.
+ * 
+ * @param {string} id - The ID of the poll to duplicate
+ * @returns {Promise<Object>} The duplicated poll response
+ */
+export const duplicatePoll = async (id) => {
+  try {
+    const response = await api.post(`/polls/${id}/duplicate`);
     return response.data;
   } catch (error) {
     handleApiError(error);

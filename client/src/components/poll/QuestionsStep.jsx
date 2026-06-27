@@ -51,10 +51,10 @@ const QuestionsStep = ({ data = [], updateData }) => {
     <div className="max-w-3xl mx-auto flex flex-col space-y-8">
       
       {/* Header */}
-      <div className="text-center space-y-2 mb-2">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Design your questions</h2>
+      <div className="space-y-1.5 mb-4">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">Questions</h2>
         <p className="text-gray-500 dark:text-gray-400 text-sm">
-          Add multiple choices, dropdowns, or text inputs. You can add as many questions as you need.
+          Define the questions and available options for your audience.
         </p>
       </div>
 

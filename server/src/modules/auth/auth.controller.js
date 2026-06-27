@@ -94,3 +94,49 @@ export const logout = async (req, res) => {
     });
   }
 };
+
+/**
+ * Handle Forgot Password
+ */
+export const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    
+    // Get origin to construct reset URL (fallback if undefined)
+    const origin = req.get('origin') || `${req.protocol}://${req.get('host')}`;
+
+    const result = await authService.forgotPassword(email, origin);
+
+    res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Forgot password request failed',
+    });
+  }
+};
+
+/**
+ * Handle Reset Password
+ */
+export const resetPassword = async (req, res) => {
+  try {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    const result = await authService.resetPassword(token, password);
+
+    res.status(200).json({
+      success: true,
+      message: result.message,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Reset password failed',
+    });
+  }
+};

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, Suspense } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, Suspense, useRef, useCallback } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Loader2, PlusCircle, AlertCircle, BarChart3 } from 'lucide-react';
 import { getMyPolls } from '../api/poll.api';
 
@@ -10,6 +10,7 @@ import EmptyState from '../components/dashboard/EmptyState';
 import PollGrid from '../components/poll/PollGrid';
 import PollSearch from '../components/poll/PollSearch';
 import PollFilters from '../components/poll/PollFilters';
+import PollSort from '../components/poll/PollSort';
 
 /**
  * My Polls Page
@@ -24,51 +25,114 @@ const MyPollsPage = () => {
   // ---------------------------------------------------------------------------
   // STATE
   // ---------------------------------------------------------------------------
-  const [polls, setPolls] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
   
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('All'); // 'All', 'Draft', 'Published', 'Expired'
+  const [polls, setPolls] = useState([]);
+  const [isLoading, setIsLoading] = useState(true); // Initial/Filter load
+  const [isFetchingMore, setIsFetchingMore] = useState(false); // Pagination load
+  const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({ page: 1, totalPages: 1, hasMore: false });
+  
+  const activeFilter = searchParams.get('filter') || 'All';
+  const sortBy = searchParams.get('sort') || 'Latest';
+  const initialSearch = searchParams.get('q') || '';
+
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(initialSearch);
+
+  const observerTarget = useRef(null);
+
+  // ---------------------------------------------------------------------------
+  // DEBOUNCE & URL SYNC
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+      const newParams = new URLSearchParams(searchParams);
+      if (searchQuery) newParams.set('q', searchQuery);
+      else newParams.delete('q');
+      setSearchParams(newParams, { replace: true });
+    }, 400); 
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handleFilterChange = (filter) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (filter === 'All') newParams.delete('filter');
+    else newParams.set('filter', filter);
+    setSearchParams(newParams);
+  };
+
+  const handleSortChange = (sort) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (sort === 'Latest') newParams.delete('sort');
+    else newParams.set('sort', sort);
+    setSearchParams(newParams);
+  };
 
   // ---------------------------------------------------------------------------
   // DATA FETCHING
   // ---------------------------------------------------------------------------
-  const fetchPolls = async () => {
+  const fetchPolls = useCallback(async (page = 1, isLoadMore = false) => {
     try {
-      setIsLoading(true);
+      if (isLoadMore) setIsFetchingMore(true);
+      else setIsLoading(true);
       setError(null);
-      const response = await getMyPolls();
-      setPolls(response?.data || []);
+
+      const params = {
+        page,
+        limit: 9, // Number of items per page
+        q: debouncedSearch,
+        filter: activeFilter,
+        sort: sortBy
+      };
+
+      const response = await getMyPolls(params);
+      const newPolls = response?.data || [];
+      const pagInfo = response?.pagination || { totalPages: 1, page: 1 };
+
+      setPolls(prev => isLoadMore ? [...prev, ...newPolls] : newPolls);
+      setPagination({
+        page: pagInfo.page,
+        totalPages: pagInfo.totalPages,
+        hasMore: pagInfo.page < pagInfo.totalPages
+      });
     } catch (err) {
       setError(err.message || 'Failed to load your polls. Please try again.');
     } finally {
       setIsLoading(false);
+      setIsFetchingMore(false);
     }
-  };
+  }, [debouncedSearch, activeFilter, sortBy]);
 
+  // Initial load & when filters change
   useEffect(() => {
-    fetchPolls();
-  }, []);
+    fetchPolls(1, false);
+  }, [fetchPolls]);
 
   // ---------------------------------------------------------------------------
-  // LOCAL FILTERING LOGIC
+  // INFINITE SCROLL OBSERVER
   // ---------------------------------------------------------------------------
-  const filteredPolls = polls.filter((poll) => {
-    // 1. Search Match
-    const matchesSearch = poll.title?.toLowerCase().includes(searchQuery.toLowerCase());
-    
-    // 2. Status Match
-    const isExpired = poll.expiryDate ? new Date(poll.expiryDate) < new Date() : false;
-    const isPublished = poll.isResultsPublished === true; 
-    
-    let matchesFilter = true;
-    if (activeFilter === 'Expired') matchesFilter = isExpired;
-    if (activeFilter === 'Published') matchesFilter = isPublished && !isExpired;
-    if (activeFilter === 'Draft') matchesFilter = !isPublished && !isExpired;
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && pagination.hasMore && !isLoading && !isFetchingMore) {
+          fetchPolls(pagination.page + 1, true);
+        }
+      },
+      { threshold: 1.0 }
+    );
 
-    return matchesSearch && matchesFilter;
-  });
+    if (observerTarget.current) {
+      observer.observe(observerTarget.current);
+    }
+
+    return () => {
+      if (observerTarget.current) {
+        observer.unobserve(observerTarget.current);
+      }
+    };
+  }, [observerTarget.current, pagination.hasMore, isLoading, isFetchingMore, fetchPolls, pagination.page]);
 
   // ---------------------------------------------------------------------------
   // RENDER: LOADING STATE
@@ -160,24 +224,57 @@ const MyPollsPage = () => {
         // Active Grid View
         <div className="space-y-6">
           
-          {/* Controls Bar (Search + Filters) */}
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div className="w-full md:w-96">
+          {/* Controls Bar (Search + Filters + Sort) */}
+          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+            <div className="w-full xl:w-96">
               <Suspense fallback={<div className="h-10 bg-gray-100 dark:bg-zinc-800 rounded-lg animate-pulse" />}>
                 <PollSearch value={searchQuery} onChange={setSearchQuery} />
               </Suspense>
             </div>
-            <div className="w-full md:w-auto">
-              <Suspense fallback={<div className="h-10 bg-gray-100 dark:bg-zinc-800 rounded-lg animate-pulse" />}>
-                <PollFilters activeFilter={activeFilter} onFilterChange={setActiveFilter} />
-              </Suspense>
+            <div className="flex flex-col sm:flex-row items-center gap-4 w-full xl:w-auto">
+              <div className="w-full sm:w-auto overflow-hidden">
+                <Suspense fallback={<div className="h-10 bg-gray-100 dark:bg-zinc-800 rounded-lg animate-pulse" />}>
+                  <PollFilters activeFilter={activeFilter} onFilterChange={handleFilterChange} />
+                </Suspense>
+              </div>
+              <div className="w-full sm:w-48 flex-shrink-0">
+                <Suspense fallback={<div className="h-10 bg-gray-100 dark:bg-zinc-800 rounded-lg animate-pulse" />}>
+                  <PollSort activeSort={sortBy} onSortChange={handleSortChange} />
+                </Suspense>
+              </div>
             </div>
           </div>
 
           {/* Render Responsive Grid */}
           <Suspense fallback={<div className="h-64 bg-gray-50 dark:bg-zinc-900 rounded-3xl animate-pulse" />}>
-            <PollGrid polls={filteredPolls} refreshData={fetchPolls} />
+            <PollGrid polls={polls} refreshData={() => fetchPolls(1, false)} />
           </Suspense>
+
+          {/* Infinite Scroll Footer */}
+          <div ref={observerTarget} className="py-8 flex flex-col items-center justify-center text-center">
+            {isFetchingMore && (
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="w-8 h-8 text-orange-500 animate-spin" />
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Loading more polls...</p>
+              </div>
+            )}
+            {!isFetchingMore && !pagination.hasMore && polls.length > 0 && (
+              <p className="text-sm font-medium text-gray-400 dark:text-gray-500 bg-gray-50 dark:bg-zinc-900/50 px-4 py-2 rounded-full">
+                You've reached the end of the list.
+              </p>
+            )}
+            {error && !isLoading && polls.length > 0 && (
+              <div className="flex flex-col items-center gap-3">
+                <p className="text-sm font-medium text-red-500">{error}</p>
+                <button 
+                  onClick={() => fetchPolls(pagination.page + 1, true)}
+                  className="px-4 py-1.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-semibold rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors"
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+          </div>
           
         </div>
       )}

@@ -22,4 +22,14 @@ router.get('/:pollId', protect, analyticsController.getPollAnalyticsOverview);
 // * Note: I added this route so your getQuestionWiseAnalytics function can be accessed!
 router.get('/:pollId/questions', protect, analyticsController.getQuestionWiseAnalytics);
 
+// @route   GET /api/analytics/:pollId/export/csv
+// @desc    Export analytics data to CSV
+// @access  Private (Only Poll Creator)
+router.get('/:pollId/export/csv', protect, analyticsController.exportAnalyticsCSV);
+
+// @route   GET /api/analytics/:pollId/export/pdf
+// @desc    Export analytics data to PDF
+// @access  Private (Only Poll Creator)
+router.get('/:pollId/export/pdf', protect, analyticsController.exportAnalyticsPDF);
+
 export default router;

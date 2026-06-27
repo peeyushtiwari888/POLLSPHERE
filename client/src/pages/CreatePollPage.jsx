@@ -28,8 +28,8 @@ const CreatePollPage = () => {
         </div>
         <p className="text-base text-gray-500 dark:text-gray-400 ml-1">
           {isEditMode 
-            ? 'Update your poll settings, manage questions, and save your changes.' 
-            : 'Follow the simple steps below to design your poll, configure settings, and share it with your audience.'}
+            ? 'Modify your poll structure, adjust settings, and save changes.' 
+            : 'Configure basic attributes, build your questionnaire, and deploy to your audience.'}
         </p>
       </div>
 

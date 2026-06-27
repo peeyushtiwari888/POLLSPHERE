@@ -36,12 +36,11 @@ const Footer = () => {
           
           {/* Logo & Tagline (Spans 2 cols on lg screens) */}
           <div className="col-span-2 lg:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center">
-                <span className="text-white font-bold text-xl leading-none">P</span>
-              </div>
-              <span className="font-bold text-xl tracking-tight text-gray-900 dark:text-white">
-                PollSphere
+            <div className="flex items-center gap-2.5 mb-4">
+              <img src="/logo.png" alt="PollSphere Icon" className="h-8 w-auto object-contain rounded-lg shadow-sm" />
+              <span className="font-extrabold text-2xl tracking-tighter">
+                <span className="text-gray-900 dark:text-white">Poll</span>
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500">Sphere</span>
               </span>
             </div>
             <p className="text-gray-500 dark:text-gray-400 text-sm mb-6 max-w-xs leading-relaxed">

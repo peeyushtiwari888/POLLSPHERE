@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import User from './auth.model.js';
+import sendEmail from '../../common/utils/sendEmail.js';
 
 /**
  * Helper: Generate JWT Token
@@ -86,4 +88,67 @@ export const getCurrentUser = async (userId) => {
  */
 export const logoutUser = async () => {
   return { success: true, message: 'Logged out successfully' };
+};
+
+/**
+ * Initiate Forgot Password
+ */
+export const forgotPassword = async (email, origin) => {
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new Error('There is no user with that email address.');
+  }
+
+  const resetToken = user.generatePasswordResetToken();
+  await user.save({ validateBeforeSave: false });
+
+  // For frontend URL, we fallback to typical vite port if origin is backend URL, 
+  // but better to rely on origin header or env variable
+  const clientUrl = process.env.CLIENT_URL || origin.replace('5000', '5173');
+  const resetUrl = `${clientUrl}/reset-password/${resetToken}`;
+
+  const message = `You are receiving this email because you (or someone else) has requested the reset of a password.\n\nPlease click on the following link, or paste this into your browser to complete the process:\n\n${resetUrl}\n\nIf you did not request this, please ignore this email and your password will remain unchanged.`;
+
+  try {
+    await sendEmail({
+      email: user.email,
+      subject: 'Password Reset Request',
+      message
+    });
+    return { success: true, message: 'Email sent' };
+  } catch (error) {
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save({ validateBeforeSave: false });
+    throw new Error('Email could not be sent');
+  }
+};
+
+/**
+ * Reset Password
+ */
+export const resetPassword = async (resetToken, newPassword) => {
+  // Hash token to compare with DB
+  const resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  const user = await User.findOne({
+    resetPasswordToken,
+    resetPasswordExpires: { $gt: Date.now() }
+  });
+
+  if (!user) {
+    throw new Error('Password reset token is invalid or has expired.');
+  }
+
+  // Set new password
+  user.password = newPassword;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+
+  await user.save();
+
+  return { success: true, message: 'Password has been reset successfully' };
 };

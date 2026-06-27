@@ -77,3 +77,51 @@ export const getPublicPollResults = async (req, res) => {
     });
   }
 };
+
+/**
+ * Export analytics data to CSV
+ */
+export const exportAnalyticsCSV = async (req, res) => {
+  try {
+    const { pollId } = req.params;
+    const userId = req.user.id;
+
+    const csvData = await analyticsService.exportAnalyticsCSV(pollId, userId);
+
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename=poll_${pollId}_analytics.csv`);
+    res.status(200).send(csvData);
+  } catch (error) {
+    const statusCode = error.message.includes('authorized') ? 403 : 
+                      error.message.includes('not found') ? 404 : 400;
+
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Failed to export CSV',
+    });
+  }
+};
+
+/**
+ * Export analytics data to PDF
+ */
+export const exportAnalyticsPDF = async (req, res) => {
+  try {
+    const { pollId } = req.params;
+    const userId = req.user.id;
+
+    const pdfBuffer = await analyticsService.exportAnalyticsPDF(pollId, userId);
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=poll_${pollId}_analytics.pdf`);
+    res.status(200).send(pdfBuffer);
+  } catch (error) {
+    const statusCode = error.message.includes('authorized') ? 403 : 
+                      error.message.includes('not found') ? 404 : 400;
+
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Failed to export PDF',
+    });
+  }
+};

@@ -42,4 +42,19 @@ router.delete('/:id', protect, pollController.deletePoll);
 // @access  Private (Only Creator)
 router.patch('/:id/publish', protect, validate(publishPollSchema), pollController.publishPoll);
 
+// @route   PATCH /api/polls/:id/archive
+// @desc    Archive a poll
+// @access  Private (Only Creator)
+router.patch('/:id/archive', protect, pollController.archivePoll);
+
+// @route   PATCH /api/polls/:id/restore
+// @desc    Restore an archived poll
+// @access  Private (Only Creator)
+router.patch('/:id/restore', protect, pollController.restorePoll);
+
+// @route   POST /api/polls/:id/duplicate
+// @desc    Duplicate an existing poll
+// @access  Private (Only Creator)
+router.post('/:id/duplicate', protect, pollController.duplicatePoll);
+
 export default router;

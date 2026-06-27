@@ -28,4 +28,14 @@ router.get('/me', protect, authController.getMe);
 // @access  Private (Requires authentication)
 router.post('/logout', protect, authController.logout);
 
+// @route   POST /api/auth/forgot-password
+// @desc    Forgot Password
+// @access  Public
+router.post('/forgot-password', authController.forgotPassword);
+
+// @route   POST /api/auth/reset-password/:token
+// @desc    Reset Password
+// @access  Public
+router.post('/reset-password/:token', authController.resetPassword);
+
 export default router;

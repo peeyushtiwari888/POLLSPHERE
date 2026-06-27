@@ -62,10 +62,10 @@ const PollSettingsStep = ({ data = {}, updateData }) => {
     <div className="max-w-2xl mx-auto flex flex-col space-y-8">
       
       {/* Header */}
-      <div className="text-center space-y-2 mb-4">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Configure your poll</h2>
+      <div className="space-y-1.5 mb-6">
+        <h2 className="text-2xl font-semibold text-gray-900 dark:text-white tracking-tight">Settings</h2>
         <p className="text-gray-500 dark:text-gray-400 text-sm">
-          Set privacy rules and decide exactly when your poll should automatically close.
+          Configure privacy rules and poll lifecycle.
         </p>
       </div>
 

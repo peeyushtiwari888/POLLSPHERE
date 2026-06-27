@@ -63,3 +63,32 @@ export const getCurrentUser = async () => {
     handleApiError(error);
   }
 };
+
+/**
+ * Request password reset email
+ * @param {string} email - User's email address
+ * @returns {Promise<Object>} Success message
+ */
+export const forgotPassword = async (email) => {
+  try {
+    const response = await api.post('/auth/forgot-password', { email });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+/**
+ * Reset password with token
+ * @param {string} token - The reset token from URL
+ * @param {string} password - The new password
+ * @returns {Promise<Object>} Success message
+ */
+export const resetPassword = async (token, password) => {
+  try {
+    const response = await api.post(`/auth/reset-password/${token}`, { password });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};

@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 
 const userSchema = new mongoose.Schema(
   {
@@ -22,6 +23,11 @@ const userSchema = new mongoose.Schema(
         'Please provide a valid email address',
       ],
     },
+    name: { type: String, trim: true },
+    bio: { type: String, trim: true, maxlength: [500, 'Bio cannot exceed 500 characters'] },
+    designation: { type: String, trim: true, maxlength: [100, 'Designation cannot exceed 100 characters'] },
+    company: { type: String, trim: true, maxlength: [100, 'Company cannot exceed 100 characters'] },
+    avatarUrl: { type: String, trim: true },
     password: {
       type: String,
       required: [true, 'Password is required'],
@@ -29,6 +35,8 @@ const userSchema = new mongoose.Schema(
       // By default, do not return the password in queries
       select: false,
     },
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
   },
   {
     timestamps: true,
@@ -57,6 +65,24 @@ userSchema.pre('save', async function () {
 // Method to compare candidate password with the user's hashed password
 userSchema.methods.comparePassword = async function (candidatePassword) {
   return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Method to generate and hash password reset token
+userSchema.methods.generatePasswordResetToken = function () {
+  // Generate a random token
+  const resetToken = crypto.randomBytes(20).toString('hex');
+
+  // Hash the token and set it to resetPasswordToken field
+  this.resetPasswordToken = crypto
+    .createHash('sha256')
+    .update(resetToken)
+    .digest('hex');
+
+  // Set expiration to 15 minutes from now
+  this.resetPasswordExpires = Date.now() + 15 * 60 * 1000;
+
+  // Return the unhashed token (to send via email)
+  return resetToken;
 };
 
 const User = mongoose.model('User', userSchema);
