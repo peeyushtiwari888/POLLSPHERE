@@ -1,5 +1,7 @@
 import Poll from '../poll/poll.model.js';
 import Response from './response.model.js';
+import { emitResponseSubmitted, emitAnalyticsUpdated } from '../../emitters.js';
+import { getQuestionWiseAnalytics } from '../analytics/analytics.service.js';
 
 /**
  * Submit a response to a poll
@@ -68,6 +70,14 @@ export const submitResponse = async (pollId, userId, answers) => {
     userId: userId || null,
     answers,
   });
+
+  // 8. Fire Real-Time Socket Events (Only happens if save was successful)
+  // We emit the new response directly
+  emitResponseSubmitted(pollId, response);
+  
+  // We also recalculate the latest analytics and emit them so charts update instantly
+  const updatedAnalytics = await getQuestionWiseAnalytics(pollId, poll.creatorId);
+  emitAnalyticsUpdated(pollId, updatedAnalytics);
 
   return response;
 };

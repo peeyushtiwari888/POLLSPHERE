@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+@layer base {
+  /* 
+   * LIGHT THEME (Default)
+   * Using space-separated RGB values to support Tailwind's opacity modifier syntax
+   */
+  :root, .light {
+    --bg-background: 255 255 255;      /* Crisp White */
+    --bg-surface: 250 250 250;         /* Very Light Gray for contrast */
+    --bg-card: 255 255 255;            
+    
+    --border: 229 231 235;             /* Subtle Gray (gray-200) */
+    
+    /* Primary Accent: Premium SaaS Orange */
+    --primary: 249 115 22;             /* orange-500 */
+    --primary-hover: 234 88 12;        /* orange-600 */
+    
+    --secondary: 243 244 246;          /* gray-100 */
+    
+    /* Typography */
+    --text-primary: 17 24 39;          /* gray-900 */
+    --text-secondary: 107 114 128;     /* gray-500 */
+    
+    /* Semantic Status Colors */
+    --success: 34 197 94;              /* green-500 */
+    --warning: 234 179 8;              /* yellow-500 */
+    --danger: 239 68 68;               /* red-500 */
+    
+    /* Shapes & Shadows */
+    --radius: 0.75rem;                 /* 12px for beautiful rounded corners */
+    --shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); /* Soft, elegant shadow */
+  }
+
+  /* 
+   * DARK THEME
+   * Deep, premium near-black (Notion/Linear inspired)
+   */
+  .dark {
+    --bg-background: 15 15 15;         /* Deep Black */
+    --bg-surface: 23 23 23;            /* Elevated Dark */
+    --bg-card: 28 28 28;               /* Darker Gray */
+    
+    --border: 43 43 43;                /* Barely visible border */
+    
+    /* Orange slightly brightened for dark mode contrast */
+    --primary: 251 146 60;             /* orange-400 */
+    --primary-hover: 249 115 22;       /* orange-500 */
+    
+    --secondary: 38 38 38;             /* neutral-800 */
+    
+    /* Typography */
+    --text-primary: 249 250 251;       /* gray-50 */
+    --text-secondary: 156 163 175;     /* gray-400 */
+    
+    /* Semantic Status Colors */
+    --success: 74 222 128;             /* green-400 */
+    --warning: 250 204 21;             /* yellow-400 */
+    --danger: 248 113 113;             /* red-400 */
+    
+    --shadow: 0 4px 30px -2px rgba(0, 0, 0, 0.5);
+  }
+}
+
+@layer base {
+  /* Global Resets */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    /* Apply variables dynamically */
+    @apply bg-[rgb(var(--bg-background))] text-[rgb(var(--text-primary))] font-sans antialiased;
+    /* Smooth transition for theme switching */
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  /* Minimalist Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-[rgb(var(--border))] rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-[rgb(var(--text-secondary))];
+  }
+
+  /* Elegant Selection Color */
+  ::selection {
+    @apply bg-[rgb(var(--primary)_/_0.2)] text-[rgb(var(--primary))];
+  }
+}
+
+@layer utilities {
+  /* Reusable Layout Classes */
+  .container-layout {
+    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-spacing {
+    @apply py-12 md:py-20 lg:py-24;
+  }
+
+  /* Premium Component Classes */
+  .card-premium {
+    @apply bg-[rgb(var(--bg-card))] border border-[rgb(var(--border))] rounded-[var(--radius)] transition-all duration-300;
+    box-shadow: var(--shadow);
+  }
+
+  .glass-effect {
+    @apply bg-[rgb(var(--bg-card)_/_0.6)] backdrop-blur-xl border border-[rgb(var(--border))] rounded-[var(--radius)];
+  }
+
+  /* Typography & Accents */
+  .gradient-text {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-[rgb(var(--primary))] to-[rgb(var(--warning))];
+  }
+
+  .gradient-button {
+    @apply bg-gradient-to-r from-[rgb(var(--primary))] to-orange-400 text-white font-medium rounded-[var(--radius)] 
+           hover:opacity-90 hover:shadow-[0_4px_20px_-2px_rgba(249,115,22,0.4)] 
+           transition-all duration-300 active:scale-95 flex items-center justify-center;
+  }
+}
