@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, LayoutDashboard, BarChart3, PlusCircle, 
-  LineChart, User, LogOut, ChevronLeft, ChevronRight 
+  LineChart, User, LogOut, ChevronLeft, ChevronRight, Calendar, PieChart
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
@@ -37,7 +37,9 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
     { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
     { name: 'My Polls', icon: BarChart3, path: '/polls' },
     { name: 'Create Poll', icon: PlusCircle, path: '/polls/create' },
-    { name: 'Analytics', icon: LineChart, path: '/analytics/general' },
+    { name: 'Poll Analytics', icon: LineChart, path: '/analytics/general' },
+    { name: 'Manage Events', icon: Calendar, path: '/events' },
+    { name: 'Event Analytics', icon: PieChart, path: '/events/analytics/dashboard' },
     { name: 'Profile', icon: User, path: '/profile' },
   ];
 

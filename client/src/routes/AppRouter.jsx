@@ -17,9 +17,12 @@ const DashboardPage = lazy(() => import('../pages/DashboardPage.jsx'));
 const ProfilePage = lazy(() => import('../pages/ProfilePage.jsx'));
 const SettingsPage = lazy(() => import('../pages/SettingsPage.jsx'));
 
-// Other App Pages
 const CreatePoll = lazy(() => import('../pages/CreatePollPage.jsx'));
 const MyPolls = lazy(() => import('../pages/MyPollsPage.jsx'));
+const ManageEvents = lazy(() => import('../pages/ManageEventsPage.jsx'));
+const CreateEvent = lazy(() => import('../pages/CreateEventPage.jsx'));
+const PublicEvent = lazy(() => import('../pages/PublicEventPage.jsx'));
+const EventAnalytics = lazy(() => import('../pages/EventAnalyticsPage.jsx'));
 const ViewPoll = lazy(() => import('../pages/PublicPollPage.jsx'));
 const PollSubmitted = lazy(() => import('../pages/PollSubmittedPage.jsx'));
 const Analytics = lazy(() => import('../pages/Analytics.jsx'));
@@ -49,11 +52,12 @@ const AppRouter = () => {
         <Route path="/reset-password/:token" element={<ResetPassword />} />
         
         {/* ==============================
-            Poll Participation Routes 
+            Poll & Event Participation Routes 
             ============================== */}
         <Route path="/poll/:pollId" element={<ViewPoll />} />
         <Route path="/poll/:pollId/success" element={<PollSubmitted />} />
         <Route path="/results/:pollId" element={<PublicResults />} />
+        <Route path="/event/:slug" element={<PublicEvent />} />
 
         {/* ==============================
             Creator Dashboard Routes 
@@ -69,6 +73,10 @@ const AppRouter = () => {
           {/* Outlet routes injected into DashboardLayout */}
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/polls" element={<MyPolls />} />
+          <Route path="/events" element={<ManageEvents />} />
+          <Route path="/events/create" element={<CreateEvent />} />
+          <Route path="/events/:id/edit" element={<CreateEvent />} />
+          <Route path="/events/analytics/dashboard" element={<EventAnalytics />} />
           <Route path="/polls/create" element={<CreatePoll />} />
           <Route path="/polls/:id/edit" element={<CreatePoll />} />
           <Route path="/analytics/:pollId" element={<Analytics />} />
