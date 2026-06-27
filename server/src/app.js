@@ -3,6 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
 import authRoutes from './modules/auth/auth.routes.js';
+import pollRoutes from './modules/poll/poll.routes.js';
 
 const app = express();
 
@@ -13,6 +14,7 @@ app.use(cookieParser()); // Parses cookies
 
 // Mount API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/polls', pollRoutes);
 
 // Base route to verify server is running
 app.get('/', (req, res) => {
