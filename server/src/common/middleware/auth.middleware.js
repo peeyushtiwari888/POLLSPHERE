@@ -52,3 +52,33 @@ export const protect = (req, res, next) => {
     });
   }
 };
+
+/**
+ * Middleware that checks for a token but doesn't block if missing.
+ * Useful for routes that support both anonymous and authenticated access.
+ */
+export const optionalProtect = (req, res, next) => {
+  let token;
+
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
+  }
+
+  // If no token is found, just proceed without setting req.user
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // Attach user to request
+    next();
+  } catch (error) {
+    // If a token is provided but invalid, we still proceed as anonymous
+    // (Or we can block. Usually it's better to proceed as anonymous or throw an error. 
+    // We'll proceed without setting req.user)
+    next();
+  }
+};

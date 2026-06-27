@@ -4,6 +4,9 @@ import cookieParser from 'cookie-parser';
 
 import authRoutes from './modules/auth/auth.routes.js';
 import pollRoutes from './modules/poll/poll.routes.js';
+import publicPollRoutes from './modules/publicPoll/publicPoll.routes.js';
+import responseRoutes from './modules/response/response.routes.js';
+import analyticsRoutes from './modules/analytics/analytics.routes.js';
 
 const app = express();
 
@@ -14,7 +17,10 @@ app.use(cookieParser()); // Parses cookies
 
 // Mount API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/polls/public', publicPollRoutes);
 app.use('/api/polls', pollRoutes);
+app.use('/api/responses', responseRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // Base route to verify server is running
 app.get('/', (req, res) => {
