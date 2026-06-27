@@ -1,8 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Sparkles } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const CTA = () => {
+  const navigate = useNavigate();
+
   return (
     <section className="py-24 bg-white dark:bg-zinc-950 relative overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -63,6 +66,7 @@ const CTA = () => {
             >
               {/* Primary Button */}
               <motion.button 
+                onClick={() => navigate('/signup')}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-orange-600 hover:bg-gray-50 font-bold px-8 py-4 rounded-full transition-colors shadow-xl"

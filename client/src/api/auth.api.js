@@ -1,49 +1,65 @@
 import api from './axios';
 
 /**
- * Authentication API Service
- * 
- * This file contains all API calls related to user authentication.
- * It uses the shared Axios instance which automatically attaches the JWT token 
- * and handles base URL configuration.
+ * Helper function to extract and format API errors cleanly.
+ * Guarantees that UI components only receive standard Error objects with clean messages.
  */
+const handleApiError = (error) => {
+  const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
+  throw new Error(message);
+};
 
 /**
  * Register a new user
  * @param {Object} userData - User registration details (e.g., name, email, password)
- * @returns {Promise} Axios response promise
+ * @returns {Promise<Object>} Clean response data from the backend
  */
 export const signup = async (userData) => {
-  const response = await api.post('/auth/signup', userData);
-  return response.data;
+  try {
+    const response = await api.post('/auth/register', userData);
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
 };
 
 /**
  * Log in an existing user
  * @param {Object} credentials - User login details (e.g., email, password)
- * @returns {Promise} Axios response promise
+ * @returns {Promise<Object>} Clean response data containing token and user info
  */
 export const login = async (credentials) => {
-  const response = await api.post('/auth/login', credentials);
-  return response.data;
+  try {
+    const response = await api.post('/auth/login', credentials);
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
 };
 
 /**
  * Log out the current user from the server
- * Note: Client-side token removal should be handled in the Context/UI layer.
- * @returns {Promise} Axios response promise
+ * @returns {Promise<Object>} Clean response data confirming logout
  */
 export const logout = async () => {
-  const response = await api.post('/auth/logout');
-  return response.data;
+  try {
+    const response = await api.post('/auth/logout');
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
 };
 
 /**
  * Fetch the currently authenticated user's profile
  * The JWT token is automatically attached to this request by the axios interceptor.
- * @returns {Promise} Axios response promise
+ * @returns {Promise<Object>} Clean response data containing the user profile
  */
 export const getCurrentUser = async () => {
-  const response = await api.get('/auth/me');
-  return response.data;
+  try {
+    const response = await api.get('/auth/me');
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
 };

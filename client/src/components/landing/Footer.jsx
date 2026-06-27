@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
 import { Code, MessageCircle, Globe, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 const Footer = () => {
-  const [isDarkMode, setIsDarkMode] = useState(false); // Mock theme state
-
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    // Real implementation would use context/document class toggle
-  };
+  const { isDarkMode, toggleTheme } = useTheme();
 
   const currentYear = new Date().getFullYear();
 

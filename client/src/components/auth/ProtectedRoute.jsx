@@ -1,5 +1,6 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 /**
@@ -17,9 +18,8 @@ const ProtectedRoute = ({ children }) => {
   // The AuthContext sets isLoading to true while it validates the token on mount.
   if (isLoading) {
     return (
-      // A clean, centered loading spinner using the primary orange brand color
       <div className="flex items-center justify-center min-h-screen bg-white dark:bg-zinc-950">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-orange-500"></div>
+        <Loader2 className="h-10 w-10 text-orange-500 animate-spin" />
       </div>
     );
   }
@@ -33,7 +33,6 @@ const ProtectedRoute = ({ children }) => {
   }
 
   // Step 3: Render the protected component
-  // If the code reaches here, the user is fully authenticated.
   return children;
 };
 

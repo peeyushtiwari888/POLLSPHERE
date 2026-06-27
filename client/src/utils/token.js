@@ -1,11 +1,10 @@
 /**
  * Token Management Utility
  * 
- * Centralized helper functions for managing the authentication token in localStorage.
- * Using a constant for the token key prevents typos and keeps the code clean.
+ * Reusable helper functions for managing the JWT access token in localStorage.
  */
 
-const TOKEN_KEY = 'pollsphere_auth_token';
+const TOKEN_KEY = 'pollsphere_access_token';
 
 /**
  * Save the JWT token to localStorage
@@ -33,11 +32,9 @@ export const removeToken = () => {
 };
 
 /**
- * Check if a token exists in localStorage
- * Note: This only checks for presence, not validity/expiration.
+ * Check if the user is authenticated (token exists in localStorage)
  * @returns {boolean} True if token exists, false otherwise
  */
 export const isAuthenticated = () => {
-  // We reuse getToken() and use double negation (!!) to convert it to a strict boolean
   return !!getToken();
 };

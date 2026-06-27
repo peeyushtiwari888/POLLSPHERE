@@ -1,8 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight, Play, BarChart3, Users, Zap, CheckCircle2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const Hero = () => {
+  const navigate = useNavigate();
+
   // Animation variants for staggered entrance
   const fadeUp = {
     hidden: { opacity: 0, y: 20 },
@@ -50,7 +53,10 @@ const Hero = () => {
 
             {/* Actions */}
             <motion.div variants={fadeUp} className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-              <button className="w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-medium px-8 py-3.5 rounded-full transition-all shadow-lg hover:shadow-orange-500/25 active:scale-95">
+              <button 
+                onClick={() => navigate('/signup')}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 text-white font-medium px-8 py-3.5 rounded-full transition-all shadow-lg hover:shadow-orange-500/25 active:scale-95"
+              >
                 Get Started Free
                 <ArrowRight className="w-4 h-4" />
               </button>

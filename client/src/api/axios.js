@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getToken } from '../utils/token';
 
 /**
  * Reusable Axios Instance
@@ -25,8 +26,8 @@ const api = axios.create({
 // The request interceptor runs BEFORE every request is sent to the backend.
 api.interceptors.request.use(
   (config) => {
-    // Step 1: Retrieve the authentication token from localStorage
-    const token = localStorage.getItem('token');
+    // Step 1: Retrieve the authentication token using our centralized utility
+    const token = getToken();
     
     // Step 2: If a token exists, attach it to the Authorization header
     if (token) {

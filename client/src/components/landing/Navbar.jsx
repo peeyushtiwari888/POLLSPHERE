@@ -1,25 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Menu, X, Moon, Sun, Code } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../../context/ThemeContext';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode, toggleTheme } = useTheme();
+  const [activeSection, setActiveSection] = useState('');
+  
+  const navigate = useNavigate();
 
-  // Handle scroll event for sticky navbar effect
+  // Handle scroll events for navbar styling and active section highlighting
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      const scrollY = window.scrollY;
+      setIsScrolled(scrollY > 10);
+
+      // Determine active section for highlighting
+      const sections = ['features', 'how-it-works', 'faq'];
+      let current = '';
+      
+      for (const section of sections) {
+        const element = document.getElementById(section);
+        if (element) {
+          const rect = element.getBoundingClientRect();
+          // If the section top is above the middle of viewport, it's active
+          if (rect.top <= window.innerHeight / 3 && rect.bottom >= window.innerHeight / 3) {
+            current = section;
+            break;
+          }
+        }
+      }
+      setActiveSection(current);
     };
+
     window.addEventListener('scroll', handleScroll);
+    // Trigger once on mount
+    handleScroll();
+    
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Mock theme toggle (Context will replace this later)
-  const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode);
-    // Logic to toggle Tailwind dark class on html/body can be added here
+  const scrollToSection = (e, href) => {
+    e.preventDefault();
+    const targetId = href.replace('#', '');
+    const element = document.getElementById(targetId);
+    if (element) {
+      const offset = 80; // offset for fixed navbar
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = element.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: 'smooth'
+      });
+    }
+    setIsOpen(false);
   };
 
   const navLinks = [
@@ -40,7 +80,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between">
           
           {/* Logo Section */}
-          <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer">
+          <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
             <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center">
               <span className="text-white font-bold text-xl leading-none">P</span>
             </div>
@@ -51,17 +91,25 @@ const Navbar = () => {
 
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-8">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-              >
-                {link.name}
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = activeSection === link.href.replace('#', '');
+              return (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  onClick={(e) => scrollToSection(e, link.href)}
+                  className={`text-sm font-medium transition-colors ${
+                    isActive 
+                      ? 'text-orange-500 dark:text-orange-500' 
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                  }`}
+                >
+                  {link.name}
+                </a>
+              );
+            })}
             <a
-              href="https://github.com"
+              href="https://github.com/peeyushtiwari888/POLLSPHERE"
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors flex items-center gap-2"
@@ -80,12 +128,16 @@ const Navbar = () => {
             >
               {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
-            <button className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 transition-colors px-4 py-2">
+            <button 
+              onClick={() => navigate('/login')}
+              className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 transition-colors px-4 py-2"
+            >
               Log in
             </button>
             <motion.button 
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => navigate('/signup')}
               className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-5 py-2 rounded-full transition-colors shadow-sm hover:shadow-md"
             >
               Get Started
@@ -123,18 +175,25 @@ const Navbar = () => {
             className="md:hidden border-t border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 overflow-hidden"
           >
             <div className="px-4 py-6 space-y-4 flex flex-col">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  onClick={() => setIsOpen(false)}
-                  className="text-base font-medium text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-500 transition-colors"
-                >
-                  {link.name}
-                </a>
-              ))}
+              {navLinks.map((link) => {
+                const isActive = activeSection === link.href.replace('#', '');
+                return (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    onClick={(e) => scrollToSection(e, link.href)}
+                    className={`text-base font-medium transition-colors ${
+                      isActive 
+                        ? 'text-orange-500 dark:text-orange-500' 
+                        : 'text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-500'
+                    }`}
+                  >
+                    {link.name}
+                  </a>
+                );
+              })}
               <a
-                href="https://github.com"
+                href="https://github.com/peeyushtiwari888/POLLSPHERE"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setIsOpen(false)}
@@ -145,10 +204,16 @@ const Navbar = () => {
               </a>
               
               <div className="pt-4 mt-2 flex flex-col gap-3 border-t border-gray-100 dark:border-zinc-800">
-                <button className="w-full text-center text-base font-medium text-gray-900 dark:text-white py-2.5 border border-gray-200 dark:border-zinc-700 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors">
+                <button 
+                  onClick={() => { setIsOpen(false); navigate('/login'); }}
+                  className="w-full text-center text-base font-medium text-gray-900 dark:text-white py-2.5 border border-gray-200 dark:border-zinc-700 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors"
+                >
                   Log in
                 </button>
-                <button className="w-full text-center text-base font-medium bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-lg transition-colors shadow-sm">
+                <button 
+                  onClick={() => { setIsOpen(false); navigate('/signup'); }}
+                  className="w-full text-center text-base font-medium bg-orange-500 hover:bg-orange-600 text-white py-2.5 rounded-lg transition-colors shadow-sm"
+                >
                   Get Started
                 </button>
               </div>

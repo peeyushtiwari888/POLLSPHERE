@@ -56,9 +56,8 @@ const LoginForm = () => {
       const from = location.state?.from?.pathname || '/dashboard';
       navigate(from, { replace: true });
     } catch (error) {
-      // Display the error message from the backend safely
-      const errorMessage = error.response?.data?.message || 'Failed to login. Please check your credentials.';
-      toast.error(errorMessage);
+      // Display the cleanly formatted error message from our API layer
+      toast.error(error.message || 'Failed to login. Please check your credentials.');
     }
   };
 
