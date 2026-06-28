@@ -1,6 +1,11 @@
 import Poll from '../poll/poll.model.js';
 import Response from './response.model.js';
-import { emitResponseSubmitted, emitAnalyticsUpdated } from '../../emitters.js';
+import { 
+  emitResponseSubmitted, 
+  emitAnalyticsUpdated,
+  emitLiveResponseUpdate,
+  emitLiveQuestionUpdate 
+} from '../../emitters.js';
 import { getQuestionWiseAnalytics } from '../analytics/analytics.service.js';
 
 /**
@@ -78,6 +83,10 @@ export const submitResponse = async (pollId, userId, answers) => {
   // We also recalculate the latest analytics and emit them so charts update instantly
   const updatedAnalytics = await getQuestionWiseAnalytics(pollId, poll.creatorId);
   emitAnalyticsUpdated(pollId, updatedAnalytics);
+
+  // Emit Live Event Mode updates
+  emitLiveResponseUpdate(pollId);
+  emitLiveQuestionUpdate(pollId);
 
   return response;
 };

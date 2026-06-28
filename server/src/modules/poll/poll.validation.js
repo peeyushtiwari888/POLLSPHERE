@@ -7,6 +7,7 @@ const optionValidation = z.object({
     .string({ required_error: 'Option text is required' })
     .trim()
     .min(1, 'Option text cannot be empty'),
+  isCorrect: z.boolean().optional(),
 });
 
 const questionValidation = z.object({

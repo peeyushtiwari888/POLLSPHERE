@@ -1,8 +1,9 @@
 import React from 'react';
 import { 
   Sparkles, HelpCircle, Shield, UserCheck, 
-  Calendar, CheckCircle2, AlertCircle 
+  Calendar, CheckCircle2, AlertCircle, Circle
 } from 'lucide-react';
+import DOMPurify from 'dompurify';
 
 /**
  * Step 4: Review Step
@@ -151,9 +152,14 @@ const ReviewStep = ({ data }) => {
                   <div className="flex items-start gap-3">
                     <HelpCircle className="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="text-sm font-semibold text-gray-900 dark:text-white leading-tight">
-                        {q.text || <span className="text-red-500 italic">Untitled Question</span>}
-                      </p>
+                      {q.text ? (
+                        <div 
+                          className="text-sm font-semibold text-gray-900 dark:text-white leading-tight [&>p]:m-0 inline-block"
+                          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(q.text) }}
+                        />
+                      ) : (
+                        <p className="text-sm font-semibold text-red-500 italic leading-tight">Untitled Question</p>
+                      )}
                       <p className="text-xs font-medium text-gray-500 mt-1">
                         {q.isRequired ? 'Required' : 'Optional'} • {q.options?.length || 0} Options
                       </p>
@@ -163,9 +169,18 @@ const ReviewStep = ({ data }) => {
                   {/* Question Options */}
                   <div className="pl-8 space-y-2">
                     {q.options?.map((opt, optIndex) => (
-                      <div key={opt.id || optIndex} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                        <CheckCircle2 className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      <div key={opt.id || optIndex} className={`flex items-center gap-2 text-sm font-medium ${opt.isCorrect ? 'text-emerald-600 dark:text-emerald-500' : 'text-gray-600 dark:text-gray-300'}`}>
+                        {opt.isCorrect ? (
+                          <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                        ) : (
+                          <Circle className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                        )}
                         <span>{opt.text || <span className="text-red-400 italic">Empty Option</span>}</span>
+                        {opt.isCorrect && (
+                          <span className="ml-2 px-2 py-0.5 text-[10px] uppercase tracking-wider font-bold bg-emerald-100 text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-400 rounded-full border border-emerald-200 dark:border-emerald-500/20">
+                            Correct
+                          </span>
+                        )}
                       </div>
                     ))}
                   </div>

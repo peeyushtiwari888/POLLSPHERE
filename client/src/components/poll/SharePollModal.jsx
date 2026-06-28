@@ -18,7 +18,7 @@ const SharePollModal = ({ isOpen, onClose, pollId }) => {
 
   // Generate the absolute public URL for the poll
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://pollsphere.com';
-  const publicUrl = `${baseUrl}/polls/${pollId || 'demo-123'}`;
+  const publicUrl = `${baseUrl}/poll/${pollId || 'demo-123'}`;
 
   const handleCopy = async () => {
     try {

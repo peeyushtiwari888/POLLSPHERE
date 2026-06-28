@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle, BarChart3, Users, Lock, Trophy, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import DOMPurify from 'dompurify';
 
 // Import the public results API
 import { getPublishedPollResults } from '../api/publicPoll.api';
@@ -161,9 +162,10 @@ const PublishedResultsPage = () => {
                   Question {qIndex + 1}
                 </span>
                 <div className="flex justify-between items-start gap-4">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-snug">
-                    {question.text}
-                  </h3>
+                  <div 
+                    className="text-xl font-bold text-gray-900 dark:text-white leading-snug [&>p]:m-0 inline-block"
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(question.text) }}
+                  />
                   <div className="shrink-0 text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-zinc-800 px-3 py-1 rounded-full">
                     {totalQuestionVotes} Votes
                   </div>

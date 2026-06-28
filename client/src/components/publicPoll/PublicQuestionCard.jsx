@@ -1,5 +1,6 @@
 import React from 'react';
 import OptionRadio from './OptionRadio';
+import DOMPurify from 'dompurify';
 
 /**
  * Public Question Card
@@ -28,9 +29,10 @@ const PublicQuestionCard = ({ index, question, currentAnswer, onAnswerChange }) 
         <div className="flex-1 mt-1 sm:mt-1.5">
           <div className="flex items-start flex-wrap gap-3">
             
-            <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white leading-tight">
-              {question.text}
-            </h3>
+            <div 
+              className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white leading-tight [&>p]:m-0 inline-block"
+              dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(question.text) }}
+            />
             
             {question.isRequired && (
               <span className="mt-1 px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg border border-red-100 dark:border-red-900/30">

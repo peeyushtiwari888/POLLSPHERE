@@ -70,13 +70,13 @@ const Navbar = () => {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`fixed left-0 right-0 z-50 transition-all duration-500 ease-in-out ${
         isScrolled
-          ? 'bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md shadow-sm border-b border-gray-200 dark:border-zinc-800 py-3'
-          : 'bg-transparent py-5'
+          ? 'top-2 sm:top-4 mx-4 md:mx-auto max-w-7xl bg-white/70 dark:bg-zinc-950/60 backdrop-blur-xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.2)] border border-gray-200/50 dark:border-white/10 py-2 sm:py-3 rounded-2xl'
+          : 'top-0 bg-transparent py-5'
       }`}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           
           {/* Logo Section */}
@@ -97,25 +97,36 @@ const Navbar = () => {
                   key={link.name}
                   href={link.href}
                   onClick={(e) => scrollToSection(e, link.href)}
-                  className={`text-sm font-medium transition-colors ${
+                  className={`relative text-sm font-semibold transition-colors group px-1 py-1 ${
                     isActive 
-                      ? 'text-orange-500 dark:text-orange-500' 
-                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white'
+                      ? 'text-orange-600 dark:text-orange-400' 
+                      : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
                   }`}
                 >
                   {link.name}
+                  <span className={`absolute left-0 -bottom-1 w-full h-[2.5px] bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all origin-left duration-300 ${isActive ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100'}`}></span>
                 </a>
               );
             })}
             <a
-              href="https://github.com/peeyushtiwari888/POLLSPHERE"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors flex items-center gap-2"
+              href="#pricing"
+              onClick={(e) => scrollToSection(e, '#pricing')}
+              className={`relative text-sm font-semibold transition-colors group px-1 py-1 ${
+                activeSection === 'pricing'
+                  ? 'text-orange-600 dark:text-orange-400' 
+                  : 'text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'
+              }`}
             >
-              <Code className="w-4 h-4" />
-              <span>GitHub</span>
+              Pricing
+              <span className={`absolute left-0 -bottom-1 w-full h-[2.5px] bg-gradient-to-r from-orange-500 to-amber-500 rounded-full transition-all origin-left duration-300 ${activeSection === 'pricing' ? 'scale-x-100 opacity-100' : 'scale-x-0 opacity-0 group-hover:scale-x-100 group-hover:opacity-100'}`}></span>
             </a>
+            <div className="flex items-center gap-1.5 cursor-pointer group px-1 py-1">
+              <span className="text-sm font-semibold text-gray-600 group-hover:text-gray-900 dark:text-gray-300 dark:group-hover:text-white transition-colors">What's New</span>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+              </span>
+            </div>
           </nav>
 
           {/* Right Action Buttons (Desktop) */}
@@ -129,7 +140,7 @@ const Navbar = () => {
             </button>
             <button 
               onClick={() => navigate('/login')}
-              className="text-sm font-medium text-gray-900 dark:text-white hover:text-orange-500 transition-colors px-4 py-2"
+              className="text-sm font-semibold text-gray-900 dark:text-white hover:text-orange-500 transition-colors px-4 py-2"
             >
               Log in
             </button>
@@ -137,7 +148,7 @@ const Navbar = () => {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => navigate('/signup')}
-              className="bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-5 py-2 rounded-full transition-colors shadow-sm hover:shadow-md"
+              className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white text-sm font-bold px-6 py-2.5 rounded-full transition-all shadow-[0_4px_14px_0_rgba(249,115,22,0.39)] hover:shadow-[0_6px_20px_rgba(249,115,22,0.23)] border border-orange-400/20"
             >
               Get Started
             </motion.button>
@@ -192,15 +203,22 @@ const Navbar = () => {
                 );
               })}
               <a
-                href="https://github.com/peeyushtiwari888/POLLSPHERE"
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => setIsOpen(false)}
-                className="text-base font-medium text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-500 transition-colors flex items-center gap-2"
+                href="#pricing"
+                onClick={(e) => scrollToSection(e, '#pricing')}
+                className="text-base font-medium text-gray-700 dark:text-gray-300 hover:text-orange-500 dark:hover:text-orange-500 transition-colors"
               >
-                <Code className="w-5 h-5" />
-                <span>GitHub</span>
+                Pricing
               </a>
+              <div 
+                onClick={() => setIsOpen(false)}
+                className="text-base font-medium text-gray-700 dark:text-gray-300 transition-colors flex items-center gap-2 cursor-pointer group"
+              >
+                <span className="group-hover:text-orange-500 transition-colors">What's New</span>
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500"></span>
+                </span>
+              </div>
               
               <div className="pt-4 mt-2 flex flex-col gap-3 border-t border-gray-100 dark:border-zinc-800">
                 <button 

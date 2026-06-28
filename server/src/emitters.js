@@ -33,3 +33,35 @@ export const emitAnalyticsUpdated = (pollId, analyticsData) => {
     console.error(`Socket error: Failed to emit analyticsUpdated for poll ${pollId}`, error);
   }
 };
+
+import { getLiveStats, getLiveQuestions, getLivePollDashboard } from './modules/live/live.service.js';
+
+export const emitLiveResponseUpdate = async (pollId) => {
+  try {
+    const io = getSocketIo();
+    const liveStats = await getLiveStats(pollId);
+    io.to(pollId).emit('live-response-update', liveStats);
+  } catch (error) {
+    console.error(`Socket error: Failed to emit live-response-update for poll ${pollId}`, error);
+  }
+};
+
+export const emitLiveQuestionUpdate = async (pollId) => {
+  try {
+    const io = getSocketIo();
+    const liveQuestions = await getLiveQuestions(pollId);
+    io.to(pollId).emit('live-question-update', liveQuestions);
+  } catch (error) {
+    console.error(`Socket error: Failed to emit live-question-update for poll ${pollId}`, error);
+  }
+};
+
+export const emitLiveAnalyticsUpdate = async (pollId) => {
+  try {
+    const io = getSocketIo();
+    const liveDashboard = await getLivePollDashboard(pollId);
+    io.to(pollId).emit('live-analytics-update', liveDashboard);
+  } catch (error) {
+    console.error(`Socket error: Failed to emit live-analytics-update for poll ${pollId}`, error);
+  }
+};

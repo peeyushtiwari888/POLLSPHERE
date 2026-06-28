@@ -25,34 +25,66 @@ const OptionInput = ({ option, index, canDelete, onUpdate, onDelete }) => {
       </div>
 
       {/* --------------------------------------------------------
-          Text Input
+          Text Input & Controls Container
       -------------------------------------------------------- */}
-      <div className="relative flex-1">
+      <div className="relative flex-1 flex items-center group/input">
         <input
           type="text"
           placeholder={`Option ${index + 1}`}
           value={option.text}
-          onChange={(e) => onUpdate(e.target.value)}
+          onChange={(e) => onUpdate({ text: e.target.value })}
           aria-label={`Option ${index + 1}`}
-          className="w-full h-10 pl-4 pr-10 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all duration-300 shadow-sm"
+          className={`w-full h-10 pl-4 pr-16 bg-white dark:bg-zinc-900 border rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none transition-all duration-300 shadow-sm ${
+            option.isCorrect 
+              ? 'border-emerald-500 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 bg-emerald-50/10 dark:bg-emerald-500/5' 
+              : 'border-gray-200 dark:border-zinc-700 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20'
+          }`}
         />
         
-        {/* --------------------------------------------------------
-            Delete Button (Absolute positioned inside input)
-        -------------------------------------------------------- */}
-        <button
-          type="button"
-          onClick={onDelete}
-          disabled={!canDelete}
-          aria-label={`Delete Option ${index + 1}`}
-          className={`absolute inset-y-0 right-1 my-auto h-8 w-8 flex items-center justify-center rounded-lg transition-all ${
-            canDelete 
-              ? 'text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer opacity-0 group-hover:opacity-100 focus:opacity-100' 
-              : 'text-gray-300 dark:text-zinc-700 cursor-not-allowed opacity-100'
-          }`}
-        >
-          <X className="w-4 h-4" />
-        </button>
+        <div className="absolute right-1 flex items-center gap-1">
+          {/* --------------------------------------------------------
+              Mark Correct Button
+          -------------------------------------------------------- */}
+          <button
+            type="button"
+            onClick={() => onUpdate({ isCorrect: !option.isCorrect })}
+            title={option.isCorrect ? "Marked as correct" : "Mark as correct answer"}
+            aria-label="Toggle correct answer"
+            className={`h-8 w-8 flex items-center justify-center rounded-lg transition-all ${
+              option.isCorrect
+                ? 'text-emerald-600 bg-emerald-100 dark:bg-emerald-500/20 opacity-100'
+                : 'text-gray-300 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 opacity-0 group-hover/input:opacity-100 focus:opacity-100'
+            }`}
+          >
+            <svg 
+              className="w-4 h-4" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor" 
+              strokeWidth={option.isCorrect ? "3" : "2"}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </button>
+
+          {/* --------------------------------------------------------
+              Delete Button
+          -------------------------------------------------------- */}
+          <button
+            type="button"
+            onClick={onDelete}
+            disabled={!canDelete}
+            title="Delete option"
+            aria-label={`Delete Option ${index + 1}`}
+            className={`h-8 w-8 flex items-center justify-center rounded-lg transition-all ${
+              canDelete 
+                ? 'text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 cursor-pointer opacity-0 group-hover/input:opacity-100 focus:opacity-100' 
+                : 'text-gray-200 dark:text-zinc-800 cursor-not-allowed opacity-0'
+            }`}
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
     </div>

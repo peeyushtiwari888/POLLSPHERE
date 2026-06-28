@@ -1,32 +1,62 @@
+import { getSocketIo } from './socket.js';
+
 /**
  * Register all Socket.io event listeners for a newly connected client.
- * We separate this from the main socket setup to keep the code modular and clean.
  */
 export const registerSocketEvents = (socket) => {
   
-  /**
-   * Event: join-poll
-   * Purpose: When a user visits a poll page or analytics page, they join a specific "room".
-   * This allows the server to broadcast live vote updates ONLY to the users inside this room,
-   * instead of spamming all connected users on the website.
-   */
+  const broadcastActiveUsers = (pollId) => {
+    try {
+      const io = getSocketIo();
+      const room = io.sockets.adapter.rooms.get(pollId);
+      // The number of active sockets connected to this poll's room
+      const count = room ? room.size : 0;
+      io.to(pollId).emit('active-users-update', count);
+    } catch (err) {
+      console.error('Failed to broadcast active users:', err);
+    }
+  };
+
   socket.on('join-poll', (pollId) => {
     if (pollId) {
       socket.join(pollId);
       console.log(`Socket ${socket.id} joined poll room: ${pollId}`);
+      broadcastActiveUsers(pollId);
     }
   });
 
-  /**
-   * Event: leave-poll
-   * Purpose: When a user navigates away from the poll page, they should leave the room
-   * so they stop receiving unnecessary live updates.
-   */
   socket.on('leave-poll', (pollId) => {
     if (pollId) {
       socket.leave(pollId);
       console.log(`Socket ${socket.id} left poll room: ${pollId}`);
+      broadcastActiveUsers(pollId);
     }
   });
 
+  socket.on('join-live-room', (pollId) => {
+    if (pollId) {
+      socket.join(pollId);
+      console.log(`Socket ${socket.id} joined live room: ${pollId}`);
+      broadcastActiveUsers(pollId);
+    }
+  });
+
+  socket.on('leave-live-room', (pollId) => {
+    if (pollId) {
+      socket.leave(pollId);
+      console.log(`Socket ${socket.id} left live room: ${pollId}`);
+      broadcastActiveUsers(pollId);
+    }
+  });
+
+  // Handle sudden disconnects (e.g. closing the tab)
+  socket.on('disconnecting', () => {
+    for (const room of socket.rooms) {
+      if (room !== socket.id) {
+        // The socket is still in the room during the 'disconnecting' event, 
+        // so we wait until the next tick (when it has actually left) to recount.
+        setTimeout(() => broadcastActiveUsers(room), 0);
+      }
+    }
+  });
 };

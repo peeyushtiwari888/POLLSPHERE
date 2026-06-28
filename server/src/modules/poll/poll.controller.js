@@ -203,3 +203,72 @@ export const duplicatePoll = async (req, res) => {
     });
   }
 };
+
+/**
+ * Handle Pause Poll Request
+ */
+export const pausePoll = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const poll = await pollService.pausePoll(id, userId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Poll paused successfully',
+      data: poll,
+    });
+  } catch (error) {
+    const statusCode = error.message.includes('authorized') ? 403 : 400;
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Failed to pause poll',
+    });
+  }
+};
+
+/**
+ * Handle Resume Poll Request
+ */
+export const resumePoll = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const poll = await pollService.resumePoll(id, userId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Poll resumed successfully',
+      data: poll,
+    });
+  } catch (error) {
+    const statusCode = error.message.includes('authorized') ? 403 : 400;
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Failed to resume poll',
+    });
+  }
+};
+
+/**
+ * Handle Expire Poll Request
+ */
+export const expirePoll = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const poll = await pollService.expirePoll(id, userId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Poll expired successfully',
+      data: poll,
+    });
+  } catch (error) {
+    const statusCode = error.message.includes('authorized') ? 403 : 400;
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Failed to expire poll',
+    });
+  }
+};

@@ -122,7 +122,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
                   w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all group relative
                   ${isActive 
                     ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-500 font-medium shadow-sm' 
-                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:text-gray-900 dark:hover:text-white font-medium'
+                    : 'text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 hover:text-gray-900 dark:hover:text-white font-medium'
                   }
                 `}
                 aria-current={isActive ? 'page' : undefined}
@@ -132,7 +132,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
                   className={`w-5 h-5 flex-shrink-0 transition-colors ${
                     isActive 
                       ? 'text-orange-500' 
-                      : 'text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300'
+                      : 'text-gray-400 dark:text-gray-300 group-hover:text-gray-600 dark:group-hover:text-white'
                   }`} 
                 />
                 

@@ -88,16 +88,25 @@ const AnalyticsHeader = ({ poll }) => {
         </div>
 
         {/* Title & Description */}
-        <div>
+        <div className="flex-1">
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-2">
             {title}
           </h1>
           {description && (
             <div 
-              className="text-gray-500 dark:text-gray-400 leading-relaxed text-sm sm:text-base prose dark:prose-invert prose-orange max-w-none"
+              className="text-gray-500 dark:text-gray-400 leading-relaxed text-sm sm:text-base prose dark:prose-invert prose-orange max-w-none mb-4"
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(description) }}
             />
           )}
+          
+          {/* Present Live Button */}
+          <button
+            onClick={() => navigate(`/live/${poll._id}`)}
+            className="mt-4 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/25 transition-all hover:scale-105 active:scale-95"
+          >
+            <Activity className="w-5 h-5 animate-pulse" />
+            Present Live Event
+          </button>
         </div>
 
       </div>

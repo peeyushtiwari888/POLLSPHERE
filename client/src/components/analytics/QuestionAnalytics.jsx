@@ -1,6 +1,7 @@
 import React from 'react';
 import { FileQuestion, Trophy, Users, CheckCircle2 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import DOMPurify from 'dompurify';
 
 /**
  * Question Analytics Component
@@ -38,8 +39,8 @@ const QuestionAnalytics = ({ questions = [] }) => {
         </div>
       </div>
 
-      {/* Questions List */}
-      <div className="space-y-8">
+      {/* Questions Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {questions.map((question, qIndex) => {
           
           // Determine the maximum votes to find the winner(s)
@@ -47,14 +48,14 @@ const QuestionAnalytics = ({ questions = [] }) => {
           const maxVotes = question.options.reduce((max, opt) => Math.max(max, opt.votes || 0), 0);
           
           return (
-            <div key={question._id || qIndex} className="flex flex-col space-y-4">
+            <div key={question._id || qIndex} className="flex flex-col space-y-5 bg-gray-50/50 dark:bg-zinc-800/20 border border-gray-100 dark:border-zinc-800/80 p-5 sm:p-6 rounded-2xl transition-all hover:border-orange-200 dark:hover:border-orange-500/30">
               
               {/* Question Title & Total Votes */}
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-2">
-                <h4 className="text-base font-bold text-gray-900 dark:text-white leading-snug">
-                  <span className="text-gray-400 dark:text-gray-500 mr-2 font-medium">Q{qIndex + 1}.</span>
-                  {question.text}
-                </h4>
+                <div className="text-base font-bold text-gray-900 dark:text-white leading-snug flex items-start">
+                  <span className="text-gray-400 dark:text-gray-500 mr-2 font-medium shrink-0">Q{qIndex + 1}.</span>
+                  <div className="[&>p]:m-0 inline-block" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(question.text) }} />
+                </div>
                 <div className="flex items-center gap-1.5 shrink-0 px-2.5 py-1 bg-gray-50 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 text-xs font-semibold rounded-lg border border-gray-100 dark:border-zinc-700">
                   <Users className="w-3.5 h-3.5" />
                   {question.totalVotes || 0} Votes
@@ -124,10 +125,6 @@ const QuestionAnalytics = ({ questions = [] }) => {
                 })}
               </div>
               
-              {/* Divider between questions, hidden for the last one */}
-              {qIndex !== questions.length - 1 && (
-                <div className="w-full h-px bg-gray-100 dark:bg-zinc-800 my-2" />
-              )}
             </div>
           );
         })}

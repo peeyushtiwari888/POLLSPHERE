@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Loader2, AlertCircle } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { getPublicPoll, submitPollResponse } from '../api/publicPoll.api';
+import useSocket from '../hooks/useSocket'; // Use custom hook to access global socket
 
 // Child Components (To be implemented next)
 import PublicPollHeader from '../components/publicPoll/PublicPollHeader';
@@ -20,6 +21,7 @@ import PollAlreadySubmitted from '../components/publicPoll/PollAlreadySubmitted'
 const PublicPollPage = () => {
   const { pollId } = useParams();
   const navigate = useNavigate();
+  const socket = useSocket();
   
   // State
   const [poll, setPoll] = useState(null);
@@ -48,6 +50,9 @@ const PublicPollPage = () => {
       const data = await getPublicPoll(pollId, code);
       setPoll(data);
       setNeedsCode(false); // Reset if successful
+      
+      // Join Socket.io room to increment the live audience counter
+      socket.emit('join-poll', pollId);
     } catch (err) {
       if (err.message === 'PARTICIPATION_CODE_REQUIRED' || err.message === 'INVALID_PARTICIPATION_CODE') {
         setNeedsCode(true);
@@ -66,6 +71,11 @@ const PublicPollPage = () => {
     if (pollId && !needsCode) {
       fetchPollData();
     }
+    
+    return () => {
+      // Leave room on unmount
+      socket.emit('leave-poll', pollId);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pollId]);
 

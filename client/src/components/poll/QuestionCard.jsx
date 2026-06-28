@@ -27,9 +27,9 @@ const QuestionCard = ({ question, index, totalQuestions, onUpdate, onDelete }) =
     }
   };
 
-  const handleUpdateOption = (optionId, newText) => {
+  const handleUpdateOption = (optionId, updates) => {
     const updatedOptions = question.options.map((opt) =>
-      opt.id === optionId ? { ...opt, text: newText } : opt
+      opt.id === optionId ? { ...opt, ...updates } : opt
     );
     onUpdate({ options: updatedOptions });
   };
@@ -174,7 +174,7 @@ const QuestionCard = ({ question, index, totalQuestions, onUpdate, onDelete }) =
                             option={option}
                             index={optIndex}
                             canDelete={question.options.length > 2}
-                            onUpdate={(newText) => handleUpdateOption(option.id, newText)}
+                            onUpdate={(updates) => handleUpdateOption(option.id, updates)}
                             onDelete={() => handleDeleteOption(option.id)}
                           />
                         </motion.div>

@@ -1,5 +1,6 @@
 import Poll from './poll.model.js';
 import sanitizeHtml from 'sanitize-html';
+import { emitLiveAnalyticsUpdate } from '../../emitters.js';
 
 const sanitizeOptions = {
   allowedTags: [
@@ -212,6 +213,10 @@ export const publishPoll = async (pollId, userId, publishData = {}) => {
 
   await poll.save();
   
+  if (poll.status === 'PUBLISHED') {
+    emitLiveAnalyticsUpdate(pollId);
+  }
+
   return poll;
 };
 
@@ -272,4 +277,64 @@ export const duplicatePoll = async (pollId, userId) => {
 
   const newPoll = await Poll.create(newPollData);
   return newPoll;
+};
+
+/**
+ * Pause a live poll
+ */
+export const pausePoll = async (pollId, userId) => {
+  const poll = await Poll.findById(pollId);
+  if (!poll) throw new Error('Poll not found');
+  if (poll.creatorId.toString() !== userId.toString()) throw new Error('Not authorized to pause this poll');
+  
+  if (poll.status !== 'PUBLISHED') throw new Error('Only published polls can be paused');
+
+  poll.status = 'PAUSED';
+  await poll.save();
+  
+  emitLiveAnalyticsUpdate(pollId);
+  return poll;
+};
+
+/**
+ * Resume a paused poll
+ */
+export const resumePoll = async (pollId, userId) => {
+  const poll = await Poll.findById(pollId);
+  if (!poll) throw new Error('Poll not found');
+  if (poll.creatorId.toString() !== userId.toString()) throw new Error('Not authorized to resume this poll');
+  
+  if (poll.status !== 'PAUSED') throw new Error('Only paused polls can be resumed');
+
+  poll.status = 'PUBLISHED';
+  await poll.save();
+  
+  emitLiveAnalyticsUpdate(pollId);
+  return poll;
+};
+
+/**
+ * Expire a live poll instantly
+ */
+export const expirePoll = async (pollId, userId) => {
+  const poll = await Poll.findById(pollId);
+  if (!poll) throw new Error('Poll not found');
+  
+  // Only the creator can manually expire it via the live dashboard timer
+  if (poll.creatorId.toString() !== userId.toString()) {
+    throw new Error('Not authorized to expire this poll');
+  }
+
+  // Set status to expired
+  poll.status = 'EXPIRED';
+  
+  // Ensure the expiryDate reflects that it's expired now
+  poll.expiryDate = new Date();
+  
+  await poll.save();
+  
+  // Emit socket event to notify all connected clients
+  emitLiveAnalyticsUpdate(pollId);
+  
+  return poll;
 };

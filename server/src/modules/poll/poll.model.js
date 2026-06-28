@@ -10,6 +10,10 @@ const optionSchema = new mongoose.Schema({
     required: [true, 'Option text is required'],
     trim: true,
   },
+  isCorrect: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 // Nested Schema for Questions
@@ -85,7 +89,7 @@ const pollSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['DRAFT', 'SCHEDULED', 'PUBLISHED'],
+      enum: ['DRAFT', 'SCHEDULED', 'PUBLISHED', 'EXPIRED', 'PAUSED'],
       default: 'DRAFT',
     },
     scheduledPublishDate: {

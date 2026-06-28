@@ -25,8 +25,9 @@ const PublicEvent = lazy(() => import('../pages/PublicEventPage.jsx'));
 const EventAnalytics = lazy(() => import('../pages/EventAnalyticsPage.jsx'));
 const ViewPoll = lazy(() => import('../pages/PublicPollPage.jsx'));
 const PollSubmitted = lazy(() => import('../pages/PollSubmittedPage.jsx'));
-const Analytics = lazy(() => import('../pages/Analytics.jsx'));
-const PublicResults = lazy(() => import('../pages/PublicResults.jsx'));
+const Analytics = lazy(() => import('../pages/AnalyticsPage.jsx'));
+const PublicResults = lazy(() => import('../pages/PublishedResultsPage.jsx'));
+const LiveEventPage = lazy(() => import('../pages/LiveEventPage.jsx'));
 const NotFound = lazy(() => import('../pages/NotFound.jsx'));
 
 /**
@@ -58,6 +59,7 @@ const AppRouter = () => {
         <Route path="/poll/:pollId/success" element={<PollSubmitted />} />
         <Route path="/results/:pollId" element={<PublicResults />} />
         <Route path="/event/:slug" element={<PublicEvent />} />
+        <Route path="/live/:pollId" element={<LiveEventPage />} />
 
         {/* ==============================
             Creator Dashboard Routes 

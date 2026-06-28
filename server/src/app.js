@@ -10,6 +10,7 @@ import analyticsRoutes from './modules/analytics/analytics.routes.js';
 import dashboardRoutes from './modules/dashboard/dashboard.routes.js';
 import profileRoutes from './modules/profile/profile.routes.js';
 import eventRoutes from './modules/event/event.routes.js';
+import liveRoutes from './modules/live/live.routes.js';
 
 const app = express();
 
@@ -27,6 +28,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/events', eventRoutes);
+app.use('/api/live', liveRoutes);
 
 // Base route to verify server is running
 app.get('/', (req, res) => {

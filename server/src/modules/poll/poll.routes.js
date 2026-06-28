@@ -57,4 +57,19 @@ router.patch('/:id/restore', protect, pollController.restorePoll);
 // @access  Private (Only Creator)
 router.post('/:id/duplicate', protect, pollController.duplicatePoll);
 
+// @route   PATCH /api/polls/:id/pause
+// @desc    Pause a live poll
+// @access  Private (Only Creator)
+router.patch('/:id/pause', protect, pollController.pausePoll);
+
+// @route   PATCH /api/polls/:id/resume
+// @desc    Resume a paused poll
+// @access  Private (Only Creator)
+router.patch('/:id/resume', protect, pollController.resumePoll);
+
+// @route   PATCH /api/polls/:id/expire
+// @desc    Expire a live poll instantly
+// @access  Private (Only Creator)
+router.patch('/:id/expire', protect, pollController.expirePoll);
+
 export default router;

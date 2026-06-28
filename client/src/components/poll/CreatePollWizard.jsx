@@ -145,7 +145,7 @@ const CreatePollWizard = () => {
           duration: q.duration || 30,
           points: q.points || 10,
           questionType: q.type || 'MULTIPLE_CHOICE',
-          options: q.options.map(opt => ({ text: opt.text }))
+          options: q.options.map(opt => ({ text: opt.text, isCorrect: opt.isCorrect }))
         }))
       };
 

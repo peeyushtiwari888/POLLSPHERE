@@ -145,3 +145,45 @@ export const duplicatePoll = async (id) => {
     handleApiError(error);
   }
 };
+
+/**
+ * Pause a live poll
+ * @param {string} pollId 
+ * @returns {Promise<Object>} The updated poll object
+ */
+export const pausePoll = async (pollId) => {
+  try {
+    const response = await api.patch(`/polls/${pollId}/pause`);
+    return response.data?.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+/**
+ * Resume a paused poll
+ * @param {string} pollId 
+ * @returns {Promise<Object>} The updated poll object
+ */
+export const resumePoll = async (pollId) => {
+  try {
+    const response = await api.patch(`/polls/${pollId}/resume`);
+    return response.data?.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+/**
+ * Expire a live poll instantly
+ * @param {string} pollId 
+ * @returns {Promise<Object>} The updated poll object
+ */
+export const expirePoll = async (pollId) => {
+  try {
+    const response = await api.patch(`/polls/${pollId}/expire`);
+    return response.data?.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};

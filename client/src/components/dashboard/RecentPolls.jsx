@@ -69,10 +69,10 @@ const RecentPolls = ({ polls = [], onRefresh }) => {
   };
 
   // --- Action Handlers ---
-  const handleView = (id) => navigate(`/polls/${id}`);
+  const handleView = (id) => navigate(`/poll/${id}`);
   const handleEdit = (id) => navigate(`/polls/${id}/edit`);
   // Assuming analytics route for future, else navigate to view
-  const handleAnalytics = (id) => navigate(`/polls/${id}`); 
+  const handleAnalytics = (id) => navigate(`/analytics/${id}`); 
 
   const handleDeleteConfirm = async () => {
     if (!deletePollData) return;

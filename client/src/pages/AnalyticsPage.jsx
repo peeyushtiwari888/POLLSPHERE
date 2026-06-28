@@ -158,11 +158,6 @@ const AnalyticsPage = () => {
             <ResponseChart chartData={analytics.timeSeriesData} />
           </Suspense>
 
-          {/* Granular Question-by-Question breakdown */}
-          <Suspense fallback={<div className="h-96 bg-white dark:bg-zinc-900 rounded-3xl animate-pulse" />}>
-            <QuestionAnalytics questions={analytics.questionsData} />
-          </Suspense>
-
         </div>
 
         {/* Right Column (Secondary Widgets - Takes up 1/3 width on desktop) */}
@@ -184,6 +179,14 @@ const AnalyticsPage = () => {
         </div>
 
       </div>
+
+      {/* --------------------------------------------------------
+          Full-width Question Analytics Section
+      -------------------------------------------------------- */}
+      <Suspense fallback={<div className="h-96 bg-white dark:bg-zinc-900 rounded-3xl animate-pulse" />}>
+        <QuestionAnalytics questions={analytics.questionsData} />
+      </Suspense>
+
     </div>
   );
 };

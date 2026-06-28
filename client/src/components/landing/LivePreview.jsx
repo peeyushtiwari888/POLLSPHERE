@@ -1,21 +1,29 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, BarChart2, Users, Settings, ArrowUpRight, ArrowDownRight, Zap } from 'lucide-react';
 
 const LivePreview = () => {
-  // Fake chart data (height percentages)
-  const chartData = [35, 45, 30, 60, 75, 50, 90, 85, 40, 65, 80, 55];
+  // Animated states to simulate "live" updates
+  const [votes, setVotes] = useState({ A: 30, B: 5, C: 4, D: 3 });
+  const [totalLive, setTotalLive] = useState(449);
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVotes(prev => ({
+        A: Math.min(100, prev.A + Math.floor(Math.random() * 2)),
+        B: prev.B + Math.floor(Math.random() * 2),
+        C: prev.C + Math.floor(Math.random() * 1),
+        D: prev.D + Math.floor(Math.random() * 1),
+      }));
+      setTotalLive(prev => prev + Math.floor(Math.random() * 3) - 1);
+    }, 2000);
+    return () => clearInterval(interval);
+  }, []);
 
-  // Fake recent responses
-  const recentResponses = [
-    { name: 'Alex M.', option: 'React.js', time: 'Just now', color: 'bg-blue-500' },
-    { name: 'Sarah K.', option: 'Vue.js', time: '2m ago', color: 'bg-emerald-500' },
-    { name: 'James T.', option: 'Svelte', time: '5m ago', color: 'bg-orange-500' },
-    { name: 'Emily R.', option: 'React.js', time: '12m ago', color: 'bg-purple-500' },
-  ];
+  const totalVotes = votes.A + votes.B + votes.C + votes.D;
+  const getPerc = (val) => Math.round((val / totalVotes) * 100) || 0;
 
   return (
-    <section className="py-24 bg-white dark:bg-zinc-950">
+    <section className="py-24 bg-gray-50 dark:bg-[#0a0a0a]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
@@ -26,14 +34,14 @@ const LivePreview = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
           >
-            <h2 className="text-orange-500 dark:text-orange-400 font-semibold tracking-wide uppercase text-sm mb-3">
-              Live Dashboard
+            <h2 className="text-orange-500 dark:text-orange-400 font-bold tracking-wide uppercase text-sm mb-3">
+              Interactive Quizzes
             </h2>
-            <h3 className="text-3xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6 tracking-tight">
-              Actionable insights in real-time
+            <h3 className="text-3xl md:text-5xl font-extrabold text-gray-900 dark:text-white mb-6 tracking-tight">
+              Host live quizzes like a pro
             </h3>
             <p className="text-lg text-gray-600 dark:text-gray-400">
-              Experience a premium dashboard designed for speed and clarity. Watch your data update live without ever refreshing the page.
+              Engage your audience with real-time leaderboards, beautiful projector views, and instant feedback. Make every session unforgettable.
             </p>
           </motion.div>
         </div>
@@ -44,123 +52,132 @@ const LivePreview = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative max-w-5xl mx-auto"
+          className="relative max-w-6xl mx-auto"
         >
           {/* Decorative Glow */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/20 to-amber-500/20 rounded-[2rem] blur-xl opacity-50 dark:opacity-30 pointer-events-none" />
+          <div className="absolute -inset-1 bg-gradient-to-r from-orange-500/20 to-purple-500/20 rounded-[2rem] blur-2xl opacity-50 dark:opacity-40 pointer-events-none" />
 
-          {/* Main Dashboard Window */}
-          <div className="relative rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-2xl bg-white dark:bg-[#0a0a0a] overflow-hidden flex flex-col md:flex-row h-auto md:h-[600px]">
+          {/* Main Container - Responsive Light/Dark */}
+          <div className="relative rounded-2xl shadow-2xl bg-white dark:bg-[#121212] border border-gray-200 dark:border-[#2a2a2a] overflow-hidden flex flex-col lg:flex-row gap-6 p-4 sm:p-6 font-sans">
             
-            {/* Sidebar (Collapsed on mobile) */}
-            <div className="hidden md:flex flex-col w-16 border-r border-gray-100 dark:border-zinc-800/50 bg-gray-50/50 dark:bg-zinc-900/20 py-6 items-center gap-6">
-              <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center text-white font-bold mb-4">P</div>
-              <button className="p-2 text-gray-900 dark:text-white bg-gray-200/50 dark:bg-zinc-800 rounded-lg"><LayoutDashboard className="w-5 h-5" /></button>
-              <button className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"><BarChart2 className="w-5 h-5" /></button>
-              <button className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"><Users className="w-5 h-5" /></button>
-              <div className="mt-auto">
-                <button className="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"><Settings className="w-5 h-5" /></button>
-              </div>
-            </div>
-
-            {/* Main Content Area */}
-            <div className="flex-1 p-6 lg:p-8 overflow-y-auto">
+            {/* Left Panel: Question and Options */}
+            <div className="flex-1 bg-gray-50 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-[#2a2a2a] p-6 flex flex-col">
               
-              {/* Top Bar */}
+              {/* Header */}
               <div className="flex justify-between items-center mb-8">
-                <div>
-                  <h4 className="text-xl font-bold text-gray-900 dark:text-white">Poll Overview</h4>
-                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Frontend Framework Preferences</p>
+                <div className="flex items-center gap-3 text-xs font-mono">
+                  <span className="bg-orange-500 text-white px-2.5 py-0.5 rounded-full font-bold">live</span>
+                  <span className="text-gray-500 dark:text-gray-400">single choice</span>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 text-sm font-medium border border-green-100 dark:border-green-500/20">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                    </span>
-                    Live Sync
-                  </div>
-                  <button className="bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 dark:text-zinc-900 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors shadow-sm">
-                    Export
-                  </button>
-                </div>
+                <div className="text-gray-500 dark:text-gray-400 text-xs font-mono">{totalVotes} voting</div>
               </div>
 
-              {/* Metrics Grid */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+              {/* Question */}
+              <div className="mb-10">
+                <h4 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3">
+                  What is the output of <span className="text-orange-600 dark:text-orange-400 font-mono text-[0.9em]">typeof null</span> in JavaScript?
+                </h4>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  Asked by Peeyush • Web Dev Cohort 26 • <span className="text-orange-600 dark:text-orange-400">10s left</span>
+                </p>
+              </div>
+
+              {/* Options */}
+              <div className="space-y-4 flex-1">
                 {[
-                  { label: 'Total Responses', value: '4,285', change: '+12.5%', isUp: true },
-                  { label: 'Completion Rate', value: '86.4%', change: '+4.1%', isUp: true },
-                  { label: 'Active Viewers', value: '142', change: '-2.4%', isUp: false },
-                ].map((stat, i) => (
-                  <div key={i} className="p-4 rounded-xl border border-gray-100 dark:border-zinc-800/80 bg-gray-50/50 dark:bg-zinc-900/30 hover:border-gray-200 dark:hover:border-zinc-700 transition-colors">
-                    <p className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">{stat.label}</p>
-                    <div className="flex items-end justify-between">
-                      <h5 className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</h5>
-                      <span className={`flex items-center text-xs font-medium ${stat.isUp ? 'text-emerald-500' : 'text-rose-500'}`}>
-                        {stat.isUp ? <ArrowUpRight className="w-3 h-3 mr-0.5" /> : <ArrowDownRight className="w-3 h-3 mr-0.5" />}
-                        {stat.change}
-                      </span>
+                  { id: 'A', label: '"null"', color: 'bg-[#f98825]', val: votes.A },
+                  { id: 'B', label: '"undefined"', color: 'bg-[#4b9bf8]', val: votes.B },
+                  { id: 'C', label: '"object"', color: 'bg-[#29c470]', val: votes.C },
+                  { id: 'D', label: '"string"', color: 'bg-[#ab68f4]', val: votes.D },
+                ].map((opt) => (
+                  <div key={opt.id} className="flex items-center gap-4">
+                    <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-[#2a2a2a] text-gray-700 dark:text-white flex items-center justify-center font-bold text-sm shrink-0">
+                      {opt.id}
+                    </div>
+                    <div className="flex-1 relative h-12 bg-gray-200 dark:bg-[#222] rounded-full overflow-hidden flex items-center">
+                      <motion.div 
+                        initial={{ width: 0 }}
+                        animate={{ width: `${getPerc(opt.val)}%` }}
+                        transition={{ duration: 0.5 }}
+                        className={`absolute left-0 top-0 bottom-0 ${opt.color} rounded-full`}
+                      />
+                      <span className="relative z-10 text-gray-900 dark:text-white font-medium ml-4">{opt.label}</span>
+                    </div>
+                    <div className="w-10 text-right text-gray-700 dark:text-white font-mono text-sm shrink-0">
+                      {getPerc(opt.val)}%
                     </div>
                   </div>
                 ))}
               </div>
+            </div>
 
-              {/* Main Chart & Side Info Split */}
-              <div className="grid lg:grid-cols-3 gap-6 h-auto md:h-64">
+            {/* Right Panel: Host & Leaderboard */}
+            <div className="w-full lg:w-[400px] flex flex-col gap-6">
+              
+              {/* Host Card */}
+              <div className="bg-gray-50 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-[#2a2a2a] p-5">
+                <div className="flex items-center gap-4 mb-6">
+                  <div className="w-12 h-12 rounded-full border-2 border-orange-500 overflow-hidden shrink-0">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Peeyush&backgroundColor=ffdfbf" alt="Host" className="w-full h-full object-cover bg-white" />
+                  </div>
+                  <div>
+                    <h5 className="text-gray-900 dark:text-white font-bold text-lg leading-tight flex items-center gap-2">
+                      Peeyush <span className="text-red-600 dark:text-red-500 text-xs font-mono uppercase bg-red-100 dark:bg-red-500/10 px-1.5 py-0.5 rounded">host</span>
+                    </h5>
+                    <p className="text-gray-500 dark:text-gray-400 text-sm">Web Dev Cohort 26</p>
+                  </div>
+                </div>
                 
-                {/* Fake Bar Chart */}
-                <div className="lg:col-span-2 p-5 rounded-xl border border-gray-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/20 flex flex-col justify-between">
-                  <div className="flex justify-between items-center mb-6">
-                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white">Hourly Engagement</h5>
-                    <select className="text-xs bg-transparent border-none text-gray-500 focus:ring-0 outline-none cursor-pointer">
-                      <option>Today</option>
-                      <option>Last 7 Days</option>
-                    </select>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="bg-gray-200 dark:bg-[#222] rounded-lg p-3">
+                    <p className="text-gray-500 dark:text-[#888] text-[10px] font-mono uppercase mb-1">question</p>
+                    <p className="text-gray-900 dark:text-white font-bold text-lg">07 / 12</p>
                   </div>
-                  
-                  {/* Tailwind Only CSS Chart */}
-                  <div className="flex-1 flex items-end justify-between gap-1 sm:gap-2">
-                    {chartData.map((height, i) => (
-                      <div key={i} className="w-full relative group h-full flex items-end justify-center">
-                        {/* Tooltip */}
-                        <div className="absolute -top-8 opacity-0 group-hover:opacity-100 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-xs px-2 py-1 rounded transition-opacity pointer-events-none z-10 whitespace-nowrap shadow-lg">
-                          {height * 14} votes
-                        </div>
-                        {/* Bar */}
-                        <div 
-                          style={{ height: `${height}%` }} 
-                          className="w-full max-w-[2.5rem] bg-orange-100 dark:bg-orange-500/10 group-hover:bg-orange-500 dark:group-hover:bg-orange-500 rounded-t-md transition-colors duration-300" 
+                  <div className="bg-gray-200 dark:bg-[#222] rounded-lg p-3">
+                    <p className="text-gray-500 dark:text-[#888] text-[10px] font-mono uppercase mb-1">Live</p>
+                    <p className="text-gray-900 dark:text-white font-bold text-lg">{totalLive}</p>
+                  </div>
+                  <div className="bg-gray-200 dark:bg-[#222] rounded-lg p-3">
+                    <p className="text-gray-500 dark:text-[#888] text-[10px] font-mono uppercase mb-1">Avg score</p>
+                    <p className="text-gray-900 dark:text-white font-bold text-lg">76%</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Leaderboard Card */}
+              <div className="bg-gray-50 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-[#2a2a2a] p-5 flex-1 flex flex-col">
+                <div className="flex justify-between items-center mb-6">
+                  <h5 className="text-gray-500 dark:text-[#888] text-xs font-mono uppercase">live leaderboard</h5>
+                  <span className="text-gray-500 dark:text-[#888] text-xs font-mono lowercase">top 5</span>
+                </div>
+                
+                <div className="space-y-4 flex-1">
+                  {[
+                    { rank: 1, name: 'Rahul', score: 909, color: 'bg-[#ab68f4]', w: '100%', avatar: 'Rahul' },
+                    { rank: 2, name: 'Anjali', score: 844, color: 'bg-[#facc15]', w: '90%', avatar: 'Anjali' },
+                    { rank: 3, name: 'Vikram', score: 828, color: 'bg-[#29c470]', w: '85%', avatar: 'Vikram' },
+                    { rank: 4, name: 'Sneha', score: 793, color: 'bg-[#4b9bf8]', w: '80%', avatar: 'Sneha' },
+                    { rank: 5, name: 'Rohan', score: 430, color: 'bg-[#f98825]', w: '45%', avatar: 'Rohan' },
+                  ].map((user) => (
+                    <div key={user.rank} className="flex items-center gap-3">
+                      <div className="w-4 text-gray-500 dark:text-[#888] font-mono text-sm text-center shrink-0">{user.rank}</div>
+                      <div className="flex-1 relative h-10 bg-gray-200 dark:bg-[#222] rounded-full overflow-hidden flex items-center p-1">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          whileInView={{ width: user.w }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 1, delay: user.rank * 0.1 }}
+                          className={`absolute left-0 top-0 bottom-0 ${user.color} rounded-full`}
                         />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Recent Activity List */}
-                <div className="p-5 rounded-xl border border-gray-100 dark:border-zinc-800/80 bg-white dark:bg-zinc-900/20 overflow-hidden flex flex-col">
-                  <div className="flex justify-between items-center mb-4">
-                    <h5 className="text-sm font-semibold text-gray-900 dark:text-white">Live Feed</h5>
-                    <Zap className="w-4 h-4 text-orange-500 fill-orange-500/20" />
-                  </div>
-                  <div className="flex-1 flex flex-col gap-4 overflow-y-auto pr-1">
-                    {recentResponses.map((res, i) => (
-                      <div key={i} className="flex items-center gap-3">
-                        <div className={`w-8 h-8 rounded-full ${res.color} flex items-center justify-center text-white text-xs font-bold shrink-0 shadow-inner`}>
-                          {res.name.charAt(0)}
+                        <div className="relative z-10 w-8 h-8 rounded-full bg-white/50 dark:bg-white/20 shrink-0 overflow-hidden">
+                           <img src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.avatar}`} alt={user.name} className="w-full h-full object-cover" />
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                            {res.name} <span className="text-gray-500 dark:text-gray-400 font-normal">voted</span>
-                          </p>
-                          <p className="text-xs text-orange-600 dark:text-orange-400 font-medium truncate">{res.option}</p>
-                        </div>
-                        <span className="text-xs text-gray-400 dark:text-gray-500 whitespace-nowrap">{res.time}</span>
+                        <span className="relative z-10 text-gray-900 dark:text-white font-bold ml-3 text-sm truncate">{user.name}</span>
                       </div>
-                    ))}
-                  </div>
+                      <div className="w-8 text-right text-gray-700 dark:text-white font-mono text-sm font-bold shrink-0">{user.score}</div>
+                    </div>
+                  ))}
                 </div>
-
               </div>
 
             </div>
@@ -172,3 +189,4 @@ const LivePreview = () => {
 };
 
 export default LivePreview;
+
