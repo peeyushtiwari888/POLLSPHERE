@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Share2, X, Copy, Check, Globe, Share, Download } from 'lucide-react';
+import { Share2, X, Copy, Check, Globe, Share, Download, QrCode } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { QRCodeCanvas } from 'qrcode.react';
 
 /**
  * Share Poll Modal
  * 
- * A premium SaaS modal designed to facilitate distribution of a poll.
- * Generates a public URL and provides one-click copy functionality.
+ * Redesigned for a modern SaaS look with a prominent QR Code section.
  */
 const SharePollModal = ({ isOpen, onClose, pollId }) => {
   const [copied, setCopied] = useState(false);
+  const [showQR, setShowQR] = useState(false); // Toggle between link and QR
 
   if (!isOpen) return null;
 
@@ -47,7 +48,6 @@ const SharePollModal = ({ isOpen, onClose, pollId }) => {
         }
       }
     } else {
-      // Fallback to clipboard if Native API is unsupported
       handleCopy();
     }
   };
@@ -70,14 +70,12 @@ const SharePollModal = ({ isOpen, onClose, pollId }) => {
     }
   };
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
           
-          {/* ------------------------------------------------------------------
-              Backdrop
-          ------------------------------------------------------------------ */}
+          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -85,131 +83,150 @@ const SharePollModal = ({ isOpen, onClose, pollId }) => {
             transition={{ duration: 0.2 }}
             className="absolute inset-0 bg-gray-900/60 dark:bg-black/60 backdrop-blur-sm"
             onClick={onClose}
-            aria-hidden="true"
           />
 
-          {/* ------------------------------------------------------------------
-              Modal Content
-          ------------------------------------------------------------------ */}
+          {/* Modal Content */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 10 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="relative w-full max-w-lg bg-white dark:bg-zinc-900 rounded-3xl shadow-2xl overflow-hidden border border-gray-100 dark:border-zinc-800"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="share-modal-title"
+            className="relative w-full max-w-md bg-white dark:bg-zinc-900 rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100 dark:border-zinc-800"
           >
             
-            {/* Header Area */}
-            <div className="p-6 sm:p-8 pb-4">
-              
-              {/* Close Button */}
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 pt-6 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-orange-50 dark:bg-orange-500/10 flex items-center justify-center text-orange-600 dark:text-orange-500">
+                  <Share2 className="w-5 h-5" />
+                </div>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Share Poll</h2>
+              </div>
               <button
                 onClick={onClose}
-                className="absolute top-4 right-4 p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none"
-                aria-label="Close dialog"
+                className="p-2 rounded-full text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
+            </div>
 
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-12 h-12 rounded-full bg-green-50 dark:bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-500 shadow-sm border border-green-100 dark:border-green-900/30">
-                  <Share2 className="w-6 h-6" />
-                </div>
-                <div>
-                  <h2 id="share-modal-title" className="text-xl font-bold text-gray-900 dark:text-white tracking-tight">
-                    Share Poll
-                  </h2>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    Anyone with this link can view and participate.
-                  </p>
-                </div>
-              </div>
-
-              {/* Public Link Copy Section */}
-              <div className="space-y-2 mb-8">
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
-                  Public Link
-                </label>
-                <div className="flex items-center gap-2">
-                  <div className="relative flex-1">
-                    <input
-                      type="text"
-                      readOnly
-                      value={publicUrl}
-                      className="w-full h-11 pl-4 pr-4 bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl text-sm text-gray-600 dark:text-gray-400 focus:outline-none select-all"
-                    />
-                  </div>
-                  <button
-                    onClick={handleCopy}
-                    className={`flex items-center justify-center gap-2 h-11 px-5 rounded-xl font-semibold transition-all ${
-                      copied 
-                        ? 'bg-green-500 text-white shadow-sm' 
-                        : 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 shadow-sm active:scale-95'
-                    }`}
-                  >
-                    {copied ? (
-                      <>
-                        <Check className="w-4 h-4" />
-                        Copied
-                      </>
-                    ) : (
-                      <>
-                        <Copy className="w-4 h-4" />
-                        Copy
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* QR Code Section */}
-              <div className="flex flex-col items-center justify-center p-6 bg-gray-50 dark:bg-zinc-950 border border-gray-100 dark:border-zinc-800 rounded-2xl mb-8">
-                <div className="bg-white p-3 rounded-2xl shadow-sm mb-4">
-                  <QRCodeCanvas 
-                    id="qr-code-canvas"
-                    value={publicUrl} 
-                    size={160}
-                    level={"H"}
-                    includeMargin={true}
-                    bgColor={"#ffffff"}
-                    fgColor={"#000000"}
-                  />
-                </div>
+            {/* Toggle Tabs */}
+            <div className="px-6 mb-4">
+              <div className="flex p-1 bg-gray-100 dark:bg-zinc-800/50 rounded-xl">
                 <button
-                  onClick={downloadQRCode}
-                  className="flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+                  onClick={() => setShowQR(false)}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-all ${
+                    !showQR 
+                      ? 'bg-white dark:bg-zinc-700 text-gray-900 dark:text-white shadow-sm' 
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
                 >
-                  <Download className="w-4 h-4" />
-                  Download QR Code
+                  <Globe className="w-4 h-4" /> Link
+                </button>
+                <button
+                  onClick={() => setShowQR(true)}
+                  className={`flex-1 flex items-center justify-center gap-2 py-2 text-sm font-semibold rounded-lg transition-all ${
+                    showQR 
+                      ? 'bg-white dark:bg-zinc-700 text-gray-900 dark:text-white shadow-sm' 
+                      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                  }`}
+                >
+                  <QrCode className="w-4 h-4" /> QR Code
                 </button>
               </div>
-
-              {/* Social Share Placeholders / Native Share */}
-              <div className="space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 text-center">
-                  Or share via
-                </p>
-                <div className="grid grid-cols-1 gap-3">
-                  <button 
-                    onClick={handleNativeShare}
-                    className="flex items-center justify-center gap-2 py-3 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-500/20 font-medium transition-colors border border-blue-100 dark:border-blue-900/30 w-full"
-                  >
-                    <Share className="w-5 h-5" />
-                    Share via Device...
-                  </button>
-                </div>
-              </div>
-
             </div>
-          </motion.div>
 
+            <div className="px-6 pb-6">
+              <AnimatePresence mode="wait">
+                {!showQR ? (
+                  <motion.div
+                    key="link"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.15 }}
+                    className="space-y-6"
+                  >
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                      Copy the link below and share it with your audience. Anyone with the link can participate.
+                    </p>
+                    
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        readOnly
+                        value={publicUrl}
+                        className="w-full h-12 pl-4 pr-4 bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl text-sm text-gray-600 dark:text-gray-400 focus:outline-none select-all"
+                      />
+                      <button
+                        onClick={handleCopy}
+                        className={`flex items-center justify-center gap-2 h-12 px-5 rounded-xl font-semibold transition-all flex-shrink-0 ${
+                          copied 
+                            ? 'bg-green-500 text-white' 
+                            : 'bg-orange-500 text-white hover:bg-orange-600 active:scale-95'
+                        }`}
+                      >
+                        {copied ? <Check className="w-5 h-5" /> : <Copy className="w-5 h-5" />}
+                      </button>
+                    </div>
+
+                    <div className="pt-2">
+                      <button 
+                        onClick={handleNativeShare}
+                        className="flex items-center justify-center gap-2 py-3 w-full bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-500/20 font-medium transition-colors border border-blue-100 dark:border-blue-900/30"
+                      >
+                        <Share className="w-5 h-5" />
+                        Share via Device...
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="qr"
+                    initial={{ opacity: 0, x: 10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: 10 }}
+                    transition={{ duration: 0.15 }}
+                    className="flex flex-col items-center"
+                  >
+                    <p className="text-sm text-gray-500 dark:text-gray-400 text-center mb-6">
+                      Scan this QR code with any camera app to open the poll instantly.
+                    </p>
+                    
+                    <div className="relative p-6 bg-gradient-to-br from-orange-100 to-orange-50 dark:from-orange-500/20 dark:to-orange-900/10 rounded-3xl mb-6">
+                      <div className="bg-white p-4 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.12)]">
+                        <QRCodeCanvas 
+                          id="qr-code-canvas"
+                          value={publicUrl} 
+                          size={180}
+                          level={"H"}
+                          includeMargin={false}
+                          bgColor={"#ffffff"}
+                          fgColor={"#000000"}
+                          className="rounded-lg"
+                        />
+                      </div>
+                    </div>
+                    
+                    <button
+                      onClick={downloadQRCode}
+                      className="flex items-center justify-center gap-2 w-full py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 rounded-xl font-semibold transition-all active:scale-95 shadow-sm"
+                    >
+                      <Download className="w-5 h-5" />
+                      Save Image
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+            
+          </motion.div>
         </div>
       )}
     </AnimatePresence>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 };
 
 export default SharePollModal;

@@ -38,6 +38,20 @@ export const login = async (credentials) => {
 };
 
 /**
+ * Log in/Signup with Google
+ * @param {string} token - Google credential token
+ * @returns {Promise<Object>} Clean response data containing token and user info
+ */
+export const googleLogin = async (token) => {
+  try {
+    const response = await api.post('/auth/google', { token });
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+/**
  * Log out the current user from the server
  * @returns {Promise<Object>} Clean response data confirming logout
  */

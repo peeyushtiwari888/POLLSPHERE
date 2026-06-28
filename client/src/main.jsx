@@ -7,9 +7,10 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { SocketProvider } from './socket/SocketProvider';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
-// Import global font (Make sure @fontsource/inter is installed, or remove if using Google Fonts in index.html)
-import '@fontsource/inter';
+// Import global font
+import '@fontsource/outfit';
 
 // Import global styles (Tailwind & Design System)
 import './index.css';
@@ -26,10 +27,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       {/* ThemeProvider manages light/dark mode state across the app */}
       <ThemeProvider>
-        {/* AuthProvider makes authentication state globally accessible */}
         <AuthProvider>
           <SocketProvider>
-            <App />
+            <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID'}>
+              <App />
+            </GoogleOAuthProvider>
             
             {/* Toaster renders the global toast notifications (success/error popups) */}
             <Toaster 

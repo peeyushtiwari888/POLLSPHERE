@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { X, Calendar as CalendarIcon, Clock, Loader2, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -17,7 +18,7 @@ const PublishPollModal = ({ isOpen, onClose, onConfirm, isPublishing, pollTitle 
     }
   };
 
-  return (
+  const modalContent = (
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-0">
@@ -162,6 +163,8 @@ const PublishPollModal = ({ isOpen, onClose, onConfirm, isPublishing, pollTitle 
       )}
     </AnimatePresence>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 };
 
 export default PublishPollModal;

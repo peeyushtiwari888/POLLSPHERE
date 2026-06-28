@@ -25,6 +25,21 @@ const questionSchema = new mongoose.Schema({
     type: Boolean,
     default: true, // By default, questions are mandatory
   },
+  duration: {
+    type: Number,
+    default: 30, // seconds
+    min: [5, 'Duration must be at least 5 seconds'],
+  },
+  points: {
+    type: Number,
+    default: 10,
+    min: [0, 'Points cannot be negative'],
+  },
+  questionType: {
+    type: String,
+    enum: ['MULTIPLE_CHOICE', 'SHORT_ANSWER', 'LONG_ANSWER'],
+    default: 'MULTIPLE_CHOICE',
+  },
   options: {
     type: [optionSchema],
     validate: {
@@ -58,6 +73,11 @@ const pollSchema = new mongoose.Schema(
     isAnonymous: {
       type: Boolean,
       default: false, // If true, responders don't need to be authenticated/tracked
+    },
+    participationCode: {
+      type: String,
+      trim: true,
+      default: '',
     },
     isResultsPublished: {
       type: Boolean,

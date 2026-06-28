@@ -78,6 +78,11 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, setFormValues }) => {
       tags: data.tags ? data.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
     };
     
+    // Prevent Mongoose CastError for empty date string
+    if (!formattedData.registrationDeadline) {
+      delete formattedData.registrationDeadline;
+    }
+    
     // Convert dates to ISO if needed, though they are datetime-local strings
     try {
       await onSubmit(formattedData);

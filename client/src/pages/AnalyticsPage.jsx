@@ -4,6 +4,7 @@ import { Loader2, AlertCircle } from 'lucide-react';
 
 // Socket hook
 import useSocket from '../hooks/useSocket';
+import GlobalLoader from '../components/common/GlobalLoader';
 
 // API (To be implemented later)
 import { getPollAnalytics } from '../api/analytics.api';
@@ -98,14 +99,7 @@ const AnalyticsPage = () => {
   // RENDER: LOADING STATE
   // ---------------------------------------------------------------------------
   if (isLoading) {
-    return (
-      <div className="w-full min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
-        <p className="text-gray-500 dark:text-gray-400 font-medium animate-pulse tracking-wide">
-          Crunching the numbers...
-        </p>
-      </div>
-    );
+    return <GlobalLoader text="Crunching the numbers..." />;
   }
 
   // ---------------------------------------------------------------------------

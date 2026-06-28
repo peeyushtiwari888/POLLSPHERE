@@ -81,30 +81,27 @@ const ChangePasswordForm = ({ onSubmit, isSubmitting }) => {
         {label}
       </label>
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <KeyRound className={`w-5 h-5 ${errorMsg ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`} />
-        </div>
         <input
           id={id}
           type={showState ? 'text' : 'password'}
           {...registerProps}
-          className={`w-full pl-11 pr-12 py-3 bg-gray-50 dark:bg-zinc-800/50 border ${
+          className={`w-full px-4 pr-12 py-2.5 bg-transparent border-b ${
             errorMsg 
-              ? 'border-red-300 dark:border-red-500/50 focus:ring-red-500/20 focus:border-red-500' 
-              : 'border-gray-200 dark:border-zinc-700 focus:ring-orange-500/20 focus:border-orange-500'
-          } text-gray-900 dark:text-white rounded-xl focus:ring-4 focus:outline-none transition-all duration-200`}
+              ? 'border-red-500' 
+              : 'border-gray-300 dark:border-zinc-700 focus:border-gray-900 dark:focus:border-white'
+          } text-gray-900 dark:text-white focus:outline-none transition-colors`}
           placeholder={placeholder}
         />
         <button
           type="button"
           onClick={() => setShowState(!showState)}
-          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 focus:outline-none transition-colors"
+          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 focus:outline-none"
         >
-          {showState ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          {showState ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
         </button>
       </div>
       {errorMsg && (
-        <p className="text-sm font-medium text-red-500 mt-1.5 animate-in slide-in-from-top-1">
+        <p className="text-sm font-medium text-red-500 mt-1.5">
           {errorMsg}
         </p>
       )}
@@ -112,27 +109,16 @@ const ChangePasswordForm = ({ onSubmit, isSubmitting }) => {
   );
 
   return (
-    <div className="w-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-3xl p-6 sm:p-8 shadow-sm transition-all duration-300 relative overflow-hidden">
+    <div className="w-full space-y-6 pt-4 border-t border-gray-100 dark:border-zinc-800">
       
-      {/* Background Accent */}
-      <div className="absolute top-0 right-0 w-48 h-48 bg-gradient-to-bl from-red-500/5 to-transparent rounded-full blur-3xl pointer-events-none" />
-
       {/* Header */}
-      <div className="relative z-10 flex items-center gap-3 mb-8 pb-4 border-b border-gray-100 dark:border-zinc-800">
-        <div className="p-2.5 bg-red-50 dark:bg-red-500/10 rounded-xl border border-red-100 dark:border-red-900/30">
-          <ShieldAlert className="w-5 h-5 text-red-500" />
-        </div>
-        <div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white tracking-tight">
-            Security Settings
-          </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
-            Keep your account secure by updating your password.
-          </p>
-        </div>
+      <div className="mb-6">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+          Security Settings
+        </h3>
       </div>
 
-      <form onSubmit={handleSubmit(handleFormSubmit)} className="relative z-10 space-y-6">
+      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
         
         {/* Form Fields */}
         {renderPasswordInput(
@@ -166,20 +152,14 @@ const ChangePasswordForm = ({ onSubmit, isSubmitting }) => {
         )}
 
         {/* Submit Button */}
-        <div className="pt-4 flex justify-end">
+        <div className="pt-2 flex">
           <button
             type="submit"
             disabled={isSubmitting || !isDirty}
-            className="flex items-center justify-center gap-2 px-8 py-3 bg-red-500 text-white font-semibold rounded-xl hover:bg-red-600 transition-all shadow-sm active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100"
+            className="px-6 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-semibold rounded-lg hover:bg-gray-800 dark:hover:bg-gray-100 transition-colors disabled:opacity-50 flex items-center gap-2"
           >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Updating...
-              </>
-            ) : (
-              'Update Password'
-            )}
+            {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+            Update Password
           </button>
         </div>
 

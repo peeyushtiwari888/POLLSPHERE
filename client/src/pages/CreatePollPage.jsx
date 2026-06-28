@@ -1,6 +1,6 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { Sparkles, Edit3 } from 'lucide-react';
+import { PlusCircle, Edit3 } from 'lucide-react';
 import CreatePollWizard from '../components/poll/CreatePollWizard';
 
 /**
@@ -20,15 +20,15 @@ const CreatePollPage = () => {
       <div className="flex flex-col gap-2 border-b border-gray-100 dark:border-zinc-800 pb-6">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-orange-100 dark:bg-orange-500/20 text-orange-600 dark:text-orange-500 rounded-xl">
-            {isEditMode ? <Edit3 className="w-6 h-6" /> : <Sparkles className="w-6 h-6" />}
+            {isEditMode ? <Edit3 className="w-6 h-6" /> : <PlusCircle className="w-6 h-6" />}
           </div>
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-            {isEditMode ? 'Edit Poll' : 'Create New Poll'}
+            {isEditMode ? 'Edit Quiz' : 'Create New Quiz'}
           </h1>
         </div>
         <p className="text-base text-gray-500 dark:text-gray-400 ml-1">
           {isEditMode 
-            ? 'Modify your poll structure, adjust settings, and save changes.' 
+            ? 'Modify your quiz structure, adjust settings, and save changes.' 
             : 'Configure basic attributes, build your questionnaire, and deploy to your audience.'}
         </p>
       </div>

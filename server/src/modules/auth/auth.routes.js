@@ -18,6 +18,11 @@ router.post('/register', validate(registerSchema), authController.register);
 // @access  Public
 router.post('/login', validate(loginSchema), authController.login);
 
+// @route   POST /api/auth/google
+// @desc    Login/Signup with Google
+// @access  Public
+router.post('/google', authController.googleLogin);
+
 // @route   GET /api/auth/me
 // @desc    Get current logged in user details
 // @access  Private (Requires authentication)

@@ -4,6 +4,7 @@ import { toast } from 'react-hot-toast';
 
 // API Functions
 import { getProfile, updateProfile, changePassword } from '../api/profile.api';
+import GlobalLoader from '../components/common/GlobalLoader';
 
 // Child Components (To be implemented later)
 import ProfileCard from '../components/profile/ProfileCard';
@@ -94,14 +95,7 @@ const ProfilePage = () => {
   // RENDER: LOADING STATE
   // ---------------------------------------------------------------------------
   if (isLoading) {
-    return (
-      <div className="w-full min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
-        <p className="text-gray-500 dark:text-gray-400 font-medium animate-pulse tracking-wide">
-          Loading your profile...
-        </p>
-      </div>
-    );
+    return <GlobalLoader text="Loading your profile..." />;
   }
 
   // ---------------------------------------------------------------------------
@@ -138,22 +132,13 @@ const ProfilePage = () => {
       {/* --------------------------------------------------------
           Header Section
       -------------------------------------------------------- */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 bg-white dark:bg-zinc-900 p-6 sm:p-8 rounded-3xl border border-gray-100 dark:border-zinc-800 shadow-sm relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mt-16 -mr-16 w-48 h-48 bg-gradient-to-br from-orange-500/10 to-amber-500/5 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 bg-orange-50 dark:bg-orange-500/10 rounded-lg">
-              <User className="w-6 h-6 text-orange-500" />
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-              Profile Settings
-            </h1>
-          </div>
-          <p className="text-gray-500 dark:text-gray-400 max-w-lg">
-            Manage your personal information, avatar, and security settings.
-          </p>
-        </div>
+      <div className="mb-4">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
+          Profile Settings
+        </h1>
+        <p className="text-gray-500 dark:text-gray-400 mt-1">
+          Manage your personal information and security.
+        </p>
       </div>
 
       {/* --------------------------------------------------------

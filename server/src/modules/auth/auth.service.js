@@ -1,7 +1,10 @@
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import { OAuth2Client } from 'google-auth-library';
 import User from './auth.model.js';
 import sendEmail from '../../common/utils/sendEmail.js';
+
+const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 /**
  * Helper: Generate JWT Token
@@ -61,6 +64,56 @@ export const loginUser = async (email, password) => {
     throw new Error('Invalid email or password');
   }
 
+  const token = generateToken(user._id);
+  const userResponse = user.toJSON();
+
+  return { user: userResponse, token };
+};
+
+/**
+ * Handle Google Login / Signup
+ */
+export const googleLogin = async (idToken) => {
+  // 1. Verify Google Token
+  const ticket = await client.verifyIdToken({
+    idToken,
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+  const payload = ticket.getPayload();
+  const { sub: googleId, email, name, picture } = payload;
+
+  // 2. Check if user already exists
+  let user = await User.findOne({ email });
+
+  if (user) {
+    if (!user.googleId) {
+      user.googleId = googleId;
+      await user.save();
+    }
+  } else {
+    // 3. Create new user if doesn't exist
+    const baseUsername = email.split('@')[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+    let username = baseUsername;
+    
+    let usernameExists = await User.findOne({ username });
+    let counter = 1;
+    while (usernameExists) {
+      username = `${baseUsername}${counter}`;
+      usernameExists = await User.findOne({ username });
+      counter++;
+    }
+
+    user = await User.create({
+      username,
+      email,
+      name,
+      avatarUrl: picture,
+      googleId,
+      authProvider: 'google',
+    });
+  }
+
+  // 4. Generate JWT
   const token = generateToken(user._id);
   const userResponse = user.toJSON();
 

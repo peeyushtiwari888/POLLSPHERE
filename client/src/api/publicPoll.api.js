@@ -14,11 +14,14 @@ const handleApiError = (error) => {
  * Allows respondents to view the poll details and questions.
  * 
  * @param {string} pollId - The ID of the poll
+ * @param {string} [code] - Optional participation code
  * @returns {Promise<Object>} The poll data payload
  */
-export const getPublicPoll = async (pollId) => {
+export const getPublicPoll = async (pollId, code) => {
   try {
-    const response = await api.get(`/polls/public/${pollId}`);
+    const response = await api.get(`/polls/public/${pollId}`, {
+      params: { code }
+    });
     return response.data;
   } catch (error) {
     handleApiError(error);

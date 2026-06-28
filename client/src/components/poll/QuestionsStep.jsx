@@ -25,7 +25,9 @@ const QuestionsStep = ({ data = [], updateData }) => {
     const newQuestion = {
       id: crypto.randomUUID(), // Stable ID for React mapping and animations
       text: '',
-      type: 'single_choice',
+      type: 'MULTIPLE_CHOICE',
+      duration: 30,
+      points: 10,
       options: [
         { id: crypto.randomUUID(), text: '' },
         { id: crypto.randomUUID(), text: '' }

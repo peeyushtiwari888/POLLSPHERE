@@ -3,11 +3,12 @@ import { Loader2, AlertCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DashboardHeader from '../components/dashboard/DashboardHeader';
 import StatsCards from '../components/dashboard/StatsCards';
-import QuickActions from '../components/dashboard/QuickActions';
+import QuickActions from '../components/dashboard/QuickActions'; // removed
 import RecentPolls from '../components/dashboard/RecentPolls';
 import EmptyState from '../components/dashboard/EmptyState';
 import { getDashboardStats, getRecentPolls } from '../api/dashboard.api';
 import useSocket from '../hooks/useSocket';
+import GlobalLoader from '../components/common/GlobalLoader';
 
 /**
  * Premium Dashboard Overview Page
@@ -83,14 +84,7 @@ const DashboardPage = () => {
   // RENDER: Loading State
   // ---------------------------------------------------------------------------
   if (isLoading) {
-    return (
-      <div className="w-full min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
-        <p className="text-gray-500 dark:text-gray-400 font-medium animate-pulse">
-          Loading your workspace...
-        </p>
-      </div>
-    );
+    return <GlobalLoader text="Loading your workspace..." />;
   }
 
   // ---------------------------------------------------------------------------
@@ -134,16 +128,14 @@ const DashboardPage = () => {
         <StatsCards stats={stats} />
       </section>
 
-      {/* 3. Main Content Split */}
+      {/* 3. Main Content */}
       <section 
-        className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start"
+        className="w-full flex flex-col items-start"
         aria-label="Dashboard Content"
       >
-        
-        {/* Left/Main Column: Polls Table OR Empty State (Takes up 2/3 on desktop) */}
-        <div className="lg:col-span-2 h-full flex flex-col">
+        <div className="w-full h-full flex flex-col">
           {hasPolls ? (
-            <RecentPolls polls={polls} />
+            <RecentPolls polls={polls} onRefresh={() => fetchDashboardData(false)} />
           ) : (
             <EmptyState 
               title="No polls created yet"
@@ -153,12 +145,6 @@ const DashboardPage = () => {
             />
           )}
         </div>
-
-        {/* Right Column: Quick Actions (Takes up 1/3 on desktop) */}
-        <div className="lg:col-span-1 h-full">
-          <QuickActions />
-        </div>
-        
       </section>
 
     </div>

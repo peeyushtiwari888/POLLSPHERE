@@ -1,54 +1,48 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Filter } from 'lucide-react';
 
 /**
- * Poll Filters
- * 
- * Renders a horizontally scrollable list of filter chips (pills).
- * Purely presentational; delegates state changes via onFilterChange.
+ * Minimal Poll Filters with Colors
  */
 const PollFilters = ({ activeFilter = 'All', onFilterChange }) => {
-  const filters = ['All', 'Draft', 'Published', 'Expired', 'Archived'];
+  const filterConfig = [
+    { name: 'All', activeText: 'text-gray-900 dark:text-white', activeBg: 'bg-gray-900 dark:bg-white' },
+    { name: 'Draft', activeText: 'text-orange-600 dark:text-orange-400', activeBg: 'bg-orange-500' },
+    { name: 'Published', activeText: 'text-emerald-600 dark:text-emerald-400', activeBg: 'bg-emerald-500' },
+    { name: 'Expired', activeText: 'text-red-600 dark:text-red-400', activeBg: 'bg-red-500' },
+    { name: 'Archived', activeText: 'text-indigo-600 dark:text-indigo-400', activeBg: 'bg-indigo-500' },
+  ];
 
   return (
-    <div className="flex items-center gap-3">
-      {/* Optional: Filter Icon for aesthetic grounding on desktop */}
-      <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-500 dark:text-gray-400">
-        <Filter className="w-5 h-5" />
-      </div>
-
-      {/* Horizontally scrollable container for mobile responsiveness */}
-      <div className="flex-1 overflow-x-auto custom-scrollbar pb-2 sm:pb-0 -mx-4 px-4 sm:mx-0 sm:px-0">
-        <div className="flex items-center gap-2 min-w-max">
-          {filters.map((filter) => {
-            const isActive = activeFilter === filter;
-            
-            return (
-              <button
-                key={filter}
-                onClick={() => onFilterChange && onFilterChange(filter)}
-                className={`relative px-4 py-2 rounded-full text-sm font-semibold transition-all duration-300 focus:outline-none overflow-hidden ${
-                  isActive 
-                    ? 'text-white shadow-md' 
-                    : 'text-gray-600 dark:text-gray-300 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 hover:bg-gray-50 dark:hover:bg-zinc-800'
-                }`}
-              >
-                {/* Framer Motion Background for active state (smooth slide effect) */}
-                {isActive && (
-                  <motion.div
-                    layoutId="activeFilterBubble"
-                    className="absolute inset-0 bg-gray-900 dark:bg-orange-500 z-0"
-                    initial={false}
-                    transition={{ type: "spring", stiffness: 400, damping: 30 }}
-                  />
-                )}
-                
-                <span className="relative z-10">{filter}</span>
-              </button>
-            );
-          })}
-        </div>
+    <div className="flex items-center w-full overflow-x-auto custom-scrollbar border-b border-gray-100 dark:border-zinc-800/50">
+      <div className="flex items-center gap-6 min-w-max px-2">
+        {filterConfig.map(({ name, activeText, activeBg }) => {
+          const isActive = activeFilter === name;
+          
+          return (
+            <button
+              key={name}
+              onClick={() => onFilterChange && onFilterChange(name)}
+              className={`relative py-3 text-sm font-semibold transition-colors focus:outline-none ${
+                isActive 
+                  ? activeText 
+                  : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'
+              }`}
+            >
+              <span className="relative z-10">{name}</span>
+              
+              {/* Minimal Underline Indicator */}
+              {isActive && (
+                <motion.div
+                  layoutId="minimalTabIndicator"
+                  className={`absolute bottom-0 left-0 right-0 h-[2px] rounded-t-full ${activeBg}`}
+                  initial={false}
+                  transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                />
+              )}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

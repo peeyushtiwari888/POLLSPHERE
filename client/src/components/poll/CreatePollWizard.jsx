@@ -13,10 +13,10 @@ import PollSettingsStep from './PollSettingsStep';
 import ReviewStep from './ReviewStep';
 
 const STEPS = [
-  { id: 1, title: 'Details', description: 'Configure basic attributes' },
-  { id: 2, title: 'Questions', description: 'Build your questionnaire' },
-  { id: 3, title: 'Settings', description: 'Manage access & lifecycle' },
-  { id: 4, title: 'Review', description: 'Finalize and deploy' }
+  { id: 1, title: 'Setup', description: 'Configure basic attributes' },
+  { id: 2, title: 'Builder', description: 'Build your questionnaire' },
+  { id: 3, title: 'Options', description: 'Manage access & lifecycle' },
+  { id: 4, title: 'Launch', description: 'Finalize and deploy' }
 ];
 
 /**
@@ -36,6 +36,7 @@ const CreatePollWizard = () => {
     title: '',
     thumbnailUrl: '',
     description: '',
+    participationCode: '',
     questions: [], // Array of question objects
     settings: {
       isAnonymous: false,
@@ -66,7 +67,15 @@ const CreatePollWizard = () => {
           title: poll.title || '',
           thumbnailUrl: poll.thumbnailUrl || '',
           description: poll.description || '',
-          questions: poll.questions || [],
+          participationCode: poll.participationCode || '',
+          questions: (poll.questions || []).map(q => ({
+            ...q,
+            id: q._id || crypto.randomUUID(),
+            type: q.questionType || 'MULTIPLE_CHOICE',
+            duration: q.duration || 30,
+            points: q.points || 10,
+            options: (q.options || []).map(o => ({ ...o, id: o._id || crypto.randomUUID() }))
+          })),
           settings: {
             isAnonymous: poll.isAnonymous || false,
             isResultsPublished: poll.isResultsPublished || false,
@@ -127,11 +136,15 @@ const CreatePollWizard = () => {
         title: formData.title,
         thumbnailUrl: formData.thumbnailUrl,
         description: formData.description,
+        participationCode: formData.participationCode,
         isAnonymous: formData.settings.isAnonymous,
         expiryDate: finalExpiryDate.toISOString(),
         questions: formData.questions.map(q => ({
           text: q.text,
           isRequired: q.isRequired,
+          duration: q.duration || 30,
+          points: q.points || 10,
+          questionType: q.type || 'MULTIPLE_CHOICE',
           options: q.options.map(opt => ({ text: opt.text }))
         }))
       };
@@ -160,7 +173,7 @@ const CreatePollWizard = () => {
         return (
           <PollDetailsStep 
             data={formData} 
-            updateData={(data) => setFormData(prev => ({ ...prev, title: data.title, thumbnailUrl: data.thumbnailUrl, description: data.description }))} 
+            updateData={(data) => setFormData(prev => ({ ...prev, title: data.title, thumbnailUrl: data.thumbnailUrl, description: data.description, participationCode: data.participationCode }))} 
           />
         );
       case 2:
@@ -188,65 +201,60 @@ const CreatePollWizard = () => {
     <div className="w-full bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800 overflow-hidden flex flex-col">
       
       {/* --------------------------------------------------------
-          Header: Step Indicator
+          Header: Step Indicator (Modern Card Layout)
       -------------------------------------------------------- */}
-      <div className="bg-gray-50/50 dark:bg-zinc-950/50 border-b border-gray-200 dark:border-zinc-800 px-6 py-8 sm:px-10">
+      <div className="bg-gray-50/50 dark:bg-zinc-950/50 border-b border-gray-200 dark:border-zinc-800 p-4 sm:p-6">
         <nav aria-label="Progress">
-          <ol className="flex flex-col md:flex-row md:items-center gap-6 md:gap-4 lg:gap-8">
+          <ul className="flex flex-col md:flex-row gap-3">
             {STEPS.map((step, index) => {
               const isCompleted = currentStep > step.id;
               const isCurrent = currentStep === step.id;
               
               return (
-                <li key={step.id} className="relative flex-1">
-                  
-                  {/* Connecting Line (Desktop) */}
-                  {index !== STEPS.length - 1 && (
-                    <div className="hidden md:block absolute top-4 left-10 w-full h-0.5 bg-gray-200 dark:bg-zinc-800" aria-hidden="true">
-                      {isCompleted && (
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: '100%' }}
-                          transition={{ duration: 0.4 }}
-                          className="h-full bg-orange-500"
-                        />
-                      )}
-                    </div>
-                  )}
-
-                  <div className="relative flex items-center group">
-                    <span className="h-9 flex items-center">
+                <li key={step.id} className="flex-1">
+                  <div 
+                    className={`relative p-4 rounded-xl border flex items-center transition-all duration-300 ${
+                      isCurrent 
+                        ? 'bg-white dark:bg-zinc-900 border-orange-500 shadow-sm ring-1 ring-orange-500/20' 
+                        : isCompleted
+                          ? 'bg-orange-50 dark:bg-orange-500/10 border-orange-200 dark:border-orange-500/30'
+                          : 'bg-gray-50 dark:bg-zinc-900/50 border-gray-200 dark:border-zinc-800 opacity-70'
+                    }`}
+                  >
+                    <div className="flex items-center gap-4">
                       <span 
-                        className={`relative z-10 w-8 h-8 flex items-center justify-center rounded-full border-2 transition-colors duration-300 ${
-                          isCompleted 
-                            ? 'bg-orange-500 border-orange-500' 
-                            : isCurrent 
-                              ? 'border-orange-500 bg-white dark:bg-zinc-900' 
-                              : 'border-gray-300 dark:border-zinc-700 bg-white dark:bg-zinc-900'
+                        className={`flex items-center justify-center w-10 h-10 rounded-lg text-sm font-bold transition-colors ${
+                          isCurrent 
+                            ? 'bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400' 
+                            : isCompleted
+                              ? 'bg-orange-500 text-white'
+                              : 'bg-gray-200 text-gray-500 dark:bg-zinc-800 dark:text-gray-400'
                         }`}
                       >
-                        {isCompleted ? (
-                          <Check className="w-4 h-4 text-white" strokeWidth={3} />
-                        ) : (
-                          <span className={`text-sm font-semibold ${isCurrent ? 'text-orange-500' : 'text-gray-500 dark:text-gray-400'}`}>
-                            {step.id}
-                          </span>
-                        )}
+                        {isCompleted ? <Check className="w-5 h-5" strokeWidth={3} /> : step.id}
                       </span>
-                    </span>
-                    <span className="ml-4 min-w-0 flex flex-col">
-                      <span className={`text-sm font-bold tracking-wide uppercase ${isCurrent ? 'text-orange-600 dark:text-orange-500' : 'text-gray-500 dark:text-gray-400'}`}>
-                        {step.title}
-                      </span>
-                      <span className="text-sm text-gray-500 dark:text-gray-500">
-                        {step.description}
-                      </span>
-                    </span>
+                      <div className="flex flex-col">
+                        <span className={`text-sm font-bold uppercase tracking-wider ${
+                          isCurrent ? 'text-orange-600 dark:text-orange-400' 
+                          : isCompleted ? 'text-orange-700 dark:text-orange-300'
+                          : 'text-gray-500 dark:text-gray-400'
+                        }`}>
+                          {step.title}
+                        </span>
+                        <span className={`text-xs mt-0.5 ${
+                          isCurrent ? 'text-gray-600 dark:text-gray-300'
+                          : isCompleted ? 'text-orange-600/80 dark:text-orange-400/80'
+                          : 'text-gray-400 dark:text-gray-500'
+                        }`}>
+                          {step.description}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </li>
               );
             })}
-          </ol>
+          </ul>
         </nav>
       </div>
 

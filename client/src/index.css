@@ -2,6 +2,10 @@
 @plugin "@tailwindcss/typography";
 @custom-variant dark (&:where(.dark, .dark *));
 
+@theme {
+  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+}
+
 @layer base {
   /* 
    * LIGHT THEME (Default)
@@ -129,3 +133,43 @@
            transition-all duration-300 active:scale-95 flex items-center justify-center;
   }
 }
+
+@layer base {
+  /* ReactQuill Dark Mode & Visibility Overrides */
+  .ql-container {
+    font-family: inherit !important;
+    font-size: 1rem !important;
+    border-bottom-left-radius: 0.75rem !important;
+    border-bottom-right-radius: 0.75rem !important;
+  }
+  .ql-editor {
+    min-height: 150px;
+    padding: 1rem !important;
+  }
+  .dark .ql-toolbar {
+    border-color: #27272a !important; /* zinc-800 */
+    background-color: #18181b !important; /* zinc-900 */
+    border-top-left-radius: 0.75rem !important;
+    border-top-right-radius: 0.75rem !important;
+  }
+  .dark .ql-container {
+    border-color: #27272a !important;
+  }
+  .dark .ql-editor::before {
+    color: #52525b !important; /* placeholder color (zinc-500) */
+  }
+  .dark .ql-stroke {
+    stroke: #d4d4d8 !important; /* zinc-300 icons */
+  }
+  .dark .ql-fill {
+    fill: #d4d4d8 !important;
+  }
+  .dark .ql-picker-label {
+    color: #d4d4d8 !important;
+  }
+  .dark .ql-picker-options {
+    background-color: #18181b !important;
+    border-color: #27272a !important;
+  }
+}
+

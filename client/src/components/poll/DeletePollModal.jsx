@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, Loader2, X } from 'lucide-react';
 
@@ -9,7 +10,7 @@ import { AlertTriangle, Loader2, X } from 'lucide-react';
  * Handles loading states and prevents accidental clicks while submitting.
  */
 const DeletePollModal = ({ isOpen, onClose, onConfirm, isDeleting = false, pollTitle = 'this poll' }) => {
-  return (
+  const modalContent = (
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
@@ -102,6 +103,8 @@ const DeletePollModal = ({ isOpen, onClose, onConfirm, isDeleting = false, pollT
       )}
     </AnimatePresence>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalContent, document.body) : modalContent;
 };
 
 export default DeletePollModal;

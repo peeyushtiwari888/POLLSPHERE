@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, LayoutDashboard, BarChart3, PlusCircle, 
-  LineChart, User, LogOut, ChevronLeft, ChevronRight, Calendar, PieChart
-} from 'lucide-react';
-import { useNavigate, useLocation } from 'react-router-dom';
+  X, SquaresFour, ChartBar, PlusCircle, 
+  TrendUp, UserCircle, SignOut, CaretLeft, CaretRight, CalendarBlank, ChartPieSlice
+} from '@phosphor-icons/react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { toast } from 'react-hot-toast';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 
 /**
  * Premium SaaS Sidebar Component
@@ -34,13 +35,13 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
   };
 
   const navItems = [
-    { name: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
-    { name: 'My Polls', icon: BarChart3, path: '/polls' },
+    { name: 'Dashboard', icon: SquaresFour, path: '/dashboard' },
+    { name: 'My Polls', icon: ChartBar, path: '/polls' },
     { name: 'Create Poll', icon: PlusCircle, path: '/polls/create' },
-    { name: 'Poll Analytics', icon: LineChart, path: '/analytics/general' },
-    { name: 'Manage Events', icon: Calendar, path: '/events' },
-    { name: 'Event Analytics', icon: PieChart, path: '/events/analytics/dashboard' },
-    { name: 'Profile', icon: User, path: '/profile' },
+    { name: 'Poll Analytics', icon: TrendUp, path: '/analytics/general' },
+    { name: 'Manage Events', icon: CalendarBlank, path: '/events' },
+    { name: 'Event Analytics', icon: ChartPieSlice, path: '/events/analytics/dashboard' },
+    { name: 'Profile', icon: UserCircle, path: '/profile' },
   ];
 
   return (
@@ -127,6 +128,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
                 aria-current={isActive ? 'page' : undefined}
               >
                 <item.icon 
+                  weight={isActive ? "fill" : "regular"}
                   className={`w-5 h-5 flex-shrink-0 transition-colors ${
                     isActive 
                       ? 'text-orange-500' 
@@ -158,7 +160,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 font-medium transition-all group relative"
             aria-label="Logout"
           >
-            <LogOut className="w-5 h-5 flex-shrink-0 transition-transform group-hover:-translate-x-1" />
+            <SignOut weight="regular" className="w-5 h-5 flex-shrink-0 transition-transform group-hover:-translate-x-1" />
             {!isCollapsed && <span className="truncate">Logout</span>}
             
             {/* Tooltip for Logout in collapsed state */}
@@ -175,7 +177,7 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
             className="hidden lg:flex w-full items-center justify-center p-2 rounded-xl text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors focus:outline-none"
             aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            {isCollapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+            {isCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
           </button>
         </div>
       </motion.aside>

@@ -19,6 +19,9 @@ const pollDetailsSchema = z.object({
   description: z.string()
     .max(5000, "Description cannot exceed 5000 characters")
     .optional(),
+  participationCode: z.string()
+    .max(50, "Code cannot exceed 50 characters")
+    .optional(),
 });
 
 /**
@@ -38,6 +41,7 @@ const PollDetailsStep = ({ data, updateData }) => {
     defaultValues: {
       title: data?.title || '',
       description: data?.description || '',
+      participationCode: data?.participationCode || '',
     },
     mode: 'onChange', // Validate instantly as the user types
   });
@@ -48,6 +52,7 @@ const PollDetailsStep = ({ data, updateData }) => {
   // Watch fields to sync them back to the master wizard state
   const titleValue = watch('title');
   const descriptionValue = watch('description');
+  const participationCodeValue = watch('participationCode');
 
   // Automatically sync local form state up to the parent wizard component
   // so the data isn't lost if the user navigates between steps.
@@ -56,9 +61,10 @@ const PollDetailsStep = ({ data, updateData }) => {
       title: titleValue,
       thumbnailUrl: thumbnailUrl,
       description: descriptionValue,
+      participationCode: participationCodeValue,
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [titleValue, descriptionValue, thumbnailUrl]);
+  }, [titleValue, descriptionValue, thumbnailUrl, participationCodeValue]);
 
   return (
     <div className="max-w-2xl mx-auto flex flex-col space-y-8">
@@ -168,6 +174,43 @@ const PollDetailsStep = ({ data, updateData }) => {
               {descriptionValue?.length || 0} / 5000
             </span>
           </div>
+        </div>
+
+        {/* Participation Code Input */}
+        <div className="space-y-2">
+          <label htmlFor="participationCode" className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Participation Code <span className="text-gray-400 font-normal ml-1">(Optional)</span>
+          </label>
+          <div className="relative">
+            <div className="absolute top-0 left-0 h-12 flex items-center pl-4 pointer-events-none text-gray-400">
+              <Type className="w-5 h-5" />
+            </div>
+            <input
+              id="participationCode"
+              type="text"
+              placeholder="e.g., SECRET123"
+              {...register('participationCode')}
+              className={`w-full h-12 pl-11 pr-4 bg-gray-50 dark:bg-zinc-900/50 border ${
+                errors.participationCode ? 'border-red-500 focus:ring-red-500/20' : 'border-gray-200 dark:border-zinc-800 focus:border-orange-500 focus:ring-orange-500/20'
+              } rounded-xl text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-600 focus:outline-none focus:ring-2 transition-all duration-300`}
+            />
+          </div>
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-1.5">
+            If provided, users must enter this code to join the poll.
+          </p>
+          <AnimatePresence>
+            {errors.participationCode && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0, y: -5 }}
+                animate={{ opacity: 1, height: 'auto', y: 0 }}
+                exit={{ opacity: 0, height: 0, y: -5 }}
+                className="flex items-center gap-1.5 text-sm text-red-500 mt-1"
+              >
+                <AlertCircle className="w-4 h-4" />
+                <span>{errors.participationCode.message}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
       </form>

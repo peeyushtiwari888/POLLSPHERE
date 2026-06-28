@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  Menu, Search, Sun, Moon, Bell, ChevronRight 
-} from 'lucide-react';
+  List, MagnifyingGlass, Sun, Moon, Bell, CaretRight 
+} from '@phosphor-icons/react';
 import { useTheme } from '../../context/ThemeContext';
 
 /**
@@ -24,13 +24,13 @@ const TopNavbar = ({ onMenuClick }) => {
           className="p-2 -ml-2 rounded-lg text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors lg:hidden focus:outline-none focus:ring-2 focus:ring-orange-500"
           aria-label="Open sidebar"
         >
-          <Menu className="w-5 h-5" />
+          <List weight="bold" className="w-5 h-5" />
         </button>
 
         {/* Breadcrumb Placeholder (Hidden on tiny screens) */}
         <div className="hidden sm:flex items-center text-sm font-medium text-gray-500 dark:text-gray-400">
           <span className="text-gray-900 dark:text-white font-semibold">Dashboard</span>
-          <ChevronRight className="w-4 h-4 mx-1 flex-shrink-0" />
+          <CaretRight weight="bold" className="w-4 h-4 mx-1 flex-shrink-0" />
           <span className="text-orange-500">Overview</span>
         </div>
         
@@ -46,7 +46,7 @@ const TopNavbar = ({ onMenuClick }) => {
         {/* Search Input (Hidden on mobile, expands on focus) */}
         <div className="hidden md:flex relative max-w-md w-full mr-2">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <Search className="h-4 w-4 text-gray-400" />
+            <MagnifyingGlass weight="bold" className="h-4 w-4 text-gray-400" />
           </div>
           <input
             type="text"
@@ -66,7 +66,7 @@ const TopNavbar = ({ onMenuClick }) => {
           className="md:hidden p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors focus:outline-none"
           aria-label="Search"
         >
-          <Search className="w-5 h-5" />
+          <MagnifyingGlass weight="bold" className="w-5 h-5" />
         </button>
 
         <div className="h-6 w-px bg-gray-200 dark:bg-zinc-800 hidden sm:block"></div>
@@ -77,7 +77,7 @@ const TopNavbar = ({ onMenuClick }) => {
           className="p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
           aria-label="Toggle Theme"
         >
-          {isDarkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+          {isDarkMode ? <Sun weight="fill" className="w-5 h-5" /> : <Moon weight="fill" className="w-5 h-5" />}
         </button>
 
         {/* Notification Icon */}
@@ -85,7 +85,7 @@ const TopNavbar = ({ onMenuClick }) => {
           className="relative p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
           aria-label="Notifications"
         >
-          <Bell className="w-5 h-5" />
+          <Bell weight="fill" className="w-5 h-5" />
           {/* Notification Indicator Dot */}
           <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>

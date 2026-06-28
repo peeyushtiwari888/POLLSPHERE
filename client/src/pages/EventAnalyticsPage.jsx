@@ -3,6 +3,8 @@ import { Loader2, AlertCircle, BarChart3, Download } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 import { getEventAnalyticsDashboard } from '../api/event.api';
+import GlobalLoader from '../components/common/GlobalLoader';
+import { exportEventAnalytics } from '../utils/export';
 
 import EventOverviewCards from '../components/eventAnalytics/EventOverviewCards';
 import EventRegistrationChart from '../components/eventAnalytics/EventRegistrationChart';
@@ -38,14 +40,7 @@ const EventAnalyticsPage = () => {
   }, [fetchAnalytics]);
 
   if (isLoading) {
-    return (
-      <div className="w-full min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-10 h-10 text-indigo-500 animate-spin" />
-        <p className="text-gray-500 dark:text-gray-400 font-medium animate-pulse tracking-wide">
-          Crunching event data...
-        </p>
-      </div>
-    );
+    return <GlobalLoader text="Crunching event data..." />;
   }
 
   if (error) {
@@ -81,6 +76,14 @@ const EventAnalyticsPage = () => {
     attendanceRate: analytics?.attendanceRate?.[0]?.averageAttendance || 0
   };
 
+  const handleExport = () => {
+    exportEventAnalytics(
+      stats, 
+      analytics?.monthlyRegistrations || [], 
+      analytics?.categoryDistribution || []
+    );
+  };
+
   return (
     <div className="w-full flex flex-col space-y-8 animate-in fade-in duration-500 pb-12">
       
@@ -103,8 +106,9 @@ const EventAnalyticsPage = () => {
         </div>
 
         <button 
-          className="relative z-10 flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 font-semibold rounded-xl transition-all shadow-sm hover:shadow active:scale-95 opacity-50 cursor-not-allowed"
-          title="Coming soon"
+          onClick={handleExport}
+          className="relative z-10 flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 font-semibold rounded-xl transition-all shadow-sm hover:shadow active:scale-95"
+          title="Export CSV Reports"
         >
           <Download className="w-5 h-5" />
           Export Report

@@ -7,10 +7,11 @@ import { getMyPolls } from '../api/poll.api';
 import EmptyState from '../components/dashboard/EmptyState';
 
 // Poll-specific Child components
-import PollGrid from '../components/poll/PollGrid';
+import PollTable from '../components/poll/PollTable';
 import PollSearch from '../components/poll/PollSearch';
 import PollFilters from '../components/poll/PollFilters';
 import PollSort from '../components/poll/PollSort';
+import GlobalLoader from '../components/common/GlobalLoader';
 
 /**
  * My Polls Page
@@ -138,14 +139,7 @@ const MyPollsPage = () => {
   // RENDER: LOADING STATE
   // ---------------------------------------------------------------------------
   if (isLoading) {
-    return (
-      <div className="w-full min-h-[60vh] flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="w-10 h-10 text-orange-500 animate-spin" />
-        <p className="text-gray-500 dark:text-gray-400 font-medium animate-pulse">
-          Loading your polls...
-        </p>
-      </div>
-    );
+    return <GlobalLoader text="Loading your polls..." />;
   }
 
   // ---------------------------------------------------------------------------
@@ -189,11 +183,11 @@ const MyPollsPage = () => {
               <BarChart3 className="w-6 h-6 text-orange-500" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">
-              My Polls
+              Manage Quizzes
             </h1>
           </div>
           <p className="text-gray-500 dark:text-gray-400 max-w-lg">
-            Manage, analyze, and share your polls. Keep track of what your audience is saying.
+            Create, view, edit, and delete quiz sessions
           </p>
         </div>
 
@@ -202,7 +196,7 @@ const MyPollsPage = () => {
           className="relative z-10 flex items-center justify-center gap-2 px-6 py-3 bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-100 font-semibold rounded-xl transition-all shadow-sm hover:shadow active:scale-95"
         >
           <PlusCircle className="w-5 h-5" />
-          Create New Poll
+          Create New Quiz
         </button>
       </div>
 
@@ -212,9 +206,9 @@ const MyPollsPage = () => {
         // Zero State
         <div className="py-12">
           <EmptyState 
-            title="No polls created yet"
-            description="You haven't created any polls yet. Start engaging with your audience by creating your very first poll!"
-            actionText="Create Your First Poll"
+            title="No quizzes created yet"
+            description="You haven't created any quizzes yet. Start engaging with your audience by creating your very first quiz!"
+            actionText="Create Your First Quiz"
             onAction={() => navigate('/polls/create')}
           />
         </div>
@@ -245,9 +239,9 @@ const MyPollsPage = () => {
             </div>
           </div>
 
-          {/* Render Responsive Grid */}
+          {/* Render Responsive Table */}
           <Suspense fallback={<div className="h-64 bg-gray-50 dark:bg-zinc-900 rounded-3xl animate-pulse" />}>
-            <PollGrid polls={polls} refreshData={() => fetchPolls(1, false)} />
+            <PollTable polls={polls} refreshData={() => fetchPolls(1, false)} />
           </Suspense>
 
           {/* Infinite Scroll Footer */}

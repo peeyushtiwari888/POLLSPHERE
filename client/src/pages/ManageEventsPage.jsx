@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, Suspense, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { Loader2, PlusCircle, AlertCircle, Calendar } from 'lucide-react';
+import { Loader2, PlusCircle, AlertCircle, Calendar, Search } from 'lucide-react';
 import { getEvents } from '../api/event.api';
 import EventTable from '../components/event/EventTable';
 
@@ -159,18 +159,19 @@ const ManageEventsPage = () => {
 
       {/* Controls Bar */}
       <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4 bg-white dark:bg-zinc-900 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm">
-        
         {/* Search */}
-        <div className="w-full xl:w-80">
+        <div className="relative w-full xl:w-80 group">
+          <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-gray-400 group-focus-within:text-indigo-500 transition-colors">
+            <Search className="w-5 h-5" />
+          </div>
           <input 
             type="text"
             placeholder="Search events by title..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white"
+            className="w-full h-10 pl-10 pr-10 bg-gray-50/80 dark:bg-zinc-800/50 border border-transparent rounded-full text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-gray-200 dark:focus:border-zinc-700 focus:bg-white dark:focus:bg-zinc-900 transition-all duration-300"
           />
         </div>
-
         {/* Filters & Sort */}
         <div className="flex flex-wrap items-center gap-3">
           <select 

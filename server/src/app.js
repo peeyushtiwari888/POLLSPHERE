@@ -15,7 +15,7 @@ const app = express();
 
 // Global Middlewares
 app.use(cors());
-app.use(express.json()); // Parses incoming JSON payloads
+app.use(express.json({ limit: '10mb' })); // Parses incoming JSON payloads
 app.use(cookieParser()); // Parses cookies
 
 // Mount API Routes

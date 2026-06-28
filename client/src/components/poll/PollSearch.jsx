@@ -22,7 +22,7 @@ const PollSearch = ({ value = '', onChange }) => {
         placeholder="Search polls by title..."
         value={value}
         onChange={(e) => onChange && onChange(e.target.value)}
-        className="w-full h-11 pl-10 pr-10 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 shadow-sm transition-all duration-300"
+        className="w-full h-10 pl-10 pr-10 bg-gray-50/80 dark:bg-zinc-800/50 border border-transparent rounded-full text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-gray-200 dark:focus:border-zinc-700 focus:bg-white dark:focus:bg-zinc-900 transition-all duration-300"
         aria-label="Search polls"
       />
 
