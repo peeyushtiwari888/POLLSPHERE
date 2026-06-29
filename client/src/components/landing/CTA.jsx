@@ -7,82 +7,90 @@ const CTA = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="py-24 bg-white dark:bg-zinc-950 relative overflow-hidden">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <section className="py-24 relative overflow-hidden bg-white dark:bg-zinc-950">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
-        {/* CTA Container */}
+        {/* Modern Glassmorphic Container */}
         <motion.div
-          initial={{ opacity: 0, y: 40 }}
+          initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="relative rounded-[2.5rem] bg-gradient-to-br from-orange-500 via-orange-500 to-amber-500 overflow-hidden shadow-2xl shadow-orange-500/20"
+          className="relative rounded-[2rem] overflow-hidden border border-gray-200 dark:border-white/10 bg-white/60 dark:bg-zinc-900/60 backdrop-blur-2xl shadow-2xl"
         >
-          {/* Decorative Background Elements */}
-          <div className="absolute top-0 left-0 w-[500px] h-[500px] bg-white/20 blur-[100px] rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-          <div className="absolute bottom-0 right-0 w-[400px] h-[400px] bg-amber-300/30 blur-[100px] rounded-full translate-x-1/3 translate-y-1/3 pointer-events-none" />
+          {/* Animated Glow Effects in Background */}
+          <motion.div 
+            animate={{ 
+              scale: [1, 1.2, 1],
+              opacity: [0.3, 0.5, 0.3],
+            }}
+            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-orange-500/20 dark:bg-orange-500/30 blur-[120px] rounded-full pointer-events-none" 
+          />
 
-          {/* Abstract Grid Pattern (Optional subtle texture) */}
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4xKSIvPjwvc3ZnPg==')] opacity-50" />
-
-          <div className="relative px-6 py-20 md:py-24 lg:py-32 flex flex-col items-center text-center">
+          <div className="relative px-6 py-20 md:py-24 flex flex-col items-center text-center">
             
+            {/* Pill Badge */}
             <motion.div
-              initial={{ scale: 0.8, opacity: 0 }}
-              whileInView={{ scale: 1, opacity: 1 }}
+              initial={{ opacity: 0, y: -20 }}
+              whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 0.5 }}
-              className="inline-flex items-center justify-center p-3 bg-white/10 backdrop-blur-md rounded-2xl mb-8 border border-white/20"
+              transition={{ delay: 0.2, duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/20 text-orange-600 dark:text-orange-400 text-sm font-semibold mb-8 shadow-sm"
             >
-              <Sparkles className="w-6 h-6 text-white" />
+              <Sparkles className="w-4 h-4" />
+              <span>Get started in seconds</span>
             </motion.div>
 
+            {/* Typography */}
             <motion.h2 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white tracking-tight max-w-3xl mb-6 leading-tight"
+              transition={{ delay: 0.3, duration: 0.5 }}
+              className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-gray-900 dark:text-white tracking-tight max-w-3xl mb-6 leading-tight"
             >
-              Ready to create smarter polls?
+              Ready to create <br className="hidden md:block" />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-amber-500">smarter polls?</span>
             </motion.h2>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.5, duration: 0.5 }}
-              className="text-orange-100 text-lg md:text-xl max-w-xl mx-auto mb-10"
+              transition={{ delay: 0.4, duration: 0.5 }}
+              className="text-gray-600 dark:text-gray-400 text-lg md:text-xl max-w-xl mx-auto mb-10"
             >
-              Join thousands of creators and teams who use PollSphere to collect real-time, actionable feedback.
+              Join thousands of creators and teams who use PollSphere to collect real-time, actionable feedback effortlessly.
             </motion.p>
 
+            {/* Actions */}
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.6, duration: 0.5 }}
+              transition={{ delay: 0.5, duration: 0.5 }}
               className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto"
             >
-              {/* Primary Button */}
-              <motion.button 
+              {/* Primary Button with Shine Effect */}
+              <button 
                 onClick={() => navigate('/signup')}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white text-orange-600 hover:bg-gray-50 font-bold px-8 py-4 rounded-full transition-colors shadow-xl"
+                className="group relative inline-flex h-14 items-center justify-center overflow-hidden rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-8 font-bold text-white transition-all hover:scale-105 active:scale-95 shadow-[0_8px_30px_rgb(249,115,22,0.3)] hover:shadow-[0_8px_40px_rgb(249,115,22,0.5)]"
               >
-                Get Started
-                <ArrowRight className="w-4 h-4" />
-              </motion.button>
+                <span className="mr-2">Start for free</span>
+                <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                <div className="absolute inset-0 flex h-full w-full justify-center [transform:skew(-12deg)_translateX(-100%)] group-hover:duration-1000 group-hover:[transform:skew(-12deg)_translateX(100%)]">
+                  <div className="relative h-full w-8 bg-white/20" />
+                </div>
+              </button>
               
               {/* Secondary Button */}
-              <motion.button 
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-transparent text-white border-2 border-white/30 hover:border-white hover:bg-white/10 font-bold px-8 py-4 rounded-full transition-all"
+              <button 
+                onClick={() => navigate('/live-preview')}
+                className="inline-flex h-14 items-center justify-center rounded-full border border-gray-200 dark:border-zinc-800 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-md px-8 font-bold text-gray-900 dark:text-white transition-all hover:bg-gray-50 dark:hover:bg-zinc-800 hover:scale-105 active:scale-95 shadow-sm"
               >
                 Explore Demo
-              </motion.button>
+              </button>
             </motion.div>
 
           </div>

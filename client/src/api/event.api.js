@@ -76,9 +76,9 @@ export const getEventAnalyticsDashboard = async () => {
 /**
  * Register for an event
  */
-export const registerForEvent = async (eventId) => {
+export const registerForEvent = async (eventId, registrationData) => {
   try {
-    const response = await api.post(`/events/${eventId}/register`);
+    const response = await api.post(`/events/${eventId}/register`, registrationData);
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Failed to register for event' };
@@ -106,5 +106,17 @@ export const getEventParticipants = async (eventId, params = {}) => {
     return response.data;
   } catch (error) {
     throw error.response?.data || { message: 'Failed to fetch participants' };
+  }
+};
+
+/**
+ * Toggle attendance status of a participant
+ */
+export const toggleParticipantAttendance = async (eventId, registrationId, hasAttended) => {
+  try {
+    const response = await api.patch(`/events/${eventId}/participants/${registrationId}/attendance`, { hasAttended });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || { message: 'Failed to update attendance' };
   }
 };

@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { 
   MoreVertical, Edit, Trash2, BarChart3, Users,
-  Calendar, MapPin, Video, Eye, Loader2
+  Calendar, MapPin, Video, Eye, Loader2, UserPlus, Share2
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { deleteEvent } from '../../api/event.api';
 import toast from 'react-hot-toast';
+import ManualRegistrationModal from './ManualRegistrationModal';
 
 const EventTable = ({ events = [], isLoading, refreshData }) => {
   const navigate = useNavigate();
   const [deletingId, setDeletingId] = useState(null);
   const [activeMenuId, setActiveMenuId] = useState(null);
+  const [registerModalEvent, setRegisterModalEvent] = useState(null);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -46,6 +48,13 @@ const EventTable = ({ events = [], isLoading, refreshData }) => {
       setDeletingId(null);
       setActiveMenuId(null);
     }
+  };
+
+  const handleShare = (slug) => {
+    const url = `${window.location.origin}/event/${slug}`;
+    navigator.clipboard.writeText(url);
+    toast.success('Registration link copied to clipboard!');
+    setActiveMenuId(null);
   };
 
   const toggleMenu = (id) => {
@@ -90,7 +99,11 @@ const EventTable = ({ events = [], isLoading, refreshData }) => {
             {events.map((event) => (
               <tr key={event._id} className="hover:bg-gray-50 dark:hover:bg-zinc-800/50 transition-colors group">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center gap-4">
+                  <div 
+                    className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() => navigate(`/event/${event.slug}`)}
+                    title="View Event Details"
+                  >
                     {event.thumbnail ? (
                       <img src={event.thumbnail} alt={event.title} className="w-12 h-12 rounded-lg object-cover bg-gray-100 dark:bg-zinc-800" />
                     ) : (
@@ -99,7 +112,7 @@ const EventTable = ({ events = [], isLoading, refreshData }) => {
                       </div>
                     )}
                     <div className="flex flex-col">
-                      <span className="font-semibold text-gray-900 dark:text-white max-w-[200px] truncate">{event.title}</span>
+                      <span className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline max-w-[200px] truncate">{event.title}</span>
                       <span className="text-xs text-gray-500 dark:text-gray-400 max-w-[200px] truncate">{event.slug}</span>
                     </div>
                   </div>
@@ -129,14 +142,20 @@ const EventTable = ({ events = [], isLoading, refreshData }) => {
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium relative">
                   <div className="flex items-center justify-end gap-2">
                     {/* Desktop Actions */}
-                    <div className="hidden lg:flex items-center gap-2">
-                      <button onClick={() => navigate(`/events/${event.slug}`)} className="p-1.5 text-gray-400 hover:text-orange-500 transition-colors" title="View Public Page">
+                    <div className="hidden xl:flex items-center gap-2">
+                      <button onClick={() => handleShare(event.slug)} className="p-1.5 text-gray-400 hover:text-green-500 transition-colors" title="Share Link">
+                        <Share2 className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => navigate(`/event/${event.slug}`)} className="p-1.5 text-gray-400 hover:text-orange-500 transition-colors" title="View Public Page">
                         <Eye className="w-4 h-4" />
+                      </button>
+                      <button onClick={() => setRegisterModalEvent(event)} className="p-1.5 text-gray-400 hover:text-indigo-500 transition-colors" title="Register Participant">
+                        <UserPlus className="w-4 h-4" />
                       </button>
                       <button onClick={() => navigate(`/events/${event._id}/participants`)} className="p-1.5 text-gray-400 hover:text-blue-500 transition-colors" title="View Participants">
                         <Users className="w-4 h-4" />
                       </button>
-                      <button onClick={() => navigate(`/events/${event._id}/analytics`)} className="p-1.5 text-gray-400 hover:text-purple-500 transition-colors" title="Analytics">
+                      <button onClick={() => navigate(`/events/analytics/dashboard`)} className="p-1.5 text-gray-400 hover:text-purple-500 transition-colors" title="Analytics">
                         <BarChart3 className="w-4 h-4" />
                       </button>
                       <button onClick={() => navigate(`/events/${event._id}/edit`)} className="p-1.5 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors" title="Edit">
@@ -148,19 +167,25 @@ const EventTable = ({ events = [], isLoading, refreshData }) => {
                     </div>
 
                     {/* Mobile Menu Dropdown */}
-                    <div className="lg:hidden relative">
+                    <div className="xl:hidden relative">
                       <button onClick={() => toggleMenu(event._id)} className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
                         <MoreVertical className="w-5 h-5" />
                       </button>
                       {activeMenuId === event._id && (
                         <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-zinc-800 rounded-xl shadow-lg border border-gray-100 dark:border-zinc-700 z-50 overflow-hidden">
-                          <button onClick={() => navigate(`/events/${event.slug}`)} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700/50 flex items-center gap-2">
+                          <button onClick={() => handleShare(event.slug)} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700/50 flex items-center gap-2">
+                            <Share2 className="w-4 h-4" /> Share Link
+                          </button>
+                          <button onClick={() => navigate(`/event/${event.slug}`)} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700/50 flex items-center gap-2">
                             <Eye className="w-4 h-4" /> View Public Page
+                          </button>
+                          <button onClick={() => { setRegisterModalEvent(event); setActiveMenuId(null); }} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700/50 flex items-center gap-2">
+                            <UserPlus className="w-4 h-4" /> Register User
                           </button>
                           <button onClick={() => navigate(`/events/${event._id}/participants`)} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700/50 flex items-center gap-2">
                             <Users className="w-4 h-4" /> Participants
                           </button>
-                          <button onClick={() => navigate(`/events/${event._id}/analytics`)} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700/50 flex items-center gap-2">
+                          <button onClick={() => navigate(`/events/analytics/dashboard`)} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700/50 flex items-center gap-2">
                             <BarChart3 className="w-4 h-4" /> Analytics
                           </button>
                           <button onClick={() => navigate(`/events/${event._id}/edit`)} className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-700/50 flex items-center gap-2">
@@ -179,6 +204,13 @@ const EventTable = ({ events = [], isLoading, refreshData }) => {
           </tbody>
         </table>
       </div>
+
+      <ManualRegistrationModal 
+        isOpen={!!registerModalEvent} 
+        onClose={() => setRegisterModalEvent(null)}
+        event={registerModalEvent}
+        onSuccess={() => refreshData()}
+      />
     </div>
   );
 };

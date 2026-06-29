@@ -272,3 +272,52 @@ export const expirePoll = async (req, res) => {
     });
   }
 };
+
+/**
+ * Handle Set Active Question Request (Live Presenter Mode)
+ */
+export const setActiveQuestion = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    const { questionId } = req.body;
+
+    const poll = await pollService.setActiveQuestion(id, userId, questionId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Active question updated successfully',
+      data: { activeQuestionId: poll.activeQuestionId },
+    });
+  } catch (error) {
+    const statusCode = error.message.includes('authorized') ? 403 : 400;
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Failed to update active question',
+    });
+  }
+};
+
+/**
+ * Handle Get Leaderboard Request
+ */
+export const getLeaderboard = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user.id;
+    
+    const leaderboard = await pollService.getLeaderboard(id, userId);
+
+    res.status(200).json({
+      success: true,
+      message: 'Leaderboard fetched successfully',
+      data: leaderboard,
+    });
+  } catch (error) {
+    const statusCode = error.message.includes('authorized') ? 403 : 400;
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Failed to fetch leaderboard',
+    });
+  }
+};

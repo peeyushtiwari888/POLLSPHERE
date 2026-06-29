@@ -78,12 +78,25 @@ const EventForm = ({ initialData, onSubmit, isSubmitting, setFormValues }) => {
       tags: data.tags ? data.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
     };
     
-    // Prevent Mongoose CastError for empty date string
-    if (!formattedData.registrationDeadline) {
-      delete formattedData.registrationDeadline;
+    // Convert dates to valid ISO strings for backend Zod validation
+    if (formattedData.startDate) {
+      formattedData.startDate = new Date(formattedData.startDate).toISOString();
+    }
+    if (formattedData.endDate) {
+      formattedData.endDate = new Date(formattedData.endDate).toISOString();
     }
     
-    // Convert dates to ISO if needed, though they are datetime-local strings
+    if (formattedData.registrationDeadline) {
+      formattedData.registrationDeadline = new Date(formattedData.registrationDeadline).toISOString();
+    } else {
+      delete formattedData.registrationDeadline;
+    }
+
+    // Remove empty optional URL fields to prevent Zod .url() validation errors
+    if (!formattedData.meetingLink) delete formattedData.meetingLink;
+    if (!formattedData.banner) delete formattedData.banner;
+    if (!formattedData.venue) delete formattedData.venue;
+    
     try {
       await onSubmit(formattedData);
     } catch (err) {

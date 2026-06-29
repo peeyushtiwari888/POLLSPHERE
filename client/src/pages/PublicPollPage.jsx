@@ -72,12 +72,29 @@ const PublicPollPage = () => {
       fetchPollData();
     }
     
+    const handleActiveQuestionChanged = (newActiveQuestionId) => {
+      setPoll(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          activeQuestionId: newActiveQuestionId
+        };
+      });
+    };
+
+    if (socket) {
+      socket.on('active-question-changed', handleActiveQuestionChanged);
+    }
+    
     return () => {
       // Leave room on unmount
-      socket.emit('leave-poll', pollId);
+      if (socket) {
+        socket.emit('leave-poll', pollId);
+        socket.off('active-question-changed', handleActiveQuestionChanged);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pollId]);
+  }, [pollId, socket, needsCode]);
 
   // ---------------------------------------------------------------------------
   // SUBMISSION LOGIC
@@ -103,10 +120,22 @@ const PublicPollPage = () => {
     try {
       // 3. Format payload for the backend
       const payload = {
-        responses: Object.entries(answers).map(([questionId, selectedOptionId]) => ({
-          questionId,
-          selectedOptionId
-        }))
+        responses: Object.entries(answers).map(([questionId, value]) => {
+          const question = poll.questions.find(q => q._id === questionId);
+          const answerPayload = { questionId };
+          
+          if (question.questionType === 'SINGLE_CHOICE') {
+            answerPayload.selectedOption = value;
+          } else if (question.questionType === 'MULTI_SELECT') {
+            answerPayload.selectedOptions = value;
+          } else if (['OPEN_TEXT', 'WORD_CLOUD'].includes(question.questionType)) {
+            answerPayload.textValue = value;
+          } else if (question.questionType === 'RATING') {
+            answerPayload.ratingValue = value;
+          }
+          
+          return answerPayload;
+        })
       };
 
       await submitPollResponse(pollId, payload);
@@ -240,6 +269,7 @@ const PublicPollPage = () => {
             questions={poll.questions} 
             answers={answers} 
             setAnswers={setAnswers} 
+            activeQuestionId={poll.activeQuestionId}
           />
         </Suspense>
 

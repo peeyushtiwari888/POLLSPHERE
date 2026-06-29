@@ -12,15 +12,19 @@ const EventRegistrationSidebar = ({ event }) => {
 
   // Derive status
   const now = new Date();
-  const startDate = new Date(event.startDate);
-  const deadline = event.registrationDeadline ? new Date(event.registrationDeadline) : startDate;
-  const isExpired = now > deadline;
+  const deadline = event.registrationDeadline ? new Date(event.registrationDeadline) : null;
+  const isExpired = deadline ? now > deadline : false;
   const isFull = event.maxParticipants && event.participantsCount >= event.maxParticipants;
 
   useEffect(() => {
     // Check local storage for quick UI sync (actual check happens on backend)
     if (localStorage.getItem(`event_reg_${event._id}`)) {
       setHasRegistered(true);
+    }
+
+    if (!deadline) {
+      setTimeLeft('Always Open');
+      return;
     }
 
     const timer = setInterval(() => {
@@ -45,21 +49,31 @@ const EventRegistrationSidebar = ({ event }) => {
     return () => clearInterval(timer);
   }, [deadline, event._id]);
 
-  const handleRegister = async () => {
+  const [showForm, setShowForm] = useState(false);
+  const [participantName, setParticipantName] = useState('');
+  const [mobileNumber, setMobileNumber] = useState('');
+
+  const handleRegister = async (e) => {
+    e?.preventDefault();
+    
+    if (!participantName || !mobileNumber) {
+      toast.error('Please provide your name and mobile number');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
-      await registerForEvent(event._id);
+      await registerForEvent(event._id, { participantName, mobileNumber });
       setHasRegistered(true);
+      setShowForm(false);
       localStorage.setItem(`event_reg_${event._id}`, 'true');
       toast.success('Successfully registered for the event!');
     } catch (err) {
       if (err.message === 'You are already registered for this event') {
         setHasRegistered(true);
+        setShowForm(false);
         localStorage.setItem(`event_reg_${event._id}`, 'true');
         toast.success('You are already registered.');
-      } else if (err.message === 'Please login to access this resource') {
-         toast.error('Please login to register for events.');
-         // Optionally redirect to login, but toast is okay for now.
       } else {
         toast.error(err.message || 'Failed to register. Please try again.');
       }
@@ -73,14 +87,12 @@ const EventRegistrationSidebar = ({ event }) => {
     try {
       await cancelRegistration(event._id);
       setHasRegistered(false);
+      setParticipantName('');
+      setMobileNumber('');
       localStorage.removeItem(`event_reg_${event._id}`);
       toast.success('Registration cancelled successfully.');
     } catch (err) {
-      if (err.message === 'Please login to access this resource') {
-         toast.error('Please login to manage your registration.');
-      } else {
-        toast.error(err.message || 'Failed to cancel registration. Please try again.');
-      }
+      toast.error(err.message || 'Failed to cancel registration. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -126,25 +138,66 @@ const EventRegistrationSidebar = ({ event }) => {
               Cancel Registration
             </button>
           </div>
+        ) : showForm ? (
+          <form onSubmit={handleRegister} className="mb-6 space-y-4 animate-in fade-in zoom-in-95 duration-300">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Full Name <span className="text-red-500">*</span></label>
+              <input 
+                type="text" 
+                value={participantName}
+                onChange={(e) => setParticipantName(e.target.value)}
+                placeholder="John Doe" 
+                required
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1.5">Mobile Number <span className="text-red-500">*</span></label>
+              <input 
+                type="tel" 
+                value={mobileNumber}
+                onChange={(e) => setMobileNumber(e.target.value)}
+                placeholder="+1 234 567 8900" 
+                required
+                className="w-full px-4 py-2.5 bg-gray-50 dark:bg-zinc-900/50 border border-gray-200 dark:border-zinc-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/20 text-gray-900 dark:text-white"
+              />
+            </div>
+            <div className="flex gap-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowForm(false)}
+                className="flex-1 py-3 px-4 rounded-xl font-semibold bg-gray-100 dark:bg-zinc-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isSubmitting || !participantName || !mobileNumber}
+                className="flex-1 py-3 px-4 rounded-xl font-bold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+              >
+                {isSubmitting && <Loader2 className="w-4 h-4 animate-spin" />}
+                Confirm
+              </button>
+            </div>
+          </form>
         ) : (
           <button
-            onClick={handleRegister}
-            disabled={isExpired || isFull || isSubmitting}
-            className={`w-full py-4 px-6 rounded-2xl font-bold text-lg shadow-lg transition-all flex items-center justify-center gap-2
+            onClick={() => setShowForm(true)}
+            disabled={isExpired || isFull}
+            className={`w-full py-4 px-6 rounded-2xl font-bold text-lg shadow-lg transition-all flex items-center justify-center gap-2 mb-6
               ${isExpired || isFull
                 ? 'bg-gray-100 dark:bg-zinc-900 text-gray-400 dark:text-gray-500 cursor-not-allowed shadow-none'
                 : 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white hover:opacity-90 hover:-translate-y-0.5 active:scale-95'
               }
             `}
           >
-            {isSubmitting && <Loader2 className="w-5 h-5 animate-spin" />}
             {isExpired ? 'Registration Closed' : isFull ? 'Event Full' : 'Register Now'}
           </button>
         )}
 
         {/* Countdown */}
         {!isExpired && !hasRegistered && event.registrationRequired && (
-          <div className="mt-4 flex items-center justify-center gap-2 text-sm font-medium text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-500/10 py-2 px-4 rounded-full">
+          <div className="mt-4 flex items-center justify-center gap-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 py-2 px-4 rounded-full">
             <Clock className="w-4 h-4" />
             <span>{timeLeft}</span>
           </div>

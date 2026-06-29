@@ -218,24 +218,31 @@ const MyPollsPage = () => {
         // Active Grid View
         <div className="space-y-6">
           
-          {/* Controls Bar (Search + Filters + Sort) */}
-          <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
-            <div className="w-full xl:w-96">
-              <Suspense fallback={<div className="h-10 bg-gray-100 dark:bg-zinc-800 rounded-lg animate-pulse" />}>
+          {/* Controls Bar (Search + Filters + Layout Toggle) */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 bg-gray-50 dark:bg-zinc-950 p-2 rounded-2xl transition-colors border border-gray-100 dark:border-transparent">
+            <div className="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+              <Suspense fallback={<div className="h-11 bg-gray-200 dark:bg-zinc-800 rounded-full animate-pulse w-full sm:w-80 transition-colors" />}>
                 <PollSearch value={searchQuery} onChange={setSearchQuery} />
               </Suspense>
+              <Suspense fallback={<div className="h-11 bg-gray-200 dark:bg-zinc-800 rounded-full animate-pulse w-full sm:w-40 transition-colors" />}>
+                <PollFilters activeFilter={activeFilter} onFilterChange={handleFilterChange} />
+              </Suspense>
             </div>
-            <div className="flex flex-col sm:flex-row items-center gap-4 w-full xl:w-auto">
-              <div className="w-full sm:w-auto overflow-hidden">
-                <Suspense fallback={<div className="h-10 bg-gray-100 dark:bg-zinc-800 rounded-lg animate-pulse" />}>
-                  <PollFilters activeFilter={activeFilter} onFilterChange={handleFilterChange} />
-                </Suspense>
-              </div>
-              <div className="w-full sm:w-48 flex-shrink-0">
-                <Suspense fallback={<div className="h-10 bg-gray-100 dark:bg-zinc-800 rounded-lg animate-pulse" />}>
-                  <PollSort activeSort={sortBy} onSortChange={handleSortChange} />
-                </Suspense>
-              </div>
+            
+            <div className="flex items-center gap-3 w-full md:w-auto justify-end">
+              <Suspense fallback={<div className="h-11 bg-gray-200 dark:bg-zinc-800 rounded-lg animate-pulse w-32 transition-colors" />}>
+                <PollSort activeSort={sortBy} onSortChange={handleSortChange} />
+              </Suspense>
+              
+              {/* Grid Toggle Icon (Decorative for now to match screenshot) */}
+              <button 
+                className="w-11 h-11 bg-white hover:bg-gray-100 dark:bg-[#1a1a1a] dark:hover:bg-[#222] border border-gray-200 dark:border-transparent rounded-xl flex items-center justify-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-all focus:outline-none"
+                title="Toggle View"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="none">
+                  <path d="M4 4h6v6H4zm10 0h6v6h-6zM4 14h6v6H4zm10 0h6v6h-6z" />
+                </svg>
+              </button>
             </div>
           </div>
 

@@ -65,3 +65,12 @@ export const emitLiveAnalyticsUpdate = async (pollId) => {
     console.error(`Socket error: Failed to emit live-analytics-update for poll ${pollId}`, error);
   }
 };
+
+export const emitActiveQuestionChanged = (pollId, questionId) => {
+  try {
+    const io = getSocketIo();
+    io.to(pollId).emit('active-question-changed', questionId);
+  } catch (error) {
+    console.error(`Socket error: Failed to emit active-question-changed for poll ${pollId}`, error);
+  }
+};

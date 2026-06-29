@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Eye, Edit3, BarChart3, Share2, Trash2, Globe } from 'lucide-react';
+import { Eye, Edit3, BarChart3, Share2, Trash2, Globe, MonitorPlay, Trophy } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { deletePoll, publishPoll } from '../../api/poll.api';
@@ -87,6 +87,32 @@ const PollActions = ({ poll, onRefresh }) => {
           </button>
         )}
         
+        {/* Present / Lobby Action */}
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.open(`/poll/${poll._id}/lobby`, '_blank');
+          }}
+          className="p-2 text-gray-400 hover:text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-xl transition-colors focus:outline-none"
+          title="Open Presenter Lobby"
+        >
+          <MonitorPlay className="w-4 h-4" />
+        </button>
+
+        {/* Leaderboard Action */}
+        <button 
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            window.open(`/poll/${poll._id}/leaderboard`, '_blank');
+          }}
+          className="p-2 text-gray-400 hover:text-yellow-500 hover:bg-yellow-50 dark:hover:bg-yellow-500/10 rounded-xl transition-colors focus:outline-none"
+          title="View Leaderboard"
+        >
+          <Trophy className="w-4 h-4" />
+        </button>
+
         {/* Analytics Action */}
         <button 
           onClick={(e) => handleAction(e, 'Analytics')} 

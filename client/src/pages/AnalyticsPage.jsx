@@ -70,7 +70,7 @@ const AnalyticsPage = () => {
     if (!socket || !pollId) return;
 
     // 1. Join a dedicated room for this specific poll
-    socket.emit('joinPollRoom', pollId);
+    socket.emit('join-poll', pollId);
 
     // 2. Event Handlers
     const handleAnalyticsUpdated = (updatedData) => {
@@ -83,15 +83,30 @@ const AnalyticsPage = () => {
       fetchAnalytics(false);
     };
 
+    const handleActiveQuestionChanged = (newActiveQuestionId) => {
+      setAnalytics(prev => {
+        if (!prev || !prev.poll) return prev;
+        return {
+          ...prev,
+          poll: {
+            ...prev.poll,
+            activeQuestionId: newActiveQuestionId
+          }
+        };
+      });
+    };
+
     // 3. Attach Listeners
     socket.on('analyticsUpdated', handleAnalyticsUpdated);
     socket.on('responseSubmitted', handleResponseSubmitted);
+    socket.on('active-question-changed', handleActiveQuestionChanged);
 
     // 4. Cleanup on unmount
     return () => {
-      socket.emit('leavePollRoom', pollId);
+      socket.emit('leave-poll', pollId);
       socket.off('analyticsUpdated', handleAnalyticsUpdated);
       socket.off('responseSubmitted', handleResponseSubmitted);
+      socket.off('active-question-changed', handleActiveQuestionChanged);
     };
   }, [socket, pollId, fetchAnalytics]);
 
@@ -141,51 +156,22 @@ const AnalyticsPage = () => {
       </Suspense>
 
       {/* --------------------------------------------------------
-          Bento-Box Grid Layout
+          Live Presenter Mode (Question Control)
       -------------------------------------------------------- */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-        
-        {/* Left Column (Primary Data & Charts - Takes up 2/3 width on desktop) */}
-        <div className="lg:col-span-2 space-y-6 sm:space-y-8">
-          
-          {/* High-level KPIs */}
-          <Suspense fallback={<div className="h-40 bg-white dark:bg-zinc-900 rounded-3xl animate-pulse" />}>
-            <OverviewCards stats={analytics.overview} />
-          </Suspense>
-          
-          {/* Time-Series Activity Chart */}
-          <Suspense fallback={<div className="h-96 bg-white dark:bg-zinc-900 rounded-3xl animate-pulse" />}>
-            <ResponseChart chartData={analytics.timeSeriesData} />
-          </Suspense>
+      <div className="bg-orange-50 dark:bg-orange-500/10 border border-orange-200 dark:border-orange-500/30 rounded-3xl p-6 sm:p-8">
+        <h2 className="text-xl font-bold text-orange-600 dark:text-orange-400 mb-2">Live Presenter Mode Active</h2>
+        <p className="text-sm text-gray-700 dark:text-gray-300 mb-6">
+          Your audience will only see the question you choose to publish below. You have full control over the pace of the poll.
+        </p>
 
-        </div>
-
-        {/* Right Column (Secondary Widgets - Takes up 1/3 width on desktop) */}
-        <div className="space-y-6 sm:space-y-8">
-          
-          {/* Participation / Demographics Widget */}
-          <Suspense fallback={<div className="h-64 bg-white dark:bg-zinc-900 rounded-3xl animate-pulse" />}>
-            <ParticipationCard stats={analytics.participation} />
-          </Suspense>
-          
-          {/* Settings & Publish Controls */}
-          <Suspense fallback={<div className="h-48 bg-white dark:bg-zinc-900 rounded-3xl animate-pulse" />}>
-            <PublishResultsCard 
-              pollId={pollId} 
-              isPublished={analytics.poll?.isResultsPublished} 
-            />
-          </Suspense>
-
-        </div>
-
+        <Suspense fallback={<div className="h-96 bg-white dark:bg-zinc-900 rounded-3xl animate-pulse" />}>
+          <QuestionAnalytics 
+            questions={analytics.questionsData} 
+            pollId={pollId}
+            activeQuestionId={analytics.poll?.activeQuestionId}
+          />
+        </Suspense>
       </div>
-
-      {/* --------------------------------------------------------
-          Full-width Question Analytics Section
-      -------------------------------------------------------- */}
-      <Suspense fallback={<div className="h-96 bg-white dark:bg-zinc-900 rounded-3xl animate-pulse" />}>
-        <QuestionAnalytics questions={analytics.questionsData} />
-      </Suspense>
 
     </div>
   );

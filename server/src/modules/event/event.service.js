@@ -160,7 +160,13 @@ export const deleteEvent = async (userId, eventId) => {
 /**
  * Register a user for an event
  */
-export const registerForEvent = async (userId, eventId) => {
+export const registerForEvent = async (userId, eventId, registrationData) => {
+  const { participantName, mobileNumber } = registrationData || {};
+
+  if (!participantName || !mobileNumber) {
+    throw new Error('Participant name and mobile number are required');
+  }
+
   const event = await Event.findById(eventId);
 
   if (!event) {
@@ -175,8 +181,9 @@ export const registerForEvent = async (userId, eventId) => {
     throw new Error('Event is not open for registration');
   }
 
-  if (event.registrationDeadline && new Date() > new Date(event.registrationDeadline)) {
-    throw new Error('Registration deadline has passed');
+  const deadline = event.registrationDeadline ? new Date(event.registrationDeadline) : new Date(event.endDate);
+  if (new Date() > deadline) {
+    throw new Error('Registration for this event has closed');
   }
 
   // Check capacity if limit exists
@@ -188,14 +195,25 @@ export const registerForEvent = async (userId, eventId) => {
   }
 
   // Check for duplicate
-  const existingRegistration = await EventRegistration.findOne({ event: eventId, user: userId, status: 'REGISTERED' });
+  const query = { event: eventId, status: 'REGISTERED' };
+  
+  if (userId) {
+    query.$or = [{ user: userId }, { mobileNumber }];
+  } else {
+    query.mobileNumber = mobileNumber;
+  }
+
+  const existingRegistration = await EventRegistration.findOne(query);
+  
   if (existingRegistration) {
     throw new Error('You are already registered for this event');
   }
 
   const registration = new EventRegistration({
     event: eventId,
-    user: userId,
+    user: userId || undefined,
+    participantName,
+    mobileNumber,
     status: 'REGISTERED',
   });
 
@@ -229,16 +247,27 @@ export const getEventParticipants = async (organizerId, eventId, query = {}) => 
     throw new Error('Event not found or you do not have permission to view participants');
   }
 
-  const { page = 1, limit = 20, status = 'REGISTERED' } = query;
+  const { page = 1, limit = 20, status = 'REGISTERED', search } = query;
   const skip = (Number(page) - 1) * Number(limit);
 
-  const participants = await EventRegistration.find({ event: eventId, status })
+  const filter = { event: eventId, status };
+
+  if (search) {
+    const searchRegex = new RegExp(search, 'i');
+    filter.$or = [
+      { participantName: searchRegex },
+      { mobileNumber: searchRegex }
+    ];
+    // To search by user email we would need a lookup, but for now we filter by participantName or mobileNumber.
+  }
+
+  const participants = await EventRegistration.find(filter)
     .populate('user', 'name email profilePicture')
     .sort({ registeredAt: -1 })
     .skip(skip)
     .limit(Number(limit));
 
-  const total = await EventRegistration.countDocuments({ event: eventId, status });
+  const total = await EventRegistration.countDocuments(filter);
 
   return {
     participants,
@@ -248,7 +277,30 @@ export const getEventParticipants = async (organizerId, eventId, query = {}) => 
       limit: Number(limit),
       pages: Math.ceil(total / Number(limit)),
     },
+    eventDetails: { title: event.title, participantsCount: total },
   };
+};
+
+/**
+ * Toggle attendance for a participant
+ */
+export const toggleAttendance = async (organizerId, eventId, registrationId, hasAttended) => {
+  const event = await Event.findOne({ _id: eventId, organizer: organizerId });
+
+  if (!event) {
+    throw new Error('Event not found or you do not have permission to edit participants');
+  }
+
+  const registration = await EventRegistration.findOne({ _id: registrationId, event: eventId });
+
+  if (!registration) {
+    throw new Error('Registration not found');
+  }
+
+  registration.hasAttended = Boolean(hasAttended);
+  await registration.save();
+
+  return registration;
 };
 
 /**

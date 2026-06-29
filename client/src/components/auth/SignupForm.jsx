@@ -33,7 +33,7 @@ const signupSchema = z
  */
 const SignupForm = () => {
   const navigate = useNavigate();
-  const { loginWithGoogle } = useAuth();
+  const { loginWithGoogle, signup } = useAuth();
 
   // Setup React Hook Form with Zod integration
   const {
@@ -55,17 +55,17 @@ const SignupForm = () => {
    */
   const onSubmit = async (data) => {
     try {
-      // Call the signup API endpoint
-      await authApi.signup({
+      // Call the signup function from context
+      await signup({
         username: data.name,
         email: data.email,
         password: data.password,
       });
       
-      toast.success('Account created successfully! Please log in.');
+      toast.success('Account created successfully!');
       
-      // Redirect to login page after successful registration
-      navigate('/login');
+      // Redirect to dashboard after successful registration
+      navigate('/dashboard', { replace: true });
     } catch (error) {
       toast.error(error.message || 'Failed to create account. Please try again.');
     }

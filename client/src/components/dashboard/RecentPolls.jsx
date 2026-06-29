@@ -176,30 +176,30 @@ const RecentPolls = ({ polls = [], onRefresh }) => {
                       
                       {/* Actions */}
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex items-center justify-end gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+                        <div className="flex items-center justify-end gap-2 opacity-100 transition-opacity">
                           
                           {/* View */}
-                          <button onClick={() => handleView(pollId)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors" title="View Poll">
+                          <button onClick={() => handleView(pollId)} className="p-1.5 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-colors" title="View Poll">
                             <Eye className="w-4 h-4" />
                           </button>
                           
                           {/* Edit */}
-                          <button onClick={() => handleEdit(pollId)} className="p-1.5 text-gray-400 hover:text-orange-600 hover:bg-orange-50 dark:hover:bg-orange-500/10 rounded-lg transition-colors" title="Edit Poll">
+                          <button onClick={() => handleEdit(pollId)} className="p-1.5 text-orange-500 hover:bg-orange-50 dark:hover:bg-orange-500/10 rounded-lg transition-colors" title="Edit Poll">
                             <PenLine className="w-4 h-4" />
                           </button>
                           
                           {/* Analytics */}
-                          <button onClick={() => handleAnalytics(pollId)} className="p-1.5 text-gray-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-colors" title="View Analytics">
+                          <button onClick={() => handleAnalytics(pollId)} className="p-1.5 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-colors" title="View Analytics">
                             <BarChart2 className="w-4 h-4" />
                           </button>
                           
                           {/* Share */}
-                          <button onClick={() => setSharePollId(pollId)} className="p-1.5 text-gray-400 hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-500/10 rounded-lg transition-colors" title="Share Poll">
+                          <button onClick={() => setSharePollId(pollId)} className="p-1.5 text-purple-500 hover:bg-purple-50 dark:hover:bg-purple-500/10 rounded-lg transition-colors" title="Share Poll">
                             <Share2 className="w-4 h-4" />
                           </button>
                           
                           {/* Delete */}
-                          <button onClick={() => setDeletePollData(poll)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" title="Delete Poll">
+                          <button onClick={() => setDeletePollData(poll)} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors" title="Delete Poll">
                             <Trash2 className="w-4 h-4" />
                           </button>
                           

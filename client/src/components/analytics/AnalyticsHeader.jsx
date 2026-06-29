@@ -100,13 +100,15 @@ const AnalyticsHeader = ({ poll }) => {
           )}
           
           {/* Present Live Button */}
-          <button
-            onClick={() => navigate(`/live/${poll._id}`)}
-            className="mt-4 flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/25 transition-all hover:scale-105 active:scale-95"
+          <a
+            href={`/poll/${poll._id}/lobby`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 flex flex-wrap sm:inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold rounded-xl shadow-lg shadow-orange-500/25 transition-all hover:scale-105 active:scale-95"
           >
             <Activity className="w-5 h-5 animate-pulse" />
             Present Live Event
-          </button>
+          </a>
         </div>
 
       </div>

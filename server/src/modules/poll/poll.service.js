@@ -338,3 +338,116 @@ export const expirePoll = async (pollId, userId) => {
   
   return poll;
 };
+
+/**
+ * Set the currently active question for live presenter mode
+ */
+export const setActiveQuestion = async (pollId, userId, questionId) => {
+  const poll = await Poll.findById(pollId);
+  if (!poll) throw new Error('Poll not found');
+  
+  // Verify Ownership
+  if (poll.creatorId.toString() !== userId.toString()) {
+    throw new Error('Not authorized to control this poll');
+  }
+
+  // Set the active question ID (null is allowed if the presenter wants to hide all questions)
+  poll.activeQuestionId = questionId;
+  await poll.save();
+  
+  // Broadcast to all connected clients
+  import('../../emitters.js').then(({ emitActiveQuestionChanged }) => {
+    emitActiveQuestionChanged(pollId, questionId);
+  });
+  
+  return poll;
+};
+
+/**
+ * Get Leaderboard for a Quiz/Poll
+ * Calculates scores based on correct answers and points.
+ */
+export const getLeaderboard = async (pollId, creatorId) => {
+  const poll = await Poll.findById(pollId).lean();
+  if (!poll) throw new Error('Poll not found');
+
+  // Verify ownership
+  if (poll.creatorId.toString() !== creatorId.toString()) {
+    throw new Error('Not authorized to view leaderboard for this poll');
+  }
+
+  // Pre-calculate correct options and point values
+  const questionMap = {};
+  poll.questions.forEach((q) => {
+    // Collect all correct option IDs for this question
+    const correctOptionIds = q.options?.filter(opt => opt.isCorrect).map(opt => opt._id.toString()) || [];
+    questionMap[q._id.toString()] = {
+      points: q.points || 10,
+      questionType: q.questionType,
+      correctOptionIds,
+    };
+  });
+
+  // Fetch all responses and populate user details if they exist
+  import('../response/response.model.js').then(async ({ default: Response }) => {
+    // We can't await inside then without returning a promise, so let's import it properly at the top.
+    // I'll add the import Response at the top, or just use mongoose.model.
+  });
+
+  const Response = (await import('../response/response.model.js')).default;
+  const responses = await Response.find({ pollId }).populate('userId', 'name').lean();
+
+  const leaderboardMap = new Map();
+
+  responses.forEach((res, index) => {
+    let score = 0;
+    
+    // Calculate score
+    res.answers.forEach((ans) => {
+      const qMeta = questionMap[ans.questionId.toString()];
+      if (!qMeta) return;
+
+      if (['SINGLE_CHOICE', 'MULTI_SELECT'].includes(qMeta.questionType)) {
+        // If there are correct options defined for this question
+        if (qMeta.correctOptionIds.length > 0) {
+          if (qMeta.questionType === 'SINGLE_CHOICE' && ans.selectedOption) {
+            if (qMeta.correctOptionIds.includes(ans.selectedOption.toString())) {
+              score += qMeta.points;
+            }
+          } else if (qMeta.questionType === 'MULTI_SELECT' && ans.selectedOptions) {
+            // For multi-select, they must select all correct options and NO incorrect options
+            const selected = ans.selectedOptions.map(id => id.toString());
+            const isPerfectMatch = 
+              qMeta.correctOptionIds.every(id => selected.includes(id)) && 
+              selected.every(id => qMeta.correctOptionIds.includes(id));
+            
+            if (isPerfectMatch) {
+              score += qMeta.points;
+            }
+          }
+        }
+      }
+    });
+
+    // Identify user
+    const participantName = res.userId?.name || `Guest Player ${res._id.toString().substring(0, 4)}`;
+
+    leaderboardMap.set(res._id.toString(), {
+      responseId: res._id,
+      name: participantName,
+      score,
+      submittedAt: res.createdAt
+    });
+  });
+
+  // Convert map to array, sort by score (desc) and then submission time (asc)
+  const leaderboard = Array.from(leaderboardMap.values()).sort((a, b) => {
+    if (b.score !== a.score) {
+      return b.score - a.score; // Highest score first
+    }
+    return new Date(a.submittedAt) - new Date(b.submittedAt); // Earliest first
+  });
+
+  // Return Top 10
+  return leaderboard.slice(0, 10);
+};

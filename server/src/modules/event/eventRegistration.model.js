@@ -10,12 +10,26 @@ const eventRegistrationSchema = new mongoose.Schema(
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: [true, 'User reference is required'],
+      // Optional, so guests can register
+    },
+    participantName: {
+      type: String,
+      required: [true, 'Participant name is required'],
+      trim: true,
+    },
+    mobileNumber: {
+      type: String,
+      required: [true, 'Mobile number is required'],
+      trim: true,
     },
     status: {
       type: String,
       enum: ['REGISTERED', 'CANCELLED'],
       default: 'REGISTERED',
+    },
+    hasAttended: {
+      type: Boolean,
+      default: false,
     },
     registeredAt: {
       type: Date,
@@ -26,9 +40,6 @@ const eventRegistrationSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
-
-// Prevent duplicate registrations for the same user and event if they are currently REGISTERED
-eventRegistrationSchema.index({ event: 1, user: 1, status: 1 }, { unique: true, partialFilterExpression: { status: 'REGISTERED' } });
 
 const EventRegistration = mongoose.model('EventRegistration', eventRegistrationSchema);
 

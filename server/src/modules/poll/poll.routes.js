@@ -72,4 +72,14 @@ router.patch('/:id/resume', protect, pollController.resumePoll);
 // @access  Private (Only Creator)
 router.patch('/:id/expire', protect, pollController.expirePoll);
 
+// @route   PATCH /api/polls/:id/active-question
+// @desc    Set the active question for a live presenter mode poll
+// @access  Private (Only Creator)
+router.patch('/:id/active-question', protect, pollController.setActiveQuestion);
+
+// @route   GET /api/polls/:id/leaderboard
+// @desc    Get the leaderboard for a specific poll
+// @access  Private (Only Creator)
+router.get('/:id/leaderboard', protect, pollController.getLeaderboard);
+
 export default router;

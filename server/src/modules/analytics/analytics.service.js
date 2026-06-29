@@ -77,68 +77,86 @@ export const getPollAnalyticsOverview = async (pollId, userId) => {
 };
 
 /**
- * Generate detailed question-by-question analytics (vote distribution)
+ * Generate detailed question-by-question analytics (vote distribution, ratings, text)
  */
 export const getQuestionWiseAnalytics = async (pollId, userId) => {
-  // 1. Verify poll exists and check ownership
   const poll = await Poll.findById(pollId);
-  if (!poll) {
-    throw new Error('Poll not found');
-  }
+  if (!poll) throw new Error('Poll not found');
+  if (poll.creatorId.toString() !== userId.toString()) throw new Error('Not authorized to view analytics');
 
-  if (poll.creatorId.toString() !== userId.toString()) {
-    throw new Error('Not authorized to view analytics for this poll');
-  }
+  const responses = await Response.find({ pollId });
 
-  // 2. Perform aggregation to count votes for every option across all responses
-  // We unwind the answers array so each answer becomes a separate document, 
-  // then we group by selectedOption and count.
-  const optionStats = await Response.aggregate([
-    { $match: { pollId: new mongoose.Types.ObjectId(pollId) } },
-    { $unwind: '$answers' },
-    {
-      $group: {
-        _id: '$answers.selectedOption',
-        voteCount: { $sum: 1 }
-      }
-    }
-  ]);
-
-  // Create a fast lookup map for the aggregation results O(1) lookup
-  const statsMap = new Map();
-  optionStats.forEach((stat) => {
-    statsMap.set(stat._id.toString(), stat.voteCount);
-  });
-
-  // 3. Format the data perfectly for frontend charts and UI components
   const questionAnalytics = poll.questions.map((question) => {
     let totalVotesForQuestion = 0;
-
-    // First pass: map options and sum up total votes for this specific question
-    const formattedOptions = question.options.map((opt) => {
-      const votes = statsMap.get(opt._id.toString()) || 0;
-      totalVotesForQuestion += votes;
-
-      return {
-        optionId: opt._id,
-        text: opt.text,
-        votes,
-      };
-    });
-
-    // Second pass: calculate percentage for frontend convenience
-    formattedOptions.forEach((opt) => {
-      opt.percentage = totalVotesForQuestion === 0
-        ? 0
-        : Number(((opt.votes / totalVotesForQuestion) * 100).toFixed(1));
-    });
-
-    return {
+    
+    // Structure depends on question type
+    const result = {
       questionId: question._id,
       text: question.text,
-      totalVotes: totalVotesForQuestion,
-      options: formattedOptions,
+      questionType: question.questionType,
+      totalVotes: 0,
     };
+
+    if (['SINGLE_CHOICE', 'MULTI_SELECT'].includes(question.questionType)) {
+      // Map options to count votes
+      const optionCounts = {};
+      question.options.forEach(opt => optionCounts[opt._id.toString()] = 0);
+
+      responses.forEach(res => {
+        const answer = res.answers.find(a => a.questionId.toString() === question._id.toString());
+        if (answer) {
+          if (answer.selectedOption && optionCounts[answer.selectedOption.toString()] !== undefined) {
+            optionCounts[answer.selectedOption.toString()]++;
+            totalVotesForQuestion++;
+          }
+          if (answer.selectedOptions && Array.isArray(answer.selectedOptions)) {
+            answer.selectedOptions.forEach(optId => {
+              if (optionCounts[optId.toString()] !== undefined) {
+                optionCounts[optId.toString()]++;
+                totalVotesForQuestion++;
+              }
+            });
+          }
+        }
+      });
+
+      result.totalVotes = totalVotesForQuestion;
+      result.options = question.options.map(opt => ({
+        optionId: opt._id,
+        text: opt.text,
+        votes: optionCounts[opt._id.toString()],
+        percentage: totalVotesForQuestion === 0 ? 0 : Number(((optionCounts[opt._id.toString()] / totalVotesForQuestion) * 100).toFixed(1))
+      }));
+    } else if (['OPEN_TEXT', 'WORD_CLOUD'].includes(question.questionType)) {
+      const texts = [];
+      responses.forEach(res => {
+        const answer = res.answers.find(a => a.questionId.toString() === question._id.toString());
+        if (answer && answer.textValue) {
+          texts.push(answer.textValue);
+          totalVotesForQuestion++;
+        }
+      });
+      result.totalVotes = totalVotesForQuestion;
+      result.texts = texts;
+    } else if (question.questionType === 'RATING') {
+      let ratingSum = 0;
+      const ratingDistribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      
+      responses.forEach(res => {
+        const answer = res.answers.find(a => a.questionId.toString() === question._id.toString());
+        if (answer && answer.ratingValue) {
+          ratingSum += answer.ratingValue;
+          ratingDistribution[answer.ratingValue] = (ratingDistribution[answer.ratingValue] || 0) + 1;
+          totalVotesForQuestion++;
+        }
+      });
+      
+      result.totalVotes = totalVotesForQuestion;
+      result.averageRating = totalVotesForQuestion === 0 ? 0 : Number((ratingSum / totalVotesForQuestion).toFixed(1));
+      result.ratingDistribution = ratingDistribution;
+    }
+
+    return result;
   });
 
   return questionAnalytics;
@@ -149,62 +167,80 @@ export const getQuestionWiseAnalytics = async (pollId, userId) => {
  * This function does NOT require authentication, but only works if the creator has published the results.
  */
 export const getPublicPollResults = async (pollId) => {
-  // 1. Verify poll exists
-  // We only select the fields safe for public viewing
   const poll = await Poll.findById(pollId).select('title description isResultsPublished questions');
-  
-  if (!poll) {
-    throw new Error('Poll not found');
-  }
+  if (!poll) throw new Error('Poll not found');
+  if (!poll.isResultsPublished) throw new Error('Results for this poll are private and have not been published yet');
 
-  // 2. Verify the poll has been published by the creator
-  if (!poll.isResultsPublished) {
-    throw new Error('Results for this poll are private and have not been published yet');
-  }
+  const responses = await Response.find({ pollId });
 
-  // 3. Perform aggregation to count votes (same logic as private analytics but without user checks)
-  const optionStats = await Response.aggregate([
-    { $match: { pollId: new mongoose.Types.ObjectId(pollId) } },
-    { $unwind: '$answers' },
-    {
-      $group: {
-        _id: '$answers.selectedOption',
-        voteCount: { $sum: 1 }
-      }
-    }
-  ]);
-
-  const statsMap = new Map();
-  optionStats.forEach((stat) => {
-    statsMap.set(stat._id.toString(), stat.voteCount);
-  });
-
-  // 4. Format public analytics
   const questionAnalytics = poll.questions.map((question) => {
     let totalVotesForQuestion = 0;
-
-    const formattedOptions = question.options.map((opt) => {
-      const votes = statsMap.get(opt._id.toString()) || 0;
-      totalVotesForQuestion += votes;
-      return {
-        optionId: opt._id,
-        text: opt.text,
-        votes,
-      };
-    });
-
-    formattedOptions.forEach((opt) => {
-      opt.percentage = totalVotesForQuestion === 0
-        ? 0
-        : Number(((opt.votes / totalVotesForQuestion) * 100).toFixed(1));
-    });
-
-    return {
+    const result = {
       questionId: question._id,
       text: question.text,
-      totalVotes: totalVotesForQuestion,
-      options: formattedOptions,
+      questionType: question.questionType,
+      totalVotes: 0,
     };
+
+    if (['SINGLE_CHOICE', 'MULTI_SELECT'].includes(question.questionType)) {
+      const optionCounts = {};
+      question.options.forEach(opt => optionCounts[opt._id.toString()] = 0);
+
+      responses.forEach(res => {
+        const answer = res.answers.find(a => a.questionId.toString() === question._id.toString());
+        if (answer) {
+          if (answer.selectedOption && optionCounts[answer.selectedOption.toString()] !== undefined) {
+            optionCounts[answer.selectedOption.toString()]++;
+            totalVotesForQuestion++;
+          }
+          if (answer.selectedOptions && Array.isArray(answer.selectedOptions)) {
+            answer.selectedOptions.forEach(optId => {
+              if (optionCounts[optId.toString()] !== undefined) {
+                optionCounts[optId.toString()]++;
+                totalVotesForQuestion++;
+              }
+            });
+          }
+        }
+      });
+
+      result.totalVotes = totalVotesForQuestion;
+      result.options = question.options.map(opt => ({
+        optionId: opt._id,
+        text: opt.text,
+        votes: optionCounts[opt._id.toString()],
+        percentage: totalVotesForQuestion === 0 ? 0 : Number(((optionCounts[opt._id.toString()] / totalVotesForQuestion) * 100).toFixed(1))
+      }));
+    } else if (['OPEN_TEXT', 'WORD_CLOUD'].includes(question.questionType)) {
+      const texts = [];
+      responses.forEach(res => {
+        const answer = res.answers.find(a => a.questionId.toString() === question._id.toString());
+        if (answer && answer.textValue) {
+          texts.push(answer.textValue);
+          totalVotesForQuestion++;
+        }
+      });
+      result.totalVotes = totalVotesForQuestion;
+      result.texts = texts;
+    } else if (question.questionType === 'RATING') {
+      let ratingSum = 0;
+      const ratingDistribution = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      
+      responses.forEach(res => {
+        const answer = res.answers.find(a => a.questionId.toString() === question._id.toString());
+        if (answer && answer.ratingValue) {
+          ratingSum += answer.ratingValue;
+          ratingDistribution[answer.ratingValue] = (ratingDistribution[answer.ratingValue] || 0) + 1;
+          totalVotesForQuestion++;
+        }
+      });
+      
+      result.totalVotes = totalVotesForQuestion;
+      result.averageRating = totalVotesForQuestion === 0 ? 0 : Number((ratingSum / totalVotesForQuestion).toFixed(1));
+      result.ratingDistribution = ratingDistribution;
+    }
+
+    return result;
   });
 
   return {

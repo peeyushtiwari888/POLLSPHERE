@@ -187,3 +187,32 @@ export const expirePoll = async (pollId) => {
     handleApiError(error);
   }
 };
+
+/**
+ * Set the currently active question for live presenter mode
+ * @param {string} pollId 
+ * @param {string|null} questionId 
+ * @returns {Promise<Object>}
+ */
+export const setActiveQuestion = async (pollId, questionId) => {
+  try {
+    const response = await api.patch(`/polls/${pollId}/active-question`, { questionId });
+    return response.data?.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+/**
+ * Fetch the leaderboard for a specific poll
+ * @param {string} pollId 
+ * @returns {Promise<Array>} Array of top participants
+ */
+export const getPollLeaderboard = async (pollId) => {
+  try {
+    const response = await api.get(`/polls/${pollId}/leaderboard`);
+    return response.data?.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};

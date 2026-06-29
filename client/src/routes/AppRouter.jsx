@@ -23,11 +23,14 @@ const ManageEvents = lazy(() => import('../pages/ManageEventsPage.jsx'));
 const CreateEvent = lazy(() => import('../pages/CreateEventPage.jsx'));
 const PublicEvent = lazy(() => import('../pages/PublicEventPage.jsx'));
 const EventAnalytics = lazy(() => import('../pages/EventAnalyticsPage.jsx'));
+const EventParticipants = lazy(() => import('../pages/EventParticipantsPage.jsx'));
 const ViewPoll = lazy(() => import('../pages/PublicPollPage.jsx'));
 const PollSubmitted = lazy(() => import('../pages/PollSubmittedPage.jsx'));
 const Analytics = lazy(() => import('../pages/AnalyticsPage.jsx'));
 const PublicResults = lazy(() => import('../pages/PublishedResultsPage.jsx'));
 const LiveEventPage = lazy(() => import('../pages/LiveEventPage.jsx'));
+const PollLobbyPage = lazy(() => import('../pages/PollLobbyPage.jsx'));
+const LeaderboardPage = lazy(() => import('../pages/LeaderboardPage.jsx'));
 const NotFound = lazy(() => import('../pages/NotFound.jsx'));
 
 /**
@@ -78,9 +81,12 @@ const AppRouter = () => {
           <Route path="/events" element={<ManageEvents />} />
           <Route path="/events/create" element={<CreateEvent />} />
           <Route path="/events/:id/edit" element={<CreateEvent />} />
+          <Route path="/events/:id/participants" element={<EventParticipants />} />
           <Route path="/events/analytics/dashboard" element={<EventAnalytics />} />
           <Route path="/polls/create" element={<CreatePoll />} />
           <Route path="/polls/:id/edit" element={<CreatePoll />} />
+          <Route path="/poll/:pollId/lobby" element={<PollLobbyPage />} />
+          <Route path="/poll/:pollId/leaderboard" element={<LeaderboardPage />} />
           <Route path="/analytics/:pollId" element={<Analytics />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />

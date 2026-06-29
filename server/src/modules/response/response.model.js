@@ -9,11 +9,23 @@ const answerSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       required: [true, 'Question ID is required'],
     },
-    // We store the ID of the selected option to keep it linked accurately,
-    // even if the poll creator changes the option text later.
+    // For SINGLE_CHOICE
     selectedOption: {
       type: mongoose.Schema.Types.ObjectId,
-      required: [true, 'Selected option is required'],
+    },
+    // For MULTI_SELECT
+    selectedOptions: {
+      type: [mongoose.Schema.Types.ObjectId],
+    },
+    // For OPEN_TEXT and WORD_CLOUD
+    textValue: {
+      type: String,
+    },
+    // For RATING
+    ratingValue: {
+      type: Number,
+      min: 1,
+      max: 5,
     },
   },
   { _id: false }

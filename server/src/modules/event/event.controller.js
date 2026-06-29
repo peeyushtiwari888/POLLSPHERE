@@ -67,7 +67,8 @@ export const deleteEvent = async (req, res) => {
 
 export const registerForEvent = async (req, res) => {
   try {
-    const registration = await eventService.registerForEvent(req.user.id, req.params.id);
+    const userId = req.user?.id || null;
+    const registration = await eventService.registerForEvent(userId, req.params.id, req.body);
     res.status(201).json({
       success: true,
       message: 'Successfully registered for the event',
@@ -97,9 +98,24 @@ export const getEventParticipants = async (req, res) => {
       success: true,
       data: result.participants,
       pagination: result.pagination,
+      eventDetails: result.eventDetails, // Include basic event details like title for UI
     });
   } catch (error) {
     res.status(400).json({ success: false, message: error.message || 'Failed to get participants' });
+  }
+};
+
+export const toggleAttendance = async (req, res) => {
+  try {
+    const { hasAttended } = req.body;
+    const registration = await eventService.toggleAttendance(req.user.id, req.params.id, req.params.regId, hasAttended);
+    res.status(200).json({
+      success: true,
+      message: 'Attendance updated successfully',
+      data: registration,
+    });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message || 'Failed to update attendance' });
   }
 };
 

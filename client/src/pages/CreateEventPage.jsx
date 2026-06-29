@@ -19,7 +19,8 @@ const CreateEventPage = () => {
   useEffect(() => {
     const fetchEventData = async () => {
       try {
-        const event = await getEvent(id);
+        const response = await getEvent(id);
+        const eventData = response?.data || response;
         
         // Format dates for input[type="datetime-local"] which expects YYYY-MM-DDTHH:mm
         const formatForInput = (dateString) => {
@@ -29,13 +30,13 @@ const CreateEventPage = () => {
         };
 
         setInitialData({
-          ...event,
-          startDate: formatForInput(event.startDate),
-          endDate: formatForInput(event.endDate),
-          registrationDeadline: formatForInput(event.registrationDeadline),
-          tags: event.tags ? event.tags.join(', ') : '',
+          ...eventData,
+          startDate: formatForInput(eventData.startDate),
+          endDate: formatForInput(eventData.endDate),
+          registrationDeadline: formatForInput(eventData.registrationDeadline),
+          tags: eventData.tags ? eventData.tags.join(', ') : '',
         });
-        setFormValues(event);
+        setFormValues(eventData);
       } catch (error) {
         toast.error('Failed to load event data');
         navigate('/events');
@@ -59,6 +60,7 @@ const CreateEventPage = () => {
         await createEvent(data);
         toast.success('Event created successfully!');
       }
+      setIsSubmitting(false);
       navigate('/events');
     } catch (error) {
       toast.error(error.message || 'Something went wrong');

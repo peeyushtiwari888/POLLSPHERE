@@ -41,8 +41,8 @@ router.delete('/:id', protect, eventController.deleteEvent);
 
 // @route   POST /api/events/:id/register
 // @desc    Register for an event
-// @access  Private
-router.post('/:id/register', protect, eventController.registerForEvent);
+// @access  Public / Private
+router.post('/:id/register', optionalProtect, eventController.registerForEvent);
 
 // @route   DELETE /api/events/:id/register
 // @desc    Cancel registration
@@ -53,5 +53,10 @@ router.delete('/:id/register', protect, eventController.cancelRegistration);
 // @desc    Get event participants
 // @access  Private (Only Organizer)
 router.get('/:id/participants', protect, eventController.getEventParticipants);
+
+// @route   PATCH /api/events/:id/participants/:regId/attendance
+// @desc    Toggle attendance status
+// @access  Private (Only Organizer)
+router.patch('/:id/participants/:regId/attendance', protect, eventController.toggleAttendance);
 
 export default router;

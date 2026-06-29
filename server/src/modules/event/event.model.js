@@ -108,14 +108,13 @@ const eventSchema = new mongoose.Schema(
 );
 
 // Pre-save validation for Dates
-eventSchema.pre('save', function (next) {
+eventSchema.pre('save', function () {
   if (this.endDate <= this.startDate) {
-    return next(new Error('End date must be after start date.'));
+    throw new Error('End date must be after start date.');
   }
   if (this.registrationDeadline && this.registrationDeadline > this.startDate) {
-    return next(new Error('Registration deadline must be before the event starts.'));
+    throw new Error('Registration deadline must be before the event starts.');
   }
-  next();
 });
 
 const Event = mongoose.model('Event', eventSchema);

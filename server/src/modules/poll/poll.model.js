@@ -41,16 +41,20 @@ const questionSchema = new mongoose.Schema({
   },
   questionType: {
     type: String,
-    enum: ['MULTIPLE_CHOICE', 'SHORT_ANSWER', 'LONG_ANSWER'],
-    default: 'MULTIPLE_CHOICE',
+    enum: ['SINGLE_CHOICE', 'MULTI_SELECT', 'WORD_CLOUD', 'OPEN_TEXT', 'RATING'],
+    default: 'SINGLE_CHOICE',
   },
   options: {
     type: [optionSchema],
     validate: {
       validator: function (v) {
-        return v && v.length >= 2; // A multiple-choice question must have at least 2 options
+        // Only require options for SINGLE_CHOICE and MULTI_SELECT
+        if (['SINGLE_CHOICE', 'MULTI_SELECT'].includes(this.questionType)) {
+          return v && v.length >= 2; 
+        }
+        return true; // For other types, options can be empty
       },
-      message: 'A question must have at least two options.',
+      message: 'Single Choice and Multi Select questions must have at least two options.',
     },
   },
 });
@@ -110,6 +114,10 @@ const pollSchema = new mongoose.Schema(
         },
         message: 'Expiry date must be in the future',
       },
+    },
+    activeQuestionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null, // null means "waiting for presenter"
     },
     questions: {
       type: [questionSchema],

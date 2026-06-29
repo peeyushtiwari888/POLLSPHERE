@@ -143,17 +143,19 @@ const QuestionCard = ({ question, index, totalQuestions, onUpdate, onDelete }) =
                      onChange={(e) => onUpdate({ type: e.target.value })}
                      className="w-full bg-transparent border-b border-gray-300 dark:border-gray-700 focus:border-gray-900 dark:focus:border-white focus:outline-none py-1 text-gray-900 dark:text-white cursor-pointer appearance-none"
                    >
-                     <option value="MULTIPLE_CHOICE" className="bg-white dark:bg-zinc-900">Multiple Choice</option>
-                     <option value="SHORT_ANSWER" className="bg-white dark:bg-zinc-900">Short Answer</option>
-                     <option value="LONG_ANSWER" className="bg-white dark:bg-zinc-900">Long Answer</option>
+                     <option value="SINGLE_CHOICE" className="bg-white dark:bg-zinc-900">Single Choice</option>
+                     <option value="MULTI_SELECT" className="bg-white dark:bg-zinc-900">Multi Select</option>
+                     <option value="WORD_CLOUD" className="bg-white dark:bg-zinc-900">Word Cloud</option>
+                     <option value="OPEN_TEXT" className="bg-white dark:bg-zinc-900">Open Text</option>
+                     <option value="RATING" className="bg-white dark:bg-zinc-900">Rating</option>
                    </select>
                 </div>
               </div>
 
               {/* --------------------------------------------------------
-                  Options Section (Only if MULTIPLE_CHOICE)
+                  Options Section (Only if SINGLE_CHOICE or MULTI_SELECT)
               -------------------------------------------------------- */}
-              {question.type === 'MULTIPLE_CHOICE' && (
+              {['SINGLE_CHOICE', 'MULTI_SELECT'].includes(question.type) && (
                 <div className="space-y-3 pt-6 border-t border-gray-100 dark:border-gray-800">
                   <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
                     Answers <span className="text-gray-400 font-normal ml-1">(Min 2, Max 6)</span>

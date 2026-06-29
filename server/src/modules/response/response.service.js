@@ -59,13 +59,41 @@ export const submitResponse = async (pollId, userId, answers) => {
       throw new Error(`Invalid question ID provided: ${answer.questionId}`);
     }
 
-    // Verify the selected option exists inside this specific question
-    const isValidOption = pollQuestion.options.some(
-      (opt) => opt._id.toString() === answer.selectedOption.toString()
-    );
-
-    if (!isValidOption) {
-      throw new Error(`Invalid option selected for question: "${pollQuestion.text}"`);
+    // Validation logic based on Question Type
+    switch (pollQuestion.questionType) {
+      case 'SINGLE_CHOICE': {
+        if (!answer.selectedOption) throw new Error(`Missing option for single-choice question: "${pollQuestion.text}"`);
+        const isValidOption = pollQuestion.options.some((opt) => opt._id.toString() === answer.selectedOption.toString());
+        if (!isValidOption) throw new Error(`Invalid option selected for question: "${pollQuestion.text}"`);
+        break;
+      }
+      case 'MULTI_SELECT': {
+        if (!answer.selectedOptions || answer.selectedOptions.length === 0) {
+           throw new Error(`At least one option is required for multi-select question: "${pollQuestion.text}"`);
+        }
+        const validOptionIds = new Set(pollQuestion.options.map(opt => opt._id.toString()));
+        for (const selected of answer.selectedOptions) {
+          if (!validOptionIds.has(selected.toString())) {
+            throw new Error(`Invalid option selected for question: "${pollQuestion.text}"`);
+          }
+        }
+        break;
+      }
+      case 'OPEN_TEXT':
+      case 'WORD_CLOUD': {
+        if (typeof answer.textValue !== 'string' || !answer.textValue.trim()) {
+          throw new Error(`Text answer is required for question: "${pollQuestion.text}"`);
+        }
+        break;
+      }
+      case 'RATING': {
+        if (typeof answer.ratingValue !== 'number' || answer.ratingValue < 1 || answer.ratingValue > 5) {
+          throw new Error(`A valid rating between 1 and 5 is required for question: "${pollQuestion.text}"`);
+        }
+        break;
+      }
+      default:
+        throw new Error(`Unsupported question type: ${pollQuestion.questionType}`);
     }
   }
 

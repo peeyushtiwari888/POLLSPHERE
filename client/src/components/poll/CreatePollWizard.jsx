@@ -32,18 +32,38 @@ const CreatePollWizard = () => {
   const navigate = useNavigate();
   
   // Centralized Master Form State
-  const [formData, setFormData] = useState({
-    title: '',
-    thumbnailUrl: '',
-    description: '',
-    participationCode: '',
-    questions: [], // Array of question objects
-    settings: {
-      isAnonymous: false,
-      isResultsPublished: false,
-      expiryDate: '',
+  const [formData, setFormData] = useState(() => {
+    // If we are creating a new poll, check for a saved draft
+    if (!isEditMode) {
+      const savedDraft = localStorage.getItem('poll_draft');
+      if (savedDraft) {
+        try {
+          return JSON.parse(savedDraft);
+        } catch(e) {
+          console.error("Failed to parse poll draft", e);
+        }
+      }
     }
+    return {
+      title: '',
+      thumbnailUrl: '',
+      description: '',
+      participationCode: '',
+      questions: [], // Array of question objects
+      settings: {
+        isAnonymous: false,
+        isResultsPublished: false,
+        expiryDate: '',
+      }
+    };
   });
+
+  // Auto-save draft to local storage whenever formData changes
+  useEffect(() => {
+    if (!isEditMode) {
+      localStorage.setItem('poll_draft', JSON.stringify(formData));
+    }
+  }, [formData, isEditMode]);
 
   // Handler passed to child steps to update the master state
   const updateFormData = (stepKey, data) => {
@@ -144,7 +164,7 @@ const CreatePollWizard = () => {
           isRequired: q.isRequired,
           duration: q.duration || 30,
           points: q.points || 10,
-          questionType: q.type || 'MULTIPLE_CHOICE',
+          questionType: q.type || 'SINGLE_CHOICE',
           options: q.options.map(opt => ({ text: opt.text, isCorrect: opt.isCorrect }))
         }))
       };
@@ -156,6 +176,7 @@ const CreatePollWizard = () => {
       } else {
         await createPoll(payload);
         toast.success('Poll created successfully!');
+        localStorage.removeItem('poll_draft'); // Clear draft after successful creation
       }
       navigate('/polls'); // Redirect to My Polls
 
