@@ -7,6 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import useSocket from '../hooks/useSocket';
 import { getPollAnalytics } from '../api/analytics.api';
+import ReactionOverlay from '../components/live/ReactionOverlay';
+import LeaderboardView from '../components/live/LeaderboardView';
 
 /**
  * Poll Lobby Page (Presentation Screen)
@@ -110,6 +112,8 @@ const PollLobbyPage = () => {
     ? questionsData?.find(q => (q.questionId || q._id) === activeQuestionId) 
     : null;
 
+  const isExpired = poll.status === 'EXPIRED';
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-zinc-950 flex flex-col font-sans selection:bg-orange-500/30 transition-colors overflow-hidden">
       
@@ -123,18 +127,34 @@ const PollLobbyPage = () => {
           Back to My Polls
         </button>
 
-        {/* Live Counter Widget */}
-        <div className="flex items-center gap-3 px-5 py-2.5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-full shadow-sm dark:shadow-lg transition-colors">
-          <div className="relative flex h-3 w-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
-          </div>
-          <span className="text-gray-700 dark:text-gray-300 text-sm font-semibold uppercase tracking-wider">
-            Live Students
-          </span>
-          <div className="flex items-center gap-1.5 px-2 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded-md transition-colors">
-            <Users className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-            <span className="text-gray-900 dark:text-white font-bold">{activeUsers}</span>
+        <div className="flex items-center gap-4">
+          {/* Responses Counter Widget (Only if active question) */}
+          {activeQuestion && (
+            <div className="flex items-center gap-3 px-5 py-2.5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-full shadow-sm dark:shadow-lg transition-colors">
+              <span className="text-gray-700 dark:text-gray-300 text-sm font-semibold uppercase tracking-wider">
+                Responses
+              </span>
+              <div className="flex items-center gap-1.5 px-3 py-0.5 bg-orange-100 dark:bg-orange-500/20 rounded-md transition-colors">
+                <span className="text-orange-600 dark:text-orange-400 font-bold">
+                  {activeQuestion.options?.reduce((sum, opt) => sum + (opt.votes || 0), 0) || 0} / {activeUsers}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Live Counter Widget */}
+          <div className="flex items-center gap-3 px-5 py-2.5 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-full shadow-sm dark:shadow-lg transition-colors">
+            <div className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            </div>
+            <span className="text-gray-700 dark:text-gray-300 text-sm font-semibold uppercase tracking-wider">
+              Live Students
+            </span>
+            <div className="flex items-center gap-1.5 px-2 py-0.5 bg-gray-100 dark:bg-zinc-800 rounded-md transition-colors">
+              <Users className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
+              <span className="text-gray-900 dark:text-white font-bold">{activeUsers}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -142,7 +162,18 @@ const PollLobbyPage = () => {
       {/* Main Content Area */}
       <div className="flex-1 relative flex items-center justify-center p-6">
         <AnimatePresence mode="wait">
-          {!activeQuestion ? (
+          {isExpired ? (
+            <motion.div
+              key="leaderboard"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.05 }}
+              transition={{ duration: 0.5 }}
+              className="w-full max-w-6xl"
+            >
+              <LeaderboardView pollId={pollId} />
+            </motion.div>
+          ) : !activeQuestion ? (
             <motion.div 
               key="lobby"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -230,6 +261,9 @@ const PollLobbyPage = () => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* Floating Reactions Overlay */}
+      <ReactionOverlay socket={socket} />
     </div>
   );
 };
@@ -241,6 +275,15 @@ const PollLobbyPage = () => {
 const ActiveQuestionPresenter = ({ question }) => {
   const maxVotes = question.options?.reduce((max, opt) => Math.max(max, opt.votes || 0), 0) || 0;
 
+  const textLength = question.text?.replace(/<[^>]*>?/gm, '').length || 0;
+  let textSizeClass = 'text-4xl sm:text-5xl';
+  if (textLength > 100) {
+    textSizeClass = 'text-3xl sm:text-4xl';
+  }
+  if (textLength > 200) {
+    textSizeClass = 'text-2xl sm:text-3xl';
+  }
+
   return (
     <div className="w-full bg-white dark:bg-zinc-900 rounded-[2.5rem] shadow-[0_20px_60px_-15px_rgba(0,0,0,0.1)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] border border-gray-100 dark:border-zinc-800/50 p-8 sm:p-12 transition-colors">
       <div className="text-center mb-12">
@@ -249,7 +292,7 @@ const ActiveQuestionPresenter = ({ question }) => {
           Live Question
         </span>
         <h2 
-          className="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight"
+          className={`font-extrabold text-gray-900 dark:text-white leading-tight break-words break-all w-full ${textSizeClass}`}
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(question.text) }}
         />
       </div>

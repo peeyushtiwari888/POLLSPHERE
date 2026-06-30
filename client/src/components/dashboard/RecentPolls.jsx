@@ -36,7 +36,7 @@ const RecentPolls = ({ polls = [], onRefresh }) => {
     const expiry = new Date(expiryDate);
     const now = new Date();
     
-    if (expiry < now) return 'Expired';
+    if (expiry < now) return 'Completed';
     
     const diffTime = Math.abs(expiry - now);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));

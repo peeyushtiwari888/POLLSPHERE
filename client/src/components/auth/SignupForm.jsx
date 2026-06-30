@@ -7,7 +7,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import * as authApi from '../../api/auth.api';
 import { Mail, User, Loader2 } from 'lucide-react';
-import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../../hooks/useAuth';
 import AuthCard from './AuthCard';
 import PasswordInput from './PasswordInput';
@@ -33,7 +32,7 @@ const signupSchema = z
  */
 const SignupForm = () => {
   const navigate = useNavigate();
-  const { loginWithGoogle, signup } = useAuth();
+  const { signup } = useAuth();
 
   // Setup React Hook Form with Zod integration
   const {
@@ -71,15 +70,7 @@ const SignupForm = () => {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
-    try {
-      await loginWithGoogle(credentialResponse.credential);
-      toast.success('Successfully logged in with Google!');
-      navigate('/dashboard', { replace: true });
-    } catch (error) {
-      toast.error(error.message || 'Google login failed');
-    }
-  };
+
 
   return (
     <AuthCard>
@@ -214,32 +205,7 @@ const SignupForm = () => {
           )}
         </button>
 
-        {/* Or Divider */}
-        <div className="mt-6 pt-4 relative">
-          <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-gray-200 dark:border-zinc-800" />
-          </div>
-          <div className="relative flex justify-center text-sm">
-            <span className="px-3 bg-white dark:bg-[#18181b] text-gray-500">
-              Or continue with
-            </span>
-          </div>
-        </div>
 
-        {/* Google OAuth Button */}
-        <div className="flex justify-center mt-4">
-          <GoogleLogin
-            onSuccess={handleGoogleSuccess}
-            onError={() => {
-              toast.error('Google login failed');
-            }}
-            useOneTap
-            shape="rectangular"
-            theme="outline"
-            text="signup_with"
-            size="large"
-          />
-        </div>
       </form>
 
       {/* Footer Link */}

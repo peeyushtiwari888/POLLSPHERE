@@ -52,8 +52,8 @@ const PollTable = ({ polls = [], refreshData }) => {
             let statusLabel = '';
             switch (currentStatus) {
               case 'EXPIRED':
-                statusColor = 'bg-red-500/10 text-red-500';
-                statusLabel = 'Expired';
+                statusColor = 'bg-blue-500/10 text-blue-500 dark:text-blue-400';
+                statusLabel = 'Completed';
                 break;
               case 'PUBLISHED':
                 statusColor = 'bg-emerald-500/10 text-emerald-500';

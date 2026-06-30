@@ -44,6 +44,16 @@ const QuestionCard = ({ question, index, hideCharts: manualHideCharts, isPresent
     value: opt.votes
   }));
 
+  const textLength = question.text?.replace(/<[^>]*>?/gm, '').length || 0;
+  
+  let textSizeClass = isPresenting ? 'text-3xl lg:text-4xl' : 'text-xl sm:text-2xl';
+  if (textLength > 100) {
+    textSizeClass = isPresenting ? 'text-2xl lg:text-3xl' : 'text-lg sm:text-xl';
+  }
+  if (textLength > 200) {
+    textSizeClass = isPresenting ? 'text-xl lg:text-2xl' : 'text-base sm:text-lg';
+  }
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
@@ -53,10 +63,12 @@ const QuestionCard = ({ question, index, hideCharts: manualHideCharts, isPresent
       className={`bg-white/80 dark:bg-zinc-900/80 backdrop-blur-xl border border-white/20 dark:border-zinc-800/50 rounded-3xl shadow-xl flex flex-col gap-6 ${isPresenting ? 'p-12 sm:p-16 w-full max-w-7xl mx-auto ring-1 ring-white/10 dark:ring-white/5' : 'p-6 sm:p-8'}`}
     >
       <div className="flex items-start justify-between gap-4 mb-4">
-        <div 
-          className={`font-bold text-gray-900 dark:text-white leading-snug [&>p]:m-0 inline-block ${isPresenting ? 'text-4xl lg:text-5xl' : 'text-xl sm:text-2xl'}`}
-          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(question.text) }}
-        />
+        <div className="flex-1 min-w-0">
+          <div 
+            className={`font-bold text-gray-900 dark:text-white leading-snug [&>p]:m-0 block w-full break-words break-all ${textSizeClass}`}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(question.text) }}
+          />
+        </div>
         
         <div className="flex flex-col items-end gap-3 shrink-0">
           {isCurrentlyLive && activeQuestionStartTime && timeLeft > 0 && (

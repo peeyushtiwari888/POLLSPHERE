@@ -7,7 +7,6 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { SocketProvider } from './socket/SocketProvider';
-import { GoogleOAuthProvider } from '@react-oauth/google';
 
 // Import global font
 import '@fontsource/outfit';
@@ -29,9 +28,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <ThemeProvider>
         <AuthProvider>
           <SocketProvider>
-            <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || 'YOUR_GOOGLE_CLIENT_ID'}>
-              <App />
-            </GoogleOAuthProvider>
+            <App />
             
             {/* Toaster renders the global toast notifications (success/error popups) */}
             <Toaster 

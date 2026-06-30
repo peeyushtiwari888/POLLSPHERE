@@ -37,6 +37,43 @@ export const submitResponse = async (req, res) => {
 };
 
 /**
+ * Handle submit LIVE response request (partial submission)
+ */
+export const submitLiveResponse = async (req, res) => {
+  try {
+    const { pollId, participantId, answer } = req.body;
+    const userId = req.user ? req.user.id : null;
+
+    if (!participantId && !userId) {
+      throw new Error('participantId is required for anonymous live submissions');
+    }
+    if (!answer) {
+      throw new Error('answer is required');
+    }
+
+    const response = await responseService.submitLiveResponse(pollId, userId, participantId, answer);
+
+    res.status(200).json({
+      success: true,
+      message: 'Live response recorded successfully',
+      data: response,
+    });
+  } catch (error) {
+    let statusCode = 400;
+    const msg = error.message.toLowerCase();
+    
+    if (msg.includes('not found')) statusCode = 404;
+    else if (msg.includes('authentication') || msg.includes('not allowed')) statusCode = 403;
+    else if (msg.includes('time is up') || msg.includes('expired')) statusCode = 403;
+
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Failed to submit live response',
+    });
+  }
+};
+
+/**
  * Handle fetching responses for a poll
  */
 export const getResponsesByPollId = async (req, res) => {

@@ -48,7 +48,8 @@ export const getMyPolls = async (creatorId, queryParams = {}) => {
   const now = new Date();
   if (filter) {
     switch (filter) {
-      case 'Expired':
+      case 'Completed':
+      case 'Expired': // Keep Expired for backward compatibility if needed
         query.expiryDate = { $lt: now };
         break;
       case 'Published':
@@ -380,78 +381,26 @@ export const getLeaderboard = async (pollId, creatorId) => {
     throw new Error('Not authorized to view leaderboard for this poll');
   }
 
-  // Pre-calculate correct options and point values
-  const questionMap = {};
-  poll.questions.forEach((q) => {
-    // Collect all correct option IDs for this question
-    const correctOptionIds = q.options?.filter(opt => opt.isCorrect).map(opt => opt._id.toString()) || [];
-    questionMap[q._id.toString()] = {
-      points: q.points || 10,
-      questionType: q.questionType,
-      correctOptionIds,
+  const Response = (await import('../response/response.model.js')).default;
+  
+  const responses = await Response.find({ pollId })
+    .populate('userId', 'username') // Use 'username' because user model has username
+    .sort({ totalScore: -1, totalTimeTaken: 1 })
+    .limit(10)
+    .lean();
+
+  const leaderboard = responses.map((res, index) => {
+    // Identify user
+    const participantName = res.userId?.username || `Guest ${res.participantId?.substring(0, 4) || res._id.toString().substring(0, 4)}`;
+
+    return {
+      rank: index + 1,
+      responseId: res._id,
+      name: participantName,
+      score: res.totalScore || 0,
+      timeTaken: res.totalTimeTaken || 0,
     };
   });
 
-  // Fetch all responses and populate user details if they exist
-  import('../response/response.model.js').then(async ({ default: Response }) => {
-    // We can't await inside then without returning a promise, so let's import it properly at the top.
-    // I'll add the import Response at the top, or just use mongoose.model.
-  });
-
-  const Response = (await import('../response/response.model.js')).default;
-  const responses = await Response.find({ pollId }).populate('userId', 'name').lean();
-
-  const leaderboardMap = new Map();
-
-  responses.forEach((res, index) => {
-    let score = 0;
-    
-    // Calculate score
-    res.answers.forEach((ans) => {
-      const qMeta = questionMap[ans.questionId.toString()];
-      if (!qMeta) return;
-
-      if (['SINGLE_CHOICE', 'MULTI_SELECT'].includes(qMeta.questionType)) {
-        // If there are correct options defined for this question
-        if (qMeta.correctOptionIds.length > 0) {
-          if (qMeta.questionType === 'SINGLE_CHOICE' && ans.selectedOption) {
-            if (qMeta.correctOptionIds.includes(ans.selectedOption.toString())) {
-              score += qMeta.points;
-            }
-          } else if (qMeta.questionType === 'MULTI_SELECT' && ans.selectedOptions) {
-            // For multi-select, they must select all correct options and NO incorrect options
-            const selected = ans.selectedOptions.map(id => id.toString());
-            const isPerfectMatch = 
-              qMeta.correctOptionIds.every(id => selected.includes(id)) && 
-              selected.every(id => qMeta.correctOptionIds.includes(id));
-            
-            if (isPerfectMatch) {
-              score += qMeta.points;
-            }
-          }
-        }
-      }
-    });
-
-    // Identify user
-    const participantName = res.userId?.name || `Guest Player ${res._id.toString().substring(0, 4)}`;
-
-    leaderboardMap.set(res._id.toString(), {
-      responseId: res._id,
-      name: participantName,
-      score,
-      submittedAt: res.createdAt
-    });
-  });
-
-  // Convert map to array, sort by score (desc) and then submission time (asc)
-  const leaderboard = Array.from(leaderboardMap.values()).sort((a, b) => {
-    if (b.score !== a.score) {
-      return b.score - a.score; // Highest score first
-    }
-    return new Date(a.submittedAt) - new Date(b.submittedAt); // Earliest first
-  });
-
-  // Return Top 10
-  return leaderboard.slice(0, 10);
+  return leaderboard;
 };

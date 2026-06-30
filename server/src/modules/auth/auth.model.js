@@ -23,16 +23,7 @@ const userSchema = new mongoose.Schema(
         'Please provide a valid email address',
       ],
     },
-    googleId: {
-      type: String,
-      unique: true,
-      sparse: true,
-    },
-    authProvider: {
-      type: String,
-      enum: ['local', 'google'],
-      default: 'local',
-    },
+
     name: { type: String, trim: true },
     bio: { type: String, trim: true, maxlength: [500, 'Bio cannot exceed 500 characters'] },
     designation: { type: String, trim: true, maxlength: [100, 'Designation cannot exceed 100 characters'] },
@@ -40,10 +31,7 @@ const userSchema = new mongoose.Schema(
     avatarUrl: { type: String, trim: true },
     password: {
       type: String,
-      required: [
-        function() { return this.authProvider === 'local'; },
-        'Password is required for local authentication'
-      ],
+      required: [true, 'Password is required'],
       minlength: [6, 'Password must be at least 6 characters long'],
       // By default, do not return the password in queries
       select: false,

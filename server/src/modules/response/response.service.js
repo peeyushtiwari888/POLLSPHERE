@@ -120,6 +120,122 @@ export const submitResponse = async (pollId, userId, answers) => {
 };
 
 /**
+ * Submit a LIVE partial response to a single question
+ */
+export const submitLiveResponse = async (pollId, userId, participantId, answer) => {
+  const poll = await Poll.findById(pollId);
+  if (!poll) throw new Error('Poll not found');
+
+  // Verify poll is live and active
+  if (poll.status !== 'PUBLISHED' && poll.status !== 'ACTIVE') {
+    throw new Error('This poll is not currently live');
+  }
+
+  // Find the question
+  const question = poll.questions.find(q => q._id.toString() === answer.questionId.toString());
+  if (!question) throw new Error('Question not found in this poll');
+
+  // Verify the question is the currently active one
+  if (poll.activeQuestionId?.toString() !== question._id.toString()) {
+    throw new Error('This question is not currently active');
+  }
+
+  // Timer Check & Scoring Calculations
+  let elapsedMs = 0;
+  if (poll.activeQuestionStartTime) {
+    elapsedMs = Date.now() - new Date(poll.activeQuestionStartTime).getTime();
+    const elapsedSeconds = elapsedMs / 1000;
+    if (elapsedSeconds > (question.duration || 30)) {
+      throw new Error('Time is up for this question');
+    }
+  }
+
+  // Calculate Correctness
+  let isCorrect = false;
+  if (question.questionType === 'SINGLE_CHOICE') {
+    const selectedOpt = question.options.find(o => o._id.toString() === answer.selectedOption?.toString());
+    if (selectedOpt && selectedOpt.isCorrect) isCorrect = true;
+  } else if (question.questionType === 'MULTI_SELECT') {
+    const correctOptions = question.options.filter(o => o.isCorrect).map(o => o._id.toString());
+    const selectedOptions = answer.selectedOptions?.map(id => id.toString()) || [];
+    
+    // Check if lengths match and all correct options are selected
+    if (correctOptions.length > 0 && correctOptions.length === selectedOptions.length) {
+      isCorrect = correctOptions.every(id => selectedOptions.includes(id));
+    }
+  }
+
+  // Calculate Score (Kahoot style)
+  let score = 0;
+  if (isCorrect) {
+    const maxPoints = question.points || 1000;
+    const maxTimeMs = (question.duration || 30) * 1000;
+    // Math.round(maxPoints * (1 - (elapsedMs / (maxTimeMs * 2))))
+    // e.g. answer instantly -> 1000 points. Answer at 30s -> 500 points.
+    score = Math.max(0, Math.round(maxPoints * (1 - (elapsedMs / (maxTimeMs * 2)))));
+  }
+
+  answer.score = score;
+  answer.timeTaken = elapsedMs;
+  answer.isCorrect = isCorrect;
+
+  // Find existing response document for this user/participant
+  const query = userId ? { pollId, userId } : { pollId, participantId };
+  let response = await Response.findOne(query);
+
+  if (!response) {
+    // Create new if it doesn't exist
+    response = new Response({
+      pollId,
+      userId: userId || null,
+      participantId: participantId || null,
+      answers: []
+    });
+  }
+
+  // Check if they already answered this question
+  const existingAnswerIndex = response.answers.findIndex(a => a.questionId.toString() === answer.questionId.toString());
+  if (existingAnswerIndex !== -1) {
+    // Override their answer
+    response.answers[existingAnswerIndex] = answer;
+  } else {
+    // Push new answer
+    response.answers.push(answer);
+  }
+
+  // Recalculate Total Score and Total Time Taken
+  response.totalScore = response.answers.reduce((sum, ans) => sum + (ans.score || 0), 0);
+  response.totalTimeTaken = response.answers.reduce((sum, ans) => sum + (ans.timeTaken || 0), 0);
+
+  await response.save();
+
+  // Recalculate Analytics
+  const updatedAnalytics = await getQuestionWiseAnalytics(pollId, poll.creatorId);
+  emitAnalyticsUpdated(pollId, updatedAnalytics);
+  emitLiveResponseUpdate(pollId);
+  emitLiveQuestionUpdate(pollId);
+
+  // Calculate Rank
+  // Rank is number of people with higher score + 1. If tied, check who has lower totalTimeTaken.
+  const higherScoreCount = await Response.countDocuments({
+    pollId,
+    $or: [
+      { totalScore: { $gt: response.totalScore } },
+      { totalScore: response.totalScore, totalTimeTaken: { $lt: response.totalTimeTaken } }
+    ]
+  });
+  
+  const currentRank = higherScoreCount + 1;
+
+  return {
+    ...response.toObject(),
+    scoreAwarded: score,
+    isCorrect,
+    currentRank
+  };
+};
+
+/**
  * Fetch all responses for a specific poll
  * Only the poll creator is authorized to view these responses.
  */

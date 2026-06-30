@@ -49,6 +49,14 @@ export const registerSocketEvents = (socket) => {
     }
   });
 
+  // Handle live reactions
+  socket.on('send-reaction', ({ pollId, reaction }) => {
+    if (pollId && reaction) {
+      const io = getSocketIo();
+      io.to(pollId).emit('receive-reaction', reaction);
+    }
+  });
+
   // Handle sudden disconnects (e.g. closing the tab)
   socket.on('disconnecting', () => {
     for (const room of socket.rooms) {

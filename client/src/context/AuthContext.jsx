@@ -93,26 +93,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  /**
-   * Google Login Function
-   */
-  const loginWithGoogle = async (token) => {
-    const response = await authApi.googleLogin(token);
-    
-    if (response.token) {
-      saveToken(response.token);
-    }
 
-    if (response.user) {
-      setUser(response.user);
-    } else {
-      const fetchedUser = await authApi.getCurrentUser();
-      setUser(fetchedUser);
-    }
-    
-    setIsAuthenticated(true);
-    return response;
-  };
 
   const value = {
     user,
@@ -121,7 +102,6 @@ export const AuthProvider = ({ children }) => {
     login,
     signup,
     logout,
-    loginWithGoogle,
   };
 
   return (

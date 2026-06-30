@@ -20,7 +20,7 @@ export const getPublicPollById = async (pollId, providedCode) => {
     if (!providedCode) {
       throw new Error('PARTICIPATION_CODE_REQUIRED');
     }
-    if (providedCode !== poll.participationCode) {
+    if (providedCode.trim().toLowerCase() !== poll.participationCode.trim().toLowerCase()) {
       throw new Error('INVALID_PARTICIPATION_CODE');
     }
   }

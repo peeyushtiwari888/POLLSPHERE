@@ -22,7 +22,7 @@ export const getPublicPoll = async (pollId, code) => {
     const response = await api.get(`/polls/public/${pollId}`, {
       params: { code }
     });
-    return response.data;
+    return response.data.data;
   } catch (error) {
     handleApiError(error);
   }
@@ -38,6 +38,25 @@ export const getPublicPoll = async (pollId, code) => {
 export const submitPollResponse = async (pollId, payload) => {
   try {
     const response = await api.post(`/responses/${pollId}`, payload);
+    return response.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
+/**
+ * Submit a LIVE response for a single active question.
+ * 
+ * @param {string} pollId 
+ * @param {string} participantId 
+ * @param {Object} answer 
+ */
+export const submitLiveAnswer = async (pollId, participantId, answer) => {
+  try {
+    const response = await api.post(`/responses/live/${pollId}`, {
+      participantId,
+      answer
+    });
     return response.data;
   } catch (error) {
     handleApiError(error);

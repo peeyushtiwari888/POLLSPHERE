@@ -83,7 +83,7 @@ const AnalyticsHeader = ({ poll }) => {
               : 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border-emerald-100 dark:border-emerald-900/30'
           }`}>
             <Activity className="w-3.5 h-3.5" />
-            {isExpired ? 'Expired' : 'Live / Active'}
+            {isExpired ? 'Completed' : 'Live / Active'}
           </div>
         </div>
 

@@ -9,7 +9,7 @@ const PollFilters = ({ activeFilter = 'All', onFilterChange }) => {
     { name: 'All', activeText: 'text-gray-900 dark:text-white', activeBg: 'bg-gray-900 dark:bg-white' },
     { name: 'Draft', activeText: 'text-orange-600 dark:text-orange-400', activeBg: 'bg-orange-500' },
     { name: 'Published', activeText: 'text-emerald-600 dark:text-emerald-400', activeBg: 'bg-emerald-500' },
-    { name: 'Expired', activeText: 'text-red-600 dark:text-red-400', activeBg: 'bg-red-500' },
+    { name: 'Completed', activeText: 'text-blue-600 dark:text-blue-400', activeBg: 'bg-blue-500' },
     { name: 'Archived', activeText: 'text-indigo-600 dark:text-indigo-400', activeBg: 'bg-indigo-500' },
   ];
 
@@ -17,7 +17,7 @@ const PollFilters = ({ activeFilter = 'All', onFilterChange }) => {
       <div className="flex items-center gap-2 pl-4 pr-3 py-0 bg-white hover:bg-gray-50 dark:bg-[#1a1a1a] dark:hover:bg-[#222] border border-gray-200 dark:border-transparent rounded-full transition-all duration-300 h-11 relative min-w-[160px] cursor-pointer shadow-sm dark:shadow-none">
         
         {/* Status Indicator Dot */}
-        <div className={`w-2 h-2 rounded-full ${activeFilter === 'All' ? 'bg-gray-400 dark:bg-white' : activeFilter === 'Draft' ? 'bg-orange-500' : activeFilter === 'Published' ? 'bg-emerald-500' : activeFilter === 'Scheduled' ? 'bg-indigo-500' : 'bg-red-500'}`}></div>
+        <div className={`w-2 h-2 rounded-full ${activeFilter === 'All' ? 'bg-gray-400 dark:bg-white' : activeFilter === 'Draft' ? 'bg-orange-500' : activeFilter === 'Published' ? 'bg-emerald-500' : activeFilter === 'Completed' ? 'bg-blue-500' : 'bg-indigo-500'}`}></div>
         
         {/* Native Select overlaid for functionality, completely hidden visually but clickable */}
         <select

@@ -11,6 +11,7 @@ import PublicQuestionList from '../components/publicPoll/PublicQuestionList';
 import SubmitPollButton from '../components/publicPoll/SubmitPollButton';
 import PollExpired from '../components/publicPoll/PollExpired';
 import PollAlreadySubmitted from '../components/publicPoll/PollAlreadySubmitted';
+import FloatingReactionBar from '../components/publicPoll/FloatingReactionBar';
 
 /**
  * Public Poll Page
@@ -35,6 +36,17 @@ const PublicPollPage = () => {
 
   // Form State (tracks user answers)
   const [answers, setAnswers] = useState({});
+  const [participantId, setParticipantId] = useState('');
+
+  // Setup Participant ID
+  useEffect(() => {
+    let pid = localStorage.getItem('poll_participant_id');
+    if (!pid) {
+      pid = 'participant_' + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('poll_participant_id', pid);
+    }
+    setParticipantId(pid);
+  }, []);
 
   const fetchPollData = async (code = '') => {
     try {
@@ -50,6 +62,11 @@ const PublicPollPage = () => {
       const data = await getPublicPoll(pollId, code);
       setPoll(data);
       setNeedsCode(false); // Reset if successful
+      
+      // Save valid participation code to sessionStorage so refresh works
+      if (code) {
+        sessionStorage.setItem(`poll_code_${pollId}`, code);
+      }
       
       // Join Socket.io room to increment the live audience counter
       socket.emit('join-poll', pollId);
@@ -68,8 +85,11 @@ const PublicPollPage = () => {
   };
 
   useEffect(() => {
-    if (pollId && !needsCode) {
-      fetchPollData();
+    // Only fetch automatically if we don't already have the poll data 
+    // and we aren't currently waiting for a participation code
+    if (pollId && !poll && !needsCode) {
+      const savedCode = sessionStorage.getItem(`poll_code_${pollId}`);
+      fetchPollData(savedCode || '');
     }
     
     const handleActiveQuestionChanged = (newActiveQuestionId) => {
@@ -94,7 +114,7 @@ const PublicPollPage = () => {
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pollId, socket, needsCode]);
+  }, [pollId, socket]);
 
   // ---------------------------------------------------------------------------
   // SUBMISSION LOGIC
@@ -266,24 +286,35 @@ const PublicPollPage = () => {
         {/* Questions List */}
         <Suspense fallback={<div className="h-96 bg-white dark:bg-zinc-900 rounded-3xl animate-pulse" />}>
           <PublicQuestionList 
+            pollId={poll._id}
+            participantId={participantId}
             questions={poll.questions} 
             answers={answers} 
             setAnswers={setAnswers} 
             activeQuestionId={poll.activeQuestionId}
+            activeQuestionStartTime={poll.activeQuestionStartTime}
+            pollStatus={poll.status}
           />
         </Suspense>
 
         {/* Submit Action */}
         <Suspense fallback={<div className="h-16 bg-white dark:bg-zinc-900 rounded-3xl animate-pulse" />}>
-          <SubmitPollButton 
-            poll={poll} 
-            answers={answers}
-            isSubmitting={isSubmitting}
-            onSubmit={handleSubmit} 
-          />
+          {/* Only show global submit for async polls (DRAFT/SCHEDULED etc or if we specifically don't use live mode) */}
+          {/* In live mode (poll.status === 'PUBLISHED' || poll.status === 'ACTIVE'), submissions are handled per-question */}
+          {poll.status !== 'PUBLISHED' && poll.status !== 'ACTIVE' && (
+            <SubmitPollButton 
+              poll={poll} 
+              answers={answers}
+              isSubmitting={isSubmitting}
+              onSubmit={handleSubmit} 
+            />
+          )}
         </Suspense>
 
       </div>
+      
+      {/* Floating Reaction Bar */}
+      <FloatingReactionBar pollId={pollId} socket={socket} />
     </div>
   );
 };

@@ -27,6 +27,19 @@ const answerSchema = new mongoose.Schema(
       min: 1,
       max: 5,
     },
+    // Scoring
+    score: {
+      type: Number,
+      default: 0,
+    },
+    timeTaken: {
+      type: Number, // In milliseconds
+      default: 0,
+    },
+    isCorrect: {
+      type: Boolean,
+      default: false,
+    },
   },
   { _id: false }
 );
@@ -46,6 +59,11 @@ const responseSchema = new mongoose.Schema(
       // If the respondent is not logged in, this will be null.
       default: null,
     },
+    participantId: {
+      type: String,
+      // Used to group anonymous answers from the same browser in a live poll session
+      default: null,
+    },
     answers: {
       type: [answerSchema],
       validate: {
@@ -55,6 +73,14 @@ const responseSchema = new mongoose.Schema(
         message: 'A response must contain at least one answer',
       },
     },
+    totalScore: {
+      type: Number,
+      default: 0,
+    },
+    totalTimeTaken: {
+      type: Number, // Used for tie-breakers
+      default: 0,
+    }
   },
   {
     timestamps: true, // Adds createdAt (when the vote was cast)

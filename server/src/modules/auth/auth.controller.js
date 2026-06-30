@@ -50,32 +50,6 @@ export const login = async (req, res) => {
   }
 };
 
-/**
- * Handle Google Login
- */
-export const googleLogin = async (req, res) => {
-  try {
-    const { token: idToken } = req.body;
-    
-    if (!idToken) {
-      return res.status(400).json({ success: false, message: 'Google token is required' });
-    }
-
-    const { user, token } = await authService.googleLogin(idToken);
-
-    res.status(200).json({
-      success: true,
-      message: 'Logged in with Google successfully',
-      data: user,
-      token,
-    });
-  } catch (error) {
-    res.status(401).json({
-      success: false,
-      message: error.message || 'Google authentication failed',
-    });
-  }
-};
 
 /**
  * Get Current Authenticated User

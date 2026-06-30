@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from '../components/auth/ProtectedRoute.jsx';
+import ErrorBoundary from '../components/ErrorBoundary.jsx';
 
 /* 
  * 🚀 Code Splitting with React.lazy
@@ -57,8 +58,12 @@ const AppRouter = () => {
         
         {/* ==============================
             Poll & Event Participation Routes 
-            ============================== */}
-        <Route path="/poll/:pollId" element={<ViewPoll />} />
+            {/* Public Respondent Routes */}
+        <Route path="/poll/:pollId" element={
+          <ErrorBoundary>
+            <ViewPoll />
+          </ErrorBoundary>
+        } />
         <Route path="/poll/:pollId/success" element={<PollSubmitted />} />
         <Route path="/results/:pollId" element={<PublicResults />} />
         <Route path="/event/:slug" element={<PublicEvent />} />

@@ -9,8 +9,17 @@ import { Star } from 'lucide-react';
  * Displays a single question, its required status, and a list of its options
  * or inputs depending on the questionType.
  */
-const PublicQuestionCard = ({ index, question, currentAnswer, onAnswerChange }) => {
+const PublicQuestionCard = ({ index, question, currentAnswer, onAnswerChange, isDisabled }) => {
   if (!question) return null;
+
+  const textLength = question.text?.replace(/<[^>]*>?/gm, '').length || 0;
+  let textSizeClass = 'text-xl sm:text-2xl';
+  if (textLength > 100) {
+    textSizeClass = 'text-lg sm:text-xl';
+  }
+  if (textLength > 200) {
+    textSizeClass = 'text-base sm:text-lg';
+  }
 
   // Handler for Multi-Select
   const handleMultiSelectToggle = (optionId) => {
@@ -23,26 +32,18 @@ const PublicQuestionCard = ({ index, question, currentAnswer, onAnswerChange }) 
   };
 
   return (
-    <div className="w-full bg-white dark:bg-zinc-900 rounded-3xl shadow-sm border border-gray-100 dark:border-zinc-800 p-6 sm:p-8 transition-all duration-300 hover:border-orange-200 dark:hover:border-orange-900/50">
+    <div className={`w-full bg-white dark:bg-zinc-900 rounded-3xl shadow-sm border border-gray-100 dark:border-zinc-800 p-6 sm:p-8 transition-all duration-300 ${isDisabled ? 'opacity-70 pointer-events-none' : 'hover:border-orange-200 dark:hover:border-orange-900/50'}`}>
       
       {/* ----------------------------------------------------------------------
           Question Header 
       ---------------------------------------------------------------------- */}
       <div className="flex flex-col sm:flex-row sm:items-start gap-4 sm:gap-5 mb-8">
-        <div className="flex-shrink-0 w-12 h-12 bg-gray-50 dark:bg-zinc-800 text-gray-900 dark:text-white rounded-2xl flex items-center justify-center font-bold text-lg shadow-inner border border-gray-100 dark:border-zinc-700">
-          {index}
-        </div>
-        <div className="flex-1 mt-1 sm:mt-1.5">
+        <div className="flex-1 min-w-0 mt-1 sm:mt-1.5">
           <div className="flex items-start flex-wrap gap-3">
             <div 
-              className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white leading-tight [&>p]:m-0 inline-block"
+              className={`font-bold text-gray-900 dark:text-white leading-tight [&>p]:m-0 block w-full break-words break-all ${textSizeClass}`}
               dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(question.text) }}
             />
-            {question.isRequired && (
-              <span className="mt-1 px-2.5 py-1 text-xs font-bold uppercase tracking-wider bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 rounded-lg border border-red-100 dark:border-red-900/30">
-                Required
-              </span>
-            )}
           </div>
         </div>
       </div>

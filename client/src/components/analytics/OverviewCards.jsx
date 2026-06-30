@@ -40,7 +40,7 @@ const OverviewCards = ({ stats }) => {
     },
     {
       title: 'Poll Status',
-      value: isActive ? 'Active' : 'Expired',
+      value: isActive ? 'Active' : 'Completed',
       icon: Globe2,
       color: isActive ? 'text-orange-500' : 'text-red-500',
       bgColor: isActive ? 'bg-orange-50 dark:bg-orange-500/10' : 'bg-red-50 dark:bg-red-500/10',

@@ -9,6 +9,7 @@ import LiveCenter from '../components/live/LiveCenter.jsx';
 import LiveSidebar from '../components/live/LiveSidebar.jsx';
 import LiveControls from '../components/live/LiveControls.jsx';
 import FloatingQRPanel from '../components/live/FloatingQRPanel.jsx';
+import ReactionOverlay from '../components/live/ReactionOverlay.jsx';
 import toast from 'react-hot-toast';
 
 const LiveEventPage = () => {
@@ -227,6 +228,9 @@ const LiveEventPage = () => {
         isOpen={showQrOnly}
         onClose={() => setShowQrOnly(false)}
       />
+
+      {/* Floating Reactions Overlay */}
+      <ReactionOverlay socket={socket} />
 
       <main className="flex-1 flex flex-col lg:flex-row overflow-hidden relative">
         <LiveCenter 

@@ -22,6 +22,20 @@ router.post(
   responseController.submitResponse
 );
 
+// @route   POST /api/responses/live/:pollId
+// @desc    Submit a single live response to an active question
+// @access  Public (Respondents may answer anonymously)
+router.post(
+  '/live/:pollId',
+  optionalProtect,
+  (req, res, next) => {
+    req.body.pollId = req.params.pollId;
+    next();
+  },
+  // Note: We skip the strict bulk validate(submitResponseSchema) here because it expects all answers
+  responseController.submitLiveResponse
+);
+
 // @route   GET /api/responses/:pollId
 // @desc    Get all responses for a specific poll
 // @access  Private (Accessible only to the poll creator)

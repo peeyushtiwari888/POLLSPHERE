@@ -64,30 +64,7 @@ const PublicPollHeader = ({ poll }) => {
         {/* Metadata Badges */}
         <div className="flex flex-wrap items-center gap-3">
           
-          {/* Total Questions Badge */}
-          <div className="flex items-center gap-2 px-3.5 py-2 bg-gray-50 dark:bg-zinc-800/60 rounded-xl border border-gray-100 dark:border-zinc-800 text-sm font-semibold text-gray-700 dark:text-gray-300 shadow-sm">
-            <div className="p-1 bg-white dark:bg-zinc-900 rounded-md shadow-sm">
-              <HelpCircle className="w-4 h-4 text-orange-500" />
-            </div>
-            {poll.questions?.length || 0} {poll.questions?.length === 1 ? 'Question' : 'Questions'}
-          </div>
 
-          {/* Expiry Badge */}
-          {expiryDisplay && (
-            <div className={`flex items-center gap-2 px-3.5 py-2 rounded-xl border text-sm font-semibold shadow-sm transition-colors ${
-              isExpiringSoon 
-                ? 'bg-red-50 dark:bg-red-500/10 border-red-100 dark:border-red-900/30 text-red-700 dark:text-red-400' 
-                : 'bg-gray-50 dark:bg-zinc-800/60 border-gray-100 dark:border-zinc-800 text-gray-700 dark:text-gray-300'
-            }`}>
-              <div className={`p-1 rounded-md shadow-sm ${
-                isExpiringSoon ? 'bg-white dark:bg-zinc-900' : 'bg-white dark:bg-zinc-900'
-              }`}>
-                <Clock className={`w-4 h-4 ${isExpiringSoon ? 'text-red-500' : 'text-gray-400 dark:text-gray-500'}`} />
-              </div>
-              {expiryDisplay}
-            </div>
-          )}
-          
         </div>
       </div>
     </div>

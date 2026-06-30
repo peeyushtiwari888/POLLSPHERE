@@ -10,8 +10,12 @@ let io;
 export const initSocket = (httpServer) => {
   io = new Server(httpServer, {
     cors: {
-      origin: process.env.CLIENT_URL || '*', // Allow the React frontend to connect
+      origin: (origin, callback) => {
+        // Allow any origin for development, or mirror the requesting origin
+        callback(null, origin || true);
+      },
       methods: ['GET', 'POST'],
+      credentials: true,
     },
   });
 
