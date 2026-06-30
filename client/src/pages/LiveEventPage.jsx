@@ -82,12 +82,33 @@ const LiveEventPage = () => {
       setActiveUsers(count);
     });
 
+    socket.on('active-question-changed', (data) => {
+      const newActiveQuestionId = data?.questionId !== undefined ? data.questionId : data;
+      const newActiveQuestionStartTime = data?.startTime || null;
+
+      setLiveData((prev) => {
+        if (!prev) return prev;
+        
+        const qIndex = prev.questions?.findIndex(q => q.questionId === newActiveQuestionId);
+        if (qIndex >= 0) {
+          setCurrentQuestionIndex(qIndex);
+        }
+
+        return {
+          ...prev,
+          activeQuestionId: newActiveQuestionId,
+          activeQuestionStartTime: newActiveQuestionStartTime
+        };
+      });
+    });
+
     return () => {
       socket.emit('leave-live-room', pollId);
       socket.off('live-analytics-update');
       socket.off('live-response-update');
       socket.off('live-question-update');
       socket.off('active-users-update');
+      socket.off('active-question-changed');
     };
   }, [socket, pollId]);
 
@@ -202,6 +223,7 @@ const LiveEventPage = () => {
       
       <FloatingQRPanel 
         pollId={pollId}
+        participationCode={liveData.participationCode}
         isOpen={showQrOnly}
         onClose={() => setShowQrOnly(false)}
       />
@@ -214,12 +236,16 @@ const LiveEventPage = () => {
           timeline={liveData.timeline}
           isPresenting={isPresenting}
           currentQuestionIndex={currentQuestionIndex}
+          activeQuestionId={liveData.activeQuestionId}
+          activeQuestionStartTime={liveData.activeQuestionStartTime}
+          activeUsers={activeUsers}
         />
         
         {!isPresenting && (
           <LiveSidebar 
             pollId={pollId} 
             totalResponses={liveData.totalResponses} 
+            participationCode={liveData.participationCode}
           />
         )}
       </main>

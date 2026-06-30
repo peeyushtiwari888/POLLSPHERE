@@ -4,7 +4,7 @@ import { Link as LinkIcon, Copy, Download, Share2, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import toast from 'react-hot-toast';
 
-const FloatingQRPanel = ({ pollId, isOpen, onClose }) => {
+const FloatingQRPanel = ({ pollId, participationCode, isOpen, onClose }) => {
   const joinUrl = `${window.location.origin}/poll/${pollId}`;
   const qrRef = useRef(null);
 
@@ -95,6 +95,13 @@ const FloatingQRPanel = ({ pollId, isOpen, onClose }) => {
                 <QRCodeSVG value={joinUrl} size={220} level="H" includeMargin={true} />
               </div>
             </div>
+
+            {participationCode && (
+              <div className="flex flex-col items-center justify-center mb-8 bg-orange-50 dark:bg-orange-500/10 p-4 rounded-2xl border border-orange-100 dark:border-orange-500/30">
+                <span className="text-sm font-semibold text-orange-600 dark:text-orange-400 mb-1 uppercase tracking-wider">Participation Code</span>
+                <span className="text-4xl font-black text-gray-900 dark:text-white tracking-widest">{participationCode}</span>
+              </div>
+            )}
 
             <div className="space-y-4">
               <div className="flex items-center gap-2 bg-gray-50 dark:bg-zinc-800/50 p-3 rounded-xl border border-gray-200 dark:border-zinc-700">

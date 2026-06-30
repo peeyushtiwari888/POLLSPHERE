@@ -119,6 +119,10 @@ const pollSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       default: null, // null means "waiting for presenter"
     },
+    activeQuestionStartTime: {
+      type: Date,
+      default: null, // Tracks when the question was made live for the countdown timer
+    },
     questions: {
       type: [questionSchema],
       validate: {

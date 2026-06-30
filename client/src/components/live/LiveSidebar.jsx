@@ -3,7 +3,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Link, QrCode, Activity, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const LiveSidebar = ({ pollId, totalResponses }) => {
+const LiveSidebar = ({ pollId, totalResponses, participationCode }) => {
   const joinUrl = `${window.location.origin}/poll/${pollId}`;
   const [feed, setFeed] = useState([]);
   const [prevTotal, setPrevTotal] = useState(totalResponses);
@@ -35,6 +35,13 @@ const LiveSidebar = ({ pollId, totalResponses }) => {
         <div className="bg-white p-4 rounded-2xl shadow-sm mb-4">
           <QRCodeSVG value={joinUrl} size={180} level="H" />
         </div>
+        
+        {participationCode && (
+          <div className="flex flex-col items-center justify-center w-full mb-4 bg-orange-50 dark:bg-orange-500/10 p-3 rounded-xl border border-orange-100 dark:border-orange-500/30">
+            <span className="text-[10px] font-bold text-orange-600 dark:text-orange-400 mb-0.5 uppercase tracking-wider">Participation Code</span>
+            <span className="text-2xl font-black text-gray-900 dark:text-white tracking-widest">{participationCode}</span>
+          </div>
+        )}
         <p className="text-sm text-gray-500 dark:text-gray-400 mb-2 font-medium">Or visit link:</p>
         <div className="flex items-center justify-center gap-2 bg-gray-100/80 dark:bg-zinc-800/80 backdrop-blur-sm rounded-xl px-4 py-2 w-full shadow-inner border border-white/10 dark:border-zinc-700/50">
           <Link className="w-4 h-4 text-gray-400" />

@@ -33,6 +33,7 @@ const AnalyticsPage = () => {
   const [analytics, setAnalytics] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeUsers, setActiveUsers] = useState(0);
 
   const socket = useSocket();
 
@@ -83,23 +84,32 @@ const AnalyticsPage = () => {
       fetchAnalytics(false);
     };
 
-    const handleActiveQuestionChanged = (newActiveQuestionId) => {
+    const handleActiveQuestionChanged = (data) => {
+      const newActiveQuestionId = data?.questionId !== undefined ? data.questionId : data;
+      const newActiveQuestionStartTime = data?.startTime || null;
+      
       setAnalytics(prev => {
         if (!prev || !prev.poll) return prev;
         return {
           ...prev,
           poll: {
             ...prev.poll,
-            activeQuestionId: newActiveQuestionId
+            activeQuestionId: newActiveQuestionId,
+            activeQuestionStartTime: newActiveQuestionStartTime
           }
         };
       });
+    };
+
+    const handleActiveUsersUpdate = (count) => {
+      setActiveUsers(count);
     };
 
     // 3. Attach Listeners
     socket.on('analyticsUpdated', handleAnalyticsUpdated);
     socket.on('responseSubmitted', handleResponseSubmitted);
     socket.on('active-question-changed', handleActiveQuestionChanged);
+    socket.on('active-users-update', handleActiveUsersUpdate);
 
     // 4. Cleanup on unmount
     return () => {
@@ -107,6 +117,7 @@ const AnalyticsPage = () => {
       socket.off('analyticsUpdated', handleAnalyticsUpdated);
       socket.off('responseSubmitted', handleResponseSubmitted);
       socket.off('active-question-changed', handleActiveQuestionChanged);
+      socket.off('active-users-update', handleActiveUsersUpdate);
     };
   }, [socket, pollId, fetchAnalytics]);
 
@@ -169,6 +180,8 @@ const AnalyticsPage = () => {
             questions={analytics.questionsData} 
             pollId={pollId}
             activeQuestionId={analytics.poll?.activeQuestionId}
+            activeQuestionStartTime={analytics.poll?.activeQuestionStartTime}
+            activeUsers={activeUsers}
           />
         </Suspense>
       </div>

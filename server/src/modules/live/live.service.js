@@ -23,7 +23,7 @@ const computeTimeRemaining = (expiryDate) => {
  * High-level Live Stats (Optimized for top-bar in presentation)
  */
 export const getLiveStats = async (pollId) => {
-  const poll = await Poll.findById(pollId).select('title expiryDate isResultsPublished creatorId status');
+  const poll = await Poll.findById(pollId).select('title expiryDate isResultsPublished creatorId status activeQuestionId activeQuestionStartTime participationCode');
   if (!poll) throw new Error('Poll not found');
 
   // Aggregation for quick high-level response counts and timeline
@@ -75,7 +75,10 @@ export const getLiveStats = async (pollId) => {
     activeUsers: 0, // Mocked for now; can be integrated with Redis later
     pollExpiryTime: poll.expiryDate,
     timeRemaining: computeTimeRemaining(poll.expiryDate),
-    isResultsPublished: poll.isResultsPublished
+    isResultsPublished: poll.isResultsPublished,
+    activeQuestionId: poll.activeQuestionId,
+    activeQuestionStartTime: poll.activeQuestionStartTime,
+    participationCode: poll.participationCode
   };
 };
 
@@ -124,6 +127,7 @@ export const getLiveQuestions = async (pollId) => {
     return {
       questionId: question._id,
       text: question.text,
+      duration: question.duration,
       totalVotes: totalVotesForQuestion,
       options: formattedOptions
     };

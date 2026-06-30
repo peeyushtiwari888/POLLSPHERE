@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
@@ -19,7 +19,26 @@ const CustomTooltip = ({ active, payload, label }) => {
   return null;
 };
 
-const QuestionCard = ({ question, index, hideCharts, isPresenting }) => {
+const QuestionCard = ({ question, index, hideCharts: manualHideCharts, isPresenting, isCurrentlyLive, activeQuestionStartTime, activeUsers }) => {
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  useEffect(() => {
+    if (!isCurrentlyLive || !activeQuestionStartTime) return;
+    const interval = setInterval(() => setCurrentTime(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [isCurrentlyLive, activeQuestionStartTime]);
+
+  const durationMs = (question.duration || 30) * 1000;
+  let timeLeft = 0;
+  let forceHideCharts = false;
+  if (isCurrentlyLive && activeQuestionStartTime) {
+    const elapsed = currentTime - new Date(activeQuestionStartTime).getTime();
+    timeLeft = Math.max(0, Math.ceil((durationMs - elapsed) / 1000));
+    forceHideCharts = timeLeft > 0;
+  }
+
+  const hideCharts = manualHideCharts || forceHideCharts;
+
   const pieData = question.options.map(opt => ({
     name: opt.text,
     value: opt.votes
@@ -38,8 +57,22 @@ const QuestionCard = ({ question, index, hideCharts, isPresenting }) => {
           className={`font-bold text-gray-900 dark:text-white leading-snug [&>p]:m-0 inline-block ${isPresenting ? 'text-4xl lg:text-5xl' : 'text-xl sm:text-2xl'}`}
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(question.text) }}
         />
-        <div className={`px-4 py-2 bg-gray-100/80 dark:bg-zinc-800/80 backdrop-blur-sm text-gray-500 rounded-full font-bold whitespace-nowrap shadow-sm ${isPresenting ? 'text-lg' : 'text-xs'}`}>
-          {question.totalVotes} Votes
+        
+        <div className="flex flex-col items-end gap-3 shrink-0">
+          {isCurrentlyLive && activeQuestionStartTime && timeLeft > 0 && (
+            <div className={`px-6 py-2 rounded-2xl border-2 font-bold transition-all shadow-[0_0_20px_rgba(249,115,22,0.2)] text-orange-500 border-orange-500/50 bg-orange-500/10 ${isPresenting ? 'text-4xl animate-pulse' : 'text-xl'}`}>
+              00:{timeLeft.toString().padStart(2, '0')}
+            </div>
+          )}
+          {isCurrentlyLive && activeQuestionStartTime && timeLeft === 0 && (
+            <div className={`px-6 py-2 rounded-2xl border-2 font-bold transition-all text-emerald-500 border-emerald-500/50 bg-emerald-500/10 ${isPresenting ? 'text-4xl' : 'text-xl'}`}>
+              Time Up!
+            </div>
+          )}
+
+          <div className={`px-4 py-2 bg-gray-100/80 dark:bg-zinc-800/80 backdrop-blur-sm text-gray-500 rounded-full font-bold whitespace-nowrap shadow-sm ${isPresenting ? 'text-lg' : 'text-xs'}`}>
+            {isCurrentlyLive ? `${question.totalVotes} / ${activeUsers || 0} Responded` : `${question.totalVotes} Votes`}
+          </div>
         </div>
       </div>
 
@@ -104,7 +137,7 @@ const QuestionCard = ({ question, index, hideCharts, isPresenting }) => {
   );
 };
 
-const LiveCenter = ({ questions, hideCharts, autoRotate, timeline = [], isPresenting, currentQuestionIndex }) => {
+const LiveCenter = ({ questions, hideCharts, autoRotate, timeline = [], isPresenting, currentQuestionIndex, activeQuestionId, activeQuestionStartTime, activeUsers }) => {
   const containerRef = useRef(null);
 
   useEffect(() => {
@@ -144,13 +177,16 @@ const LiveCenter = ({ questions, hideCharts, autoRotate, timeline = [], isPresen
       <div className="flex-1 flex flex-col items-center justify-center p-8 bg-black w-full h-full">
         <AnimatePresence mode="wait">
           {currentQ && (
-            <QuestionCard 
-              key={currentQ.questionId} 
-              question={currentQ} 
-              index={0} 
-              hideCharts={hideCharts} 
-              isPresenting={true}
-            />
+              <QuestionCard 
+                key={currentQ.questionId} 
+                question={currentQ} 
+                index={0} 
+                hideCharts={hideCharts} 
+                isPresenting={true}
+                isCurrentlyLive={currentQ.questionId === activeQuestionId}
+                activeQuestionStartTime={activeQuestionStartTime}
+                activeUsers={activeUsers}
+              />
           )}
         </AnimatePresence>
         
@@ -199,7 +235,16 @@ const LiveCenter = ({ questions, hideCharts, autoRotate, timeline = [], isPresen
 
       {/* Questions */}
       {questions.map((q, idx) => (
-        <QuestionCard key={q.questionId} question={q} index={idx} hideCharts={hideCharts} isPresenting={false} />
+        <QuestionCard 
+          key={q.questionId} 
+          question={q} 
+          index={idx} 
+          hideCharts={hideCharts} 
+          isPresenting={false} 
+          isCurrentlyLive={q.questionId === activeQuestionId}
+          activeQuestionStartTime={activeQuestionStartTime}
+          activeUsers={activeUsers}
+        />
       ))}
     </div>
   );

@@ -70,7 +70,9 @@ export const getPollAnalyticsOverview = async (pollId, userId) => {
       isExpired,
       isAnonymousAllowed: poll.isAnonymous,
       expiryDate: poll.expiryDate,
-      createdAt: poll.createdAt
+      createdAt: poll.createdAt,
+      activeQuestionId: poll.activeQuestionId,
+      participationCode: poll.participationCode
     },
     engagement: responseData
   };
@@ -93,6 +95,7 @@ export const getQuestionWiseAnalytics = async (pollId, userId) => {
     const result = {
       questionId: question._id,
       text: question.text,
+      duration: question.duration,
       questionType: question.questionType,
       totalVotes: 0,
     };

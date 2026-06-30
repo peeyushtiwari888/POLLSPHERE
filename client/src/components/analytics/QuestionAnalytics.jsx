@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { FileQuestion, Trophy, Users, CheckCircle2, Play, Square, Loader2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { FileQuestion, Trophy, Users, CheckCircle2, Play, Square, Loader2, Clock, EyeOff } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import { toast } from 'react-hot-toast';
 import { setActiveQuestion } from '../../api/poll.api';
@@ -11,8 +11,15 @@ import { setActiveQuestion } from '../../api/poll.api';
  * Renders a detailed breakdown of votes and percentages for every question.
  * Allows the presenter to select which question is currently visible to the audience.
  */
-const QuestionAnalytics = ({ questions = [], pollId, activeQuestionId }) => {
+const QuestionAnalytics = ({ questions = [], pollId, activeQuestionId, activeQuestionStartTime, activeUsers = 0 }) => {
   const [isPublishing, setIsPublishing] = useState(false);
+  const [currentTime, setCurrentTime] = useState(Date.now());
+
+  React.useEffect(() => {
+    if (!activeQuestionId || !activeQuestionStartTime) return;
+    const interval = setInterval(() => setCurrentTime(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [activeQuestionId, activeQuestionStartTime]);
 
   if (!questions || questions.length === 0) {
     return (
@@ -59,12 +66,22 @@ const QuestionAnalytics = ({ questions = [], pollId, activeQuestionId }) => {
       <div className="flex flex-col gap-6">
         {questions.map((question, qIndex) => {
           
-          const maxVotes = question.options.reduce((max, opt) => Math.max(max, opt.votes || 0), 0);
-          const isCurrentlyLive = activeQuestionId === question._id;
+          const maxVotes = question.options ? question.options.reduce((max, opt) => Math.max(max, opt.votes || 0), 0) : 0;
+          const questionId = question.questionId || question._id;
+          const isCurrentlyLive = activeQuestionId === questionId;
+          
+          const durationMs = (question.duration || 30) * 1000;
+          let timeLeft = 0;
+          let hideCharts = false;
+          if (isCurrentlyLive && activeQuestionStartTime) {
+            const elapsed = currentTime - new Date(activeQuestionStartTime).getTime();
+            timeLeft = Math.max(0, Math.ceil((durationMs - elapsed) / 1000));
+            hideCharts = timeLeft > 0;
+          }
           
           return (
             <div 
-              key={question._id || qIndex} 
+              key={questionId || qIndex} 
               className={`flex flex-col space-y-5 p-5 sm:p-6 rounded-2xl transition-all border-2 ${
                 isCurrentlyLive
                   ? 'bg-orange-50/30 dark:bg-orange-500/5 border-orange-400 dark:border-orange-500 shadow-md ring-4 ring-orange-500/10'
@@ -88,11 +105,11 @@ const QuestionAnalytics = ({ questions = [], pollId, activeQuestionId }) => {
                 </div>
                 
                 <button
-                  onClick={() => !isCurrentlyLive && handleSetLive(question._id)}
-                  disabled={isPublishing || isCurrentlyLive}
+                  onClick={() => handleSetLive(isCurrentlyLive ? null : questionId)}
+                  disabled={isPublishing}
                   className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all ${
                     isCurrentlyLive
-                      ? 'bg-emerald-500 text-white shadow-sm cursor-default'
+                      ? 'bg-red-500 text-white hover:bg-red-600 shadow-sm active:scale-95'
                       : 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm active:scale-95'
                   }`}
                 >
@@ -100,8 +117,8 @@ const QuestionAnalytics = ({ questions = [], pollId, activeQuestionId }) => {
                     <Loader2 className="w-4 h-4 animate-spin" />
                   ) : isCurrentlyLive ? (
                     <>
-                      <CheckCircle2 className="w-4 h-4" />
-                      Currently Published
+                      <Square className="w-4 h-4 fill-current" />
+                      Unpublish
                     </>
                   ) : (
                     <>
@@ -118,14 +135,38 @@ const QuestionAnalytics = ({ questions = [], pollId, activeQuestionId }) => {
                   <span className="text-gray-400 dark:text-gray-500 mr-2 font-medium shrink-0">Q{qIndex + 1}.</span>
                   <div className="[&>p]:m-0 inline-block" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(question.text) }} />
                 </div>
-                <div className="flex items-center gap-1.5 shrink-0 px-2.5 py-1 bg-gray-50 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 text-xs font-semibold rounded-lg border border-gray-100 dark:border-zinc-700">
-                  <Users className="w-3.5 h-3.5" />
-                  {question.totalVotes || 0} Votes
+                
+                <div className="flex flex-col items-end gap-2 shrink-0">
+                  {isCurrentlyLive && (
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border font-bold text-sm transition-all ${
+                      timeLeft > 0 
+                        ? 'bg-orange-50 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-200 dark:border-orange-500/30' 
+                        : 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-500/30'
+                    }`}>
+                      <Clock className="w-4 h-4" />
+                      {timeLeft > 0 ? `00:${timeLeft.toString().padStart(2, '0')}` : 'Time Up!'}
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center gap-1.5 px-2.5 py-1 bg-gray-50 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 text-xs font-semibold rounded-lg border border-gray-100 dark:border-zinc-700">
+                    <Users className="w-3.5 h-3.5" />
+                    {isCurrentlyLive 
+                      ? `${question.totalVotes || 0} / ${activeUsers} Responded`
+                      : `${question.totalVotes || 0} Votes`
+                    }
+                  </div>
                 </div>
               </div>
 
               {/* Options/Data Breakdown */}
-              <div className="space-y-3 mt-4">
+              <div className="space-y-3 mt-4 relative">
+                
+                {isCurrentlyLive && hideCharts && (
+                  <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/60 dark:bg-zinc-900/60 backdrop-blur-[2px] rounded-2xl border border-gray-200/50 dark:border-zinc-700/50">
+                    <EyeOff className="w-8 h-8 text-orange-500 mb-2 animate-pulse" />
+                    <span className="text-sm font-bold text-gray-800 dark:text-gray-200">Responses hidden during countdown</span>
+                  </div>
+                )}
                 
                 {/* CHOICE BASED QUESTIONS */}
                 {['SINGLE_CHOICE', 'MULTI_SELECT'].includes(question.questionType) && question.options && (

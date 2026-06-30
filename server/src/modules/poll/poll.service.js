@@ -353,11 +353,15 @@ export const setActiveQuestion = async (pollId, userId, questionId) => {
 
   // Set the active question ID (null is allowed if the presenter wants to hide all questions)
   poll.activeQuestionId = questionId;
+  poll.activeQuestionStartTime = questionId ? new Date() : null;
   await poll.save();
   
   // Broadcast to all connected clients
   import('../../emitters.js').then(({ emitActiveQuestionChanged }) => {
-    emitActiveQuestionChanged(pollId, questionId);
+    emitActiveQuestionChanged(pollId, { 
+      questionId, 
+      startTime: poll.activeQuestionStartTime 
+    });
   });
   
   return poll;

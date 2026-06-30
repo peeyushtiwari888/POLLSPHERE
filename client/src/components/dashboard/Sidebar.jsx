@@ -38,7 +38,6 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
     { name: 'Dashboard', icon: SquaresFour, path: '/dashboard' },
     { name: 'My Polls', icon: ChartBar, path: '/polls' },
     { name: 'Create Poll', icon: PlusCircle, path: '/polls/create' },
-    { name: 'Poll Analytics', icon: TrendUp, path: '/analytics/general' },
     { name: 'Manage Events', icon: CalendarBlank, path: '/events' },
     { name: 'Event Analytics', icon: ChartPieSlice, path: '/events/analytics/dashboard' },
     { name: 'Profile', icon: UserCircle, path: '/profile' },

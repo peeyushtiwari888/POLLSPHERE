@@ -65,6 +65,13 @@ const AppRouter = () => {
         <Route path="/live/:pollId" element={<LiveEventPage />} />
 
         {/* ==============================
+            Presenter / Fullscreen Routes 
+            (Protected via ProtectedRoute but NO Dashboard Layout)
+            ============================== */}
+        <Route path="/poll/:pollId/lobby" element={<ProtectedRoute><PollLobbyPage /></ProtectedRoute>} />
+        <Route path="/poll/:pollId/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
+
+        {/* ==============================
             Creator Dashboard Routes 
             (Protected via ProtectedRoute and DashboardLayout)
             ============================== */}
@@ -85,8 +92,6 @@ const AppRouter = () => {
           <Route path="/events/analytics/dashboard" element={<EventAnalytics />} />
           <Route path="/polls/create" element={<CreatePoll />} />
           <Route path="/polls/:id/edit" element={<CreatePoll />} />
-          <Route path="/poll/:pollId/lobby" element={<PollLobbyPage />} />
-          <Route path="/poll/:pollId/leaderboard" element={<LeaderboardPage />} />
           <Route path="/analytics/:pollId" element={<Analytics />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />

@@ -66,10 +66,10 @@ export const emitLiveAnalyticsUpdate = async (pollId) => {
   }
 };
 
-export const emitActiveQuestionChanged = (pollId, questionId) => {
+export const emitActiveQuestionChanged = (pollId, activeQuestionData) => {
   try {
     const io = getSocketIo();
-    io.to(pollId).emit('active-question-changed', questionId);
+    io.to(pollId).emit('active-question-changed', activeQuestionData);
   } catch (error) {
     console.error(`Socket error: Failed to emit active-question-changed for poll ${pollId}`, error);
   }
