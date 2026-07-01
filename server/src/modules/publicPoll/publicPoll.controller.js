@@ -1,5 +1,26 @@
 import * as publicPollService from './publicPoll.service.js';
 
+export const getParticipantStats = async (req, res) => {
+  try {
+    const { id, participantId } = req.params;
+    
+    const stats = await publicPollService.getParticipantStats(id, participantId);
+
+    res.status(200).json({
+      success: true,
+      data: stats,
+    });
+  } catch (error) {
+    let statusCode = 500;
+    if (error.message.includes('not found')) statusCode = 404;
+
+    res.status(statusCode).json({
+      success: false,
+      message: error.message || 'Failed to fetch participant stats',
+    });
+  }
+};
+
 /**
  * Handle fetching a public poll by its ID
  */

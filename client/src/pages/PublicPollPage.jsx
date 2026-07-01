@@ -11,7 +11,6 @@ import PublicQuestionList from '../components/publicPoll/PublicQuestionList';
 import SubmitPollButton from '../components/publicPoll/SubmitPollButton';
 import PollExpired from '../components/publicPoll/PollExpired';
 import PollAlreadySubmitted from '../components/publicPoll/PollAlreadySubmitted';
-import FloatingReactionBar from '../components/publicPoll/FloatingReactionBar';
 
 /**
  * Public Poll Page
@@ -312,9 +311,6 @@ const PublicPollPage = () => {
         </Suspense>
 
       </div>
-      
-      {/* Floating Reaction Bar */}
-      <FloatingReactionBar pollId={pollId} socket={socket} />
     </div>
   );
 };

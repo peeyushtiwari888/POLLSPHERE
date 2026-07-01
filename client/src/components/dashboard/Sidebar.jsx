@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   X, SquaresFour, ChartBar, PlusCircle, 
-  TrendUp, UserCircle, SignOut, CaretLeft, CaretRight, CalendarBlank, ChartPieSlice
+  TrendUp, UserCircle, SignOut, CaretLeft, CaretRight, CalendarBlank, ChartPieSlice, ShieldCheck
 } from '@phosphor-icons/react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
@@ -22,7 +22,7 @@ import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 const Sidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
     try {
@@ -42,6 +42,11 @@ const Sidebar = ({ isOpen, onClose, isCollapsed, toggleCollapse }) => {
     { name: 'Event Analytics', icon: ChartPieSlice, path: '/events/analytics/dashboard' },
     { name: 'Profile', icon: UserCircle, path: '/profile' },
   ];
+
+  // Insert Admin Panel if user is an admin
+  if (user?.role === 'admin') {
+    navItems.push({ name: 'Admin Panel', icon: ShieldCheck, path: '/admin' });
+  }
 
   return (
     <>

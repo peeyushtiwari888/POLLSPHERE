@@ -1,4 +1,5 @@
 import * as responseService from './response.service.js';
+import { logActivity } from '../../common/services/activityLogger.js';
 
 /**
  * Handle submit response request
@@ -12,6 +13,8 @@ export const submitResponse = async (req, res) => {
 
     // Delegate to service
     const response = await responseService.submitResponse(pollId, userId, answers);
+
+    logActivity(userId, 'POLL_VOTE', `A vote was cast on poll ${pollId}.`, { pollId });
 
     res.status(201).json({
       success: true,

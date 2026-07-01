@@ -16,8 +16,8 @@ export const AuthProvider = ({ children }) => {
       
       if (token) {
         try {
-          const userData = await authApi.getCurrentUser();
-          setUser(userData);
+          const response = await authApi.getCurrentUser();
+          setUser(response?.data || response || null);
           setIsAuthenticated(true);
         } catch (error) {
           console.error('Failed to initialize session:', error.message);
@@ -44,11 +44,11 @@ export const AuthProvider = ({ children }) => {
       saveToken(response.token);
     }
 
-    if (response.user) {
-      setUser(response.user);
+    if (response.user || response.data) {
+      setUser(response.user || response.data);
     } else {
       const fetchedUser = await authApi.getCurrentUser();
-      setUser(fetchedUser);
+      setUser(fetchedUser?.data || fetchedUser);
     }
     
     setIsAuthenticated(true);
@@ -66,11 +66,11 @@ export const AuthProvider = ({ children }) => {
       saveToken(response.token);
     }
 
-    if (response.user) {
-      setUser(response.user);
+    if (response.user || response.data) {
+      setUser(response.user || response.data);
     } else {
       const fetchedUser = await authApi.getCurrentUser();
-      setUser(fetchedUser);
+      setUser(fetchedUser?.data || fetchedUser);
     }
     
     setIsAuthenticated(true);

@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import ProtectedRoute from '../components/auth/ProtectedRoute.jsx';
+import AdminRoute from '../components/auth/AdminRoute.jsx';
 import ErrorBoundary from '../components/ErrorBoundary.jsx';
 
 /* 
@@ -17,6 +18,7 @@ const DashboardLayout = lazy(() => import('../layouts/DashboardLayout.jsx'));
 const DashboardPage = lazy(() => import('../pages/DashboardPage.jsx'));
 const ProfilePage = lazy(() => import('../pages/ProfilePage.jsx'));
 const SettingsPage = lazy(() => import('../pages/SettingsPage.jsx'));
+const AdminDashboardPage = lazy(() => import('../pages/AdminDashboardPage.jsx'));
 
 const CreatePoll = lazy(() => import('../pages/CreatePollPage.jsx'));
 const MyPolls = lazy(() => import('../pages/MyPollsPage.jsx'));
@@ -100,6 +102,9 @@ const AppRouter = () => {
           <Route path="/analytics/:pollId" element={<Analytics />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          
+          {/* Admin Route */}
+          <Route path="/admin" element={<AdminRoute><AdminDashboardPage /></AdminRoute>} />
         </Route>
 
         {/* ==============================

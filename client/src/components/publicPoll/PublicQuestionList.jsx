@@ -194,36 +194,14 @@ const PublicQuestionList = ({ pollId, participantId, questions = [], answers = {
 
       {/* Results Card after submission */}
       {isLiveMode && isCurrentlySubmitted && (
-        <div className={`mt-4 p-6 rounded-2xl border-2 transition-all shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-500 ${
-          submissionData.isCorrect 
-            ? 'bg-emerald-50 border-emerald-200 dark:bg-emerald-500/10 dark:border-emerald-500/30' 
-            : 'bg-red-50 border-red-200 dark:bg-red-500/10 dark:border-red-500/30'
-        }`}>
+        <div className="mt-4 p-6 rounded-2xl border-2 border-emerald-200 bg-emerald-50 dark:bg-emerald-500/10 dark:border-emerald-500/30 transition-all shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-500">
           <div className="flex flex-col items-center justify-center text-center space-y-2">
-            {submissionData.isCorrect ? (
-              <>
-                <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center mb-2">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
-                </div>
-                <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Correct!</h3>
-                <p className="text-3xl font-extrabold text-emerald-700 dark:text-emerald-300">+{submissionData.scoreAwarded} Points</p>
-              </>
-            ) : (
-              <>
-                <div className="w-16 h-16 bg-red-100 dark:bg-red-500/20 rounded-full flex items-center justify-center mb-2">
-                  <div className="text-4xl">❌</div>
-                </div>
-                <h3 className="text-2xl font-black text-red-600 dark:text-red-400 uppercase tracking-widest">Incorrect</h3>
-                <p className="text-xl font-bold text-red-500 dark:text-red-300">+0 Points</p>
-              </>
-            )}
-            
-            {submissionData.currentRank && (
-              <div className="mt-4 px-6 py-2 bg-white dark:bg-zinc-900 rounded-full shadow-sm border border-gray-100 dark:border-zinc-800">
-                <span className="text-gray-500 dark:text-gray-400 font-bold uppercase tracking-wider text-sm mr-2">Current Rank</span>
-                <span className="text-2xl font-black text-gray-900 dark:text-white">#{submissionData.currentRank}</span>
-              </div>
-            )}
+            <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-500/20 rounded-full flex items-center justify-center mb-2">
+              <CheckCircle2 className="w-8 h-8 text-emerald-600 dark:text-emerald-400" />
+            </div>
+            <h3 className="text-2xl font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Submitted!</h3>
+            <p className="text-lg font-bold text-emerald-700 dark:text-emerald-300">Your answer has been recorded.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Waiting for the next question...</p>
           </div>
         </div>
       )}

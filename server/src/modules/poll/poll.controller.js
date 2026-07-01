@@ -1,4 +1,5 @@
 import * as pollService from './poll.service.js';
+import { logActivity } from '../../common/services/activityLogger.js';
 
 /**
  * Handle Create Poll Request
@@ -7,6 +8,8 @@ export const createPoll = async (req, res) => {
   try {
     const userId = req.user.id;
     const poll = await pollService.createPoll(req.body, userId);
+
+    logActivity(userId, 'POLL_CREATE', `Created poll: ${poll.title}`, { pollId: poll._id });
 
     res.status(201).json({
       success: true,
@@ -72,6 +75,8 @@ export const updatePoll = async (req, res) => {
     const updateData = req.body;
 
     const updatedPoll = await pollService.updatePoll(id, updateData, userId);
+
+    logActivity(userId, 'POLL_EDIT', `Updated poll: ${updatedPoll.title}`, { pollId: updatedPoll._id });
 
     res.status(200).json({
       success: true,

@@ -63,6 +63,15 @@ export const submitLiveAnswer = async (pollId, participantId, answer) => {
   }
 };
 
+export const getParticipantStats = async (pollId, participantId) => {
+  try {
+    const response = await api.get(`/polls/public/${pollId}/participant/${participantId}/stats`);
+    return response.data.data;
+  } catch (error) {
+    handleApiError(error);
+  }
+};
+
 /**
  * Fetch the aggregated results for a specific poll.
  * Only returns data if the poll's isResultsPublished flag is true (enforced by backend).

@@ -29,6 +29,15 @@ const userSchema = new mongoose.Schema(
     designation: { type: String, trim: true, maxlength: [100, 'Designation cannot exceed 100 characters'] },
     company: { type: String, trim: true, maxlength: [100, 'Company cannot exceed 100 characters'] },
     avatarUrl: { type: String, trim: true },
+    role: {
+      type: String,
+      enum: ['user', 'admin'],
+      default: 'user',
+    },
+    isBlocked: {
+      type: Boolean,
+      default: false,
+    },
     password: {
       type: String,
       required: [true, 'Password is required'],

@@ -54,6 +54,10 @@ export const loginUser = async (email, password) => {
     throw new Error('Invalid email or password');
   }
 
+  if (user.isBlocked) {
+    throw new Error('Your account has been blocked by an administrator.');
+  }
+
   // Verify password using the instance method defined in the model
   const isMatch = await user.comparePassword(password);
 

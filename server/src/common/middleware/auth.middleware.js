@@ -1,9 +1,10 @@
 import jwt from 'jsonwebtoken';
+import User from '../../modules/auth/auth.model.js';
 
 /**
  * Middleware to protect routes by verifying JWT token
  */
-export const protect = (req, res, next) => {
+export const protect = async (req, res, next) => {
   let token;
 
   // Safely check if token exists in the Authorization header
@@ -31,7 +32,25 @@ export const protect = (req, res, next) => {
     // Verify the token using our secret key
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
+    // Fetch the user to ensure they still exist and are not blocked
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: 'The user belonging to this token no longer exists.',
+      });
+    }
+
+    if (user.isBlocked) {
+      return res.status(403).json({
+        success: false,
+        message: 'Your account has been blocked by an administrator.',
+      });
+    }
+
     // Attach the decoded user information (e.g., { id: '...' }) to the request object
+    // We attach decoded to keep it fast, but could attach full user object.
     req.user = decoded;
 
     // Proceed to the next middleware or controller
@@ -57,7 +76,7 @@ export const protect = (req, res, next) => {
  * Middleware that checks for a token but doesn't block if missing.
  * Useful for routes that support both anonymous and authenticated access.
  */
-export const optionalProtect = (req, res, next) => {
+export const optionalProtect = async (req, res, next) => {
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -73,7 +92,14 @@ export const optionalProtect = (req, res, next) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded; // Attach user to request
+    
+    // Fetch the user to ensure they are not blocked
+    const user = await User.findById(decoded.id);
+    
+    if (user && !user.isBlocked) {
+      req.user = decoded; // Attach user to request
+    }
+    
     next();
   } catch (error) {
     // If a token is provided but invalid, we still proceed as anonymous
@@ -82,3 +108,31 @@ export const optionalProtect = (req, res, next) => {
     next();
   }
 };
+
+/**
+ * Middleware to protect routes that require Admin access.
+ * Must be used AFTER the `protect` middleware.
+ */
+export const isAdmin = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ success: false, message: 'Not authenticated.' });
+    }
+
+    const user = await User.findById(req.user.id);
+    if (user && user.role === 'admin') {
+      next();
+    } else {
+      res.status(403).json({
+        success: false,
+        message: 'Access denied. Admin resources only.',
+      });
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Server error while verifying admin status.',
+    });
+  }
+};
+

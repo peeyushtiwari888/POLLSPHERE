@@ -10,4 +10,9 @@ const router = express.Router();
 // @access  Public (No authentication required)
 router.get('/:id', publicPollController.getPublicPoll);
 
+// @route   GET /api/polls/public/:id/participant/:participantId/stats
+// @desc    Fetch participant stats (rank, time) for a closed poll
+// @access  Public
+router.get('/:id/participant/:participantId/stats', publicPollController.getParticipantStats);
+
 export default router;

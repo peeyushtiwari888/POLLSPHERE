@@ -7,7 +7,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
 import useSocket from '../hooks/useSocket';
 import { getPollAnalytics } from '../api/analytics.api';
-import ReactionOverlay from '../components/live/ReactionOverlay';
 import LeaderboardView from '../components/live/LeaderboardView';
 
 /**
@@ -261,9 +260,6 @@ const PollLobbyPage = () => {
           )}
         </AnimatePresence>
       </div>
-
-      {/* Floating Reactions Overlay */}
-      <ReactionOverlay socket={socket} />
     </div>
   );
 };

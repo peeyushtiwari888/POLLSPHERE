@@ -1,4 +1,5 @@
 import * as authService from './auth.service.js';
+import { logActivity } from '../../common/services/activityLogger.js';
 
 /**
  * Handle User Registration
@@ -7,6 +8,8 @@ export const register = async (req, res) => {
   try {
     // Pass the request body to the service layer
     const { user, token } = await authService.registerUser(req.body);
+
+    logActivity(user._id, 'USER_REGISTER', `User ${user.username} registered.`);
 
     // Return 201 Created status code for successful creation
     res.status(201).json({
@@ -33,6 +36,8 @@ export const login = async (req, res) => {
     
     // Call the service layer to verify credentials
     const { user, token } = await authService.loginUser(email, password);
+
+    logActivity(user._id, 'USER_LOGIN', `User ${user.username} logged in.`);
 
     // Return 200 OK for successful login
     res.status(200).json({
