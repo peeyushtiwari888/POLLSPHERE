@@ -22,16 +22,21 @@ const PollCard = ({ poll, onRefresh }) => {
     responsesCount = 0,
   } = poll;
 
-  const isExpired = expiryDate ? isPast(new Date(expiryDate)) : false;
-  const currentStatus = isExpired ? 'EXPIRED' : (poll.status || 'DRAFT');
+  const isExpired = (poll.status === 'COMPLETED') || (expiryDate ? isPast(new Date(expiryDate)) : false);
+  const currentStatus = isExpired ? 'COMPLETED' : (poll.status || 'DRAFT');
 
   let statusColor = '';
   let statusLabel = '';
 
   switch (currentStatus) {
+    case 'COMPLETED':
     case 'EXPIRED':
       statusColor = 'bg-blue-500/10 text-blue-500 dark:text-blue-400';
       statusLabel = 'Completed';
+      break;
+    case 'LIVE':
+      statusColor = 'bg-pink-500/10 text-pink-500 dark:text-pink-400 animate-pulse';
+      statusLabel = 'LIVE';
       break;
     case 'PUBLISHED':
       statusColor = 'bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400';

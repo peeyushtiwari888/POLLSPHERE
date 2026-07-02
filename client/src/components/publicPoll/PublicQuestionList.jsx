@@ -16,7 +16,7 @@ const PublicQuestionList = ({ pollId, participantId, questions = [], answers = {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedStatus, setSubmittedStatus] = useState({}); // Track which questions were successfully submitted live
 
-  const isLiveMode = pollStatus === 'PUBLISHED' || pollStatus === 'ACTIVE';
+  const isLiveMode = pollStatus === 'LIVE' || pollStatus === 'ACTIVE';
 
 
   // Filter to find the active question
@@ -105,8 +105,8 @@ const PublicQuestionList = ({ pollId, participantId, questions = [], answers = {
     return null;
   }
 
-  // If no question is active, show the waiting screen
-  if (!activeQuestionId) {
+  // If no question is active IN LIVE MODE, show the waiting screen
+  if (isLiveMode && !activeQuestionId) {
     return (
       <div className="w-full flex flex-col items-center justify-center py-20 px-4 bg-white/50 dark:bg-zinc-900/50 backdrop-blur-sm border-2 border-dashed border-gray-200 dark:border-zinc-800 rounded-3xl text-center shadow-sm animate-in fade-in duration-500">
         <div className="relative mb-8">
@@ -124,10 +124,33 @@ const PublicQuestionList = ({ pollId, participantId, questions = [], answers = {
     );
   }
 
-  if (!activeQuestion) {
+  if (isLiveMode && !activeQuestion) {
     return null; // Fallback if activeQuestionId somehow doesn't match
   }
 
+  // ---------------------------------------------------------------------------
+  // RENDER: Async/Self-Paced Mode (PUBLISHED)
+  // ---------------------------------------------------------------------------
+  if (!isLiveMode) {
+    return (
+      <div className="w-full flex flex-col space-y-6 sm:space-y-8 animate-in slide-in-from-bottom-4 duration-500">
+        {questions.map((q, index) => (
+          <PublicQuestionCard
+            key={q._id}
+            index={index + 1}
+            question={q}
+            currentAnswer={answers[q._id]}
+            onAnswerChange={(value) => handleAnswerChange(q._id, value)}
+            isDisabled={isSubmitting}
+          />
+        ))}
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // RENDER: Live Presenter Mode (LIVE)
+  // ---------------------------------------------------------------------------
   const isTimeUp = isLiveMode && timeLeft === 0;
   const submissionData = submittedStatus[activeQuestion._id] || null;
   const isCurrentlySubmitted = !!submissionData;

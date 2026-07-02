@@ -45,15 +45,20 @@ const PollTable = ({ polls = [], refreshData }) => {
             } = poll;
 
             // Determine Status
-            const isExpired = expiryDate ? isPast(new Date(expiryDate)) : false;
-            const currentStatus = isExpired ? 'EXPIRED' : (poll.status || 'DRAFT');
+            const isExpired = (poll.status === 'COMPLETED') || (expiryDate ? isPast(new Date(expiryDate)) : false);
+            const currentStatus = isExpired ? 'COMPLETED' : (poll.status || 'DRAFT');
 
             let statusColor = '';
             let statusLabel = '';
             switch (currentStatus) {
+              case 'COMPLETED':
               case 'EXPIRED':
                 statusColor = 'bg-blue-500/10 text-blue-500 dark:text-blue-400';
                 statusLabel = 'Completed';
+                break;
+              case 'LIVE':
+                statusColor = 'bg-pink-500/10 text-pink-500 dark:text-pink-400 animate-pulse';
+                statusLabel = 'LIVE';
                 break;
               case 'PUBLISHED':
                 statusColor = 'bg-emerald-500/10 text-emerald-500';
