@@ -31,8 +31,13 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     // Note: Since we are using HTTP-only cookies, the browser automatically
-    // attaches the JWT cookie to every request. We no longer need to 
-    // manually attach it to the Authorization header here.
+    // attaches the JWT cookie to every request. However, some browsers block
+    // third-party cross-site cookies (e.g. deployed frontend to deployed backend).
+    // As a robust fallback, we also manually attach the JWT from localStorage if it exists.
+    const token = getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {

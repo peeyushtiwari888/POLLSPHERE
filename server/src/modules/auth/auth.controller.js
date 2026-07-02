@@ -24,6 +24,7 @@ export const register = async (req, res) => {
       success: true,
       message: 'User registered successfully',
       data: user,
+      token, // Send token in response body as fallback for strict cross-origin browser policies
     });
   } catch (error) {
     // Return 400 Bad Request if validation or business logic fails
@@ -59,6 +60,7 @@ export const login = async (req, res) => {
       success: true,
       message: 'Logged in successfully',
       data: user,
+      token, // Send token in response body as fallback for strict cross-origin browser policies
     });
   } catch (error) {
     // Return 401 Unauthorized for bad credentials

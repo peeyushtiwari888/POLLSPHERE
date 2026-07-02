@@ -41,7 +41,8 @@ export const AuthProvider = ({ children }) => {
    */
   const signup = async (userData) => {
     const response = await authApi.signup(userData);
-    
+    if (response.token) saveToken(response.token);
+
     if (response.user || response.data) {
       setUser(response.user || response.data);
     } else {
@@ -59,7 +60,8 @@ export const AuthProvider = ({ children }) => {
    */
   const login = async (credentials) => {
     const response = await authApi.login(credentials);
-    
+    if (response.token) saveToken(response.token);
+
     if (response.user || response.data) {
       setUser(response.user || response.data);
     } else {
@@ -81,6 +83,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.warn('Backend logout failed, proceeding with local cleanup.', error.message);
     } finally {
+      removeToken();
       setUser(null);
       setIsAuthenticated(false);
     }
