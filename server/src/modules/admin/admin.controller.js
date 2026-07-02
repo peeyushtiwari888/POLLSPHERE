@@ -2,6 +2,7 @@ import ActivityLog from './activityLog.model.js';
 import User from '../auth/auth.model.js';
 import Poll from '../poll/poll.model.js';
 import Event from '../event/event.model.js';
+import Notification from '../notification/notification.model.js';
 
 export const getStats = async (req, res) => {
   try {
@@ -187,5 +188,41 @@ export const toggleAdminRole = async (req, res) => {
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to update user role' });
+  }
+};
+
+export const sendBroadcast = async (req, res) => {
+  try {
+    const { title, message } = req.body;
+    
+    if (!title || !message) {
+      return res.status(400).json({ success: false, message: 'Title and message are required' });
+    }
+
+    // Fetch all users
+    const users = await User.find({}, '_id');
+    
+    // Create notifications for all users
+    const notifications = users.map(user => ({
+      recipient: user._id,
+      type: 'SYSTEM_BROADCAST',
+      title,
+      message,
+    }));
+    
+    // Bulk insert
+    await Notification.insertMany(notifications);
+    
+    // Log the activity
+    await ActivityLog.create({
+      user: req.user.id,
+      actionType: 'SYSTEM_BROADCAST_SENT',
+      description: `Broadcast sent: ${title}`,
+    });
+
+    res.status(200).json({ success: true, message: `Broadcast sent to ${users.length} users successfully.` });
+  } catch (error) {
+    console.error('Broadcast Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to send broadcast' });
   }
 };

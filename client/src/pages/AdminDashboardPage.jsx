@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import { getAdminStats, getRecentActivities, getAllUsers } from '../api/admin.api';
-import { Users, Activity, ListOrdered, BarChart3, Clock, AlertCircle, X } from 'lucide-react';
+import { Users, Activity, ListOrdered, BarChart3, Clock, AlertCircle, X, Megaphone, Send } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import DOMPurify from 'dompurify';
@@ -17,6 +17,12 @@ const AdminDashboardPage = () => {
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('activities'); // 'activities', 'users', 'polls', 'events'
   const [selectedPoll, setSelectedPoll] = useState(null);
+  
+  // Broadcast State
+  const [isBroadcastModalOpen, setIsBroadcastModalOpen] = useState(false);
+  const [broadcastTitle, setBroadcastTitle] = useState('');
+  const [broadcastMessage, setBroadcastMessage] = useState('');
+  const [isBroadcasting, setIsBroadcasting] = useState(false);
 
   useEffect(() => {
     const fetchAdminData = async () => {
@@ -94,6 +100,24 @@ const AdminDashboardPage = () => {
     }
   };
 
+  const handleSendBroadcast = async (e) => {
+    e.preventDefault();
+    if (!broadcastTitle.trim() || !broadcastMessage.trim()) return;
+    try {
+      setIsBroadcasting(true);
+      const { sendBroadcast } = await import('../api/admin.api');
+      await sendBroadcast({ title: broadcastTitle, message: broadcastMessage });
+      import('react-hot-toast').then(toast => toast.toast.success('Broadcast sent successfully'));
+      setIsBroadcastModalOpen(false);
+      setBroadcastTitle('');
+      setBroadcastMessage('');
+    } catch (err) {
+      import('react-hot-toast').then(toast => toast.toast.error(err.response?.data?.message || err.message || 'Failed to send broadcast'));
+    } finally {
+      setIsBroadcasting(false);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-screen bg-gray-50 dark:bg-zinc-950">
@@ -132,11 +156,20 @@ const AdminDashboardPage = () => {
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Header */}
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-zinc-400">
-            Welcome back, {user?.name || user?.username}. Here's what's happening on PollSphere.
-          </p>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+            <p className="mt-2 text-sm text-gray-600 dark:text-zinc-400">
+              Welcome back, {user?.name || user?.username}. Here's what's happening on PollSphere.
+            </p>
+          </div>
+          <button
+            onClick={() => setIsBroadcastModalOpen(true)}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
+          >
+            <Megaphone className="w-4 h-4" />
+            Send Broadcast
+          </button>
         </div>
 
         {/* Stats Grid */}
@@ -474,6 +507,107 @@ const AdminDashboardPage = () => {
                   Join Poll
                 </Link>
               </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Broadcast Modal */}
+      <AnimatePresence>
+        {isBroadcastModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-lg overflow-hidden border border-gray-100 dark:border-zinc-800"
+            >
+              <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100 dark:border-zinc-800 bg-indigo-50/50 dark:bg-indigo-900/10">
+                <div className="flex items-center gap-3 text-indigo-600 dark:text-indigo-400">
+                  <div className="bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-lg">
+                    <Megaphone className="w-5 h-5" />
+                  </div>
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">System Broadcast</h2>
+                </div>
+                <button 
+                  onClick={() => setIsBroadcastModalOpen(false)} 
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors p-1 rounded-md hover:bg-gray-100 dark:hover:bg-zinc-800"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              
+              <form onSubmit={handleSendBroadcast} className="p-6 space-y-5">
+                <div>
+                  <label htmlFor="broadcastTitle" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Notification Title
+                  </label>
+                  <input
+                    id="broadcastTitle"
+                    type="text"
+                    required
+                    maxLength={100}
+                    value={broadcastTitle}
+                    onChange={(e) => setBroadcastTitle(e.target.value)}
+                    placeholder="e.g., Scheduled Maintenance"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors shadow-sm placeholder-gray-400"
+                  />
+                </div>
+                
+                <div>
+                  <label htmlFor="broadcastMessage" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    Message Body
+                  </label>
+                  <textarea
+                    id="broadcastMessage"
+                    required
+                    maxLength={250}
+                    rows={4}
+                    value={broadcastMessage}
+                    onChange={(e) => setBroadcastMessage(e.target.value)}
+                    placeholder="Keep it concise..."
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors shadow-sm placeholder-gray-400 resize-none"
+                  />
+                  <div className="flex justify-between items-center mt-1">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                      This will be sent to ALL registered users immediately.
+                    </p>
+                    <span className={`text-xs ${broadcastMessage.length > 220 ? 'text-orange-500' : 'text-gray-400'}`}>
+                      {broadcastMessage.length}/250
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-2">
+                  <button 
+                    type="button"
+                    onClick={() => setIsBroadcastModalOpen(false)}
+                    disabled={isBroadcasting}
+                    className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-700 rounded-lg hover:bg-gray-50 dark:hover:bg-zinc-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit"
+                    disabled={isBroadcasting || !broadcastTitle.trim() || !broadcastMessage.trim()}
+                    className="flex items-center gap-2 px-5 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900 disabled:opacity-70 disabled:cursor-not-allowed shadow-sm"
+                  >
+                    {isBroadcasting ? (
+                      <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                      <>
+                        <Send className="w-4 h-4" />
+                        Send Now
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </motion.div>
         )}

@@ -105,7 +105,7 @@ const pollSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ['DRAFT', 'SCHEDULED', 'PUBLISHED', 'EXPIRED', 'PAUSED'],
+      enum: ['DRAFT', 'SCHEDULED', 'PUBLISHED', 'LIVE', 'COMPLETED', 'EXPIRED', 'PAUSED'],
       default: 'DRAFT',
     },
     scheduledPublishDate: {
@@ -158,7 +158,7 @@ const pollSchema = new mongoose.Schema(
 
 // Helper method to check if the poll is currently expired
 pollSchema.methods.isExpired = function () {
-  return new Date() > this.expiryDate;
+  return this.status === 'COMPLETED' || new Date() > this.expiryDate;
 };
 
 const Poll = mongoose.model('Poll', pollSchema);

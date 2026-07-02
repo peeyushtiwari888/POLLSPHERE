@@ -1,6 +1,7 @@
 import React from 'react';
 import { User, Mail, CalendarDays, ShieldCheck } from 'lucide-react';
 import { format } from 'date-fns';
+import { getAvatarGradient, getInitials } from '../../utils/avatarUtils';
 
 /**
  * Premium Profile Card
@@ -21,13 +22,9 @@ const ProfileCard = ({ profile }) => {
     createdAt 
   } = profile;
 
-  // Derive initials for the fallback avatar (e.g. "John Doe" -> "JD")
-  const initials = name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .substring(0, 2)
-    .toUpperCase();
+  // Derive initials and color for the fallback avatar
+  const initials = getInitials(name);
+  const avatarGradient = getAvatarGradient(name);
 
   // Safely format the date
   const joinedDate = createdAt ? format(new Date(createdAt), 'MMMM yyyy') : 'Unknown Date';
@@ -48,7 +45,7 @@ const ProfileCard = ({ profile }) => {
             />
           ) : null}
           <div 
-            className="w-full h-full flex items-center justify-center text-2xl font-bold text-gray-500 dark:text-gray-400"
+            className={`w-full h-full flex items-center justify-center text-2xl font-bold text-white bg-gradient-to-br ${avatarGradient}`}
             style={{ display: avatar ? 'none' : 'flex' }}
           >
             {initials || <User className="w-8 h-8" />}

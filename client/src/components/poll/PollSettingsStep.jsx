@@ -165,6 +165,26 @@ const PollSettingsStep = ({ data = {}, updateData }) => {
                 )}
               </div>
 
+              {/* Status Dropdown */}
+              <div className="space-y-2 mt-4 sm:mt-0 sm:col-span-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Status <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={settings.status || 'DRAFT'}
+                  onChange={(e) => handleChange('status', e.target.value)}
+                  className="w-full h-12 px-4 bg-gray-50 dark:bg-zinc-950 border border-gray-200 dark:border-zinc-800 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 transition-all duration-300 cursor-pointer"
+                >
+                  <option value="DRAFT" className="bg-white dark:bg-zinc-900 text-gray-900 dark:text-gray-300 font-medium py-2">Draft</option>
+                  <option value="PUBLISHED" className="bg-white dark:bg-zinc-900 text-emerald-700 dark:text-emerald-400 font-medium py-2">Published</option>
+                  <option value="LIVE" className="bg-white dark:bg-zinc-900 text-pink-700 dark:text-pink-400 font-medium py-2">LIVE</option>
+                  <option value="COMPLETED" className="bg-white dark:bg-zinc-900 text-blue-700 dark:text-blue-400 font-medium py-2">Completed</option>
+                </select>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                  Draft: Hidden. Published: Self-paced. LIVE: Presenter-led. Completed: Finished.
+                </p>
+              </div>
+
             </div>
           </div>
         </section>

@@ -20,5 +20,6 @@ router.get('/polls', adminController.getAllPolls);
 router.get('/events', adminController.getAllEvents);
 router.delete('/polls/:id', adminController.deletePoll);
 router.delete('/events/:id', adminController.deleteEvent);
+router.post('/broadcast', adminController.sendBroadcast);
 
 export default router;

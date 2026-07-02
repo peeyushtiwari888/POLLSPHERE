@@ -101,8 +101,15 @@ const PublicPollPage = () => {
       });
     };
 
+    const handlePollStatusChanged = ({ status }) => {
+      // Re-fetch the poll to get the latest status and questions without a full page reload
+      const savedCode = sessionStorage.getItem(`poll_code_${pollId}`);
+      fetchPollData(savedCode || '');
+    };
+
     if (socket) {
       socket.on('active-question-changed', handleActiveQuestionChanged);
+      socket.on('poll-status-changed', handlePollStatusChanged);
     }
     
     return () => {
@@ -110,6 +117,7 @@ const PublicPollPage = () => {
       if (socket) {
         socket.emit('leave-poll', pollId);
         socket.off('active-question-changed', handleActiveQuestionChanged);
+        socket.off('poll-status-changed', handlePollStatusChanged);
       }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -244,9 +252,28 @@ const PublicPollPage = () => {
   }
 
   // ---------------------------------------------------------------------------
+  // RENDER: Draft State
+  // ---------------------------------------------------------------------------
+  if (poll.status === 'DRAFT') {
+    return (
+      <div className="w-full min-h-screen bg-gray-50 dark:bg-black flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
+        <div className="w-20 h-20 bg-yellow-50 dark:bg-yellow-500/10 rounded-full flex items-center justify-center mb-6 shadow-sm border border-yellow-100 dark:border-yellow-900/30">
+          <AlertCircle className="w-10 h-10 text-yellow-500" />
+        </div>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-3 tracking-tight">
+          Poll is in Draft
+        </h2>
+        <p className="text-gray-500 dark:text-gray-400 max-w-md leading-relaxed mb-8">
+          This poll is currently being edited and is not yet available for responses.
+        </p>
+      </div>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
   // RENDER: Expired State
   // ---------------------------------------------------------------------------
-  const isExpired = poll.expiryDate ? new Date(poll.expiryDate) < new Date() : false;
+  const isExpired = poll.status === 'COMPLETED' || (poll.expiryDate ? new Date(poll.expiryDate) < new Date() : false);
   if (isExpired) {
     return (
       <div className="w-full min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center p-4">
@@ -299,8 +326,8 @@ const PublicPollPage = () => {
         {/* Submit Action */}
         <Suspense fallback={<div className="h-16 bg-white dark:bg-zinc-900 rounded-3xl animate-pulse" />}>
           {/* Only show global submit for async polls (DRAFT/SCHEDULED etc or if we specifically don't use live mode) */}
-          {/* In live mode (poll.status === 'PUBLISHED' || poll.status === 'ACTIVE'), submissions are handled per-question */}
-          {poll.status !== 'PUBLISHED' && poll.status !== 'ACTIVE' && (
+          {/* In live mode (poll.status === 'LIVE' || poll.status === 'ACTIVE'), submissions are handled per-question */}
+          {poll.status !== 'LIVE' && poll.status !== 'ACTIVE' && (
             <SubmitPollButton 
               poll={poll} 
               answers={answers}

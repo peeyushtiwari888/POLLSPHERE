@@ -4,6 +4,9 @@ import {
 } from '@phosphor-icons/react';
 import { useTheme } from '../../context/ThemeContext';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+import { getAvatarGradient, getInitials } from '../../utils/avatarUtils';
+import NotificationBell from '../notifications/NotificationBell';
 
 /**
  * Premium SaaS Top Navigation Component
@@ -13,6 +16,11 @@ import { useNavigate } from 'react-router-dom';
 const TopNavbar = ({ onMenuClick }) => {
   const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
+  const { user } = useAuth();
+  
+  const userName = user?.username || user?.name || 'User';
+  const avatarGradient = getAvatarGradient(userName);
+  const initials = getInitials(userName);
 
   return (
     <header className="sticky top-0 z-30 w-full h-16 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-xl border-b border-gray-200 dark:border-zinc-800 px-4 sm:px-6 lg:px-8 flex items-center justify-between transition-colors shadow-sm">
@@ -54,27 +62,17 @@ const TopNavbar = ({ onMenuClick }) => {
           {isDarkMode ? <Sun weight="fill" className="w-5 h-5" /> : <Moon weight="fill" className="w-5 h-5" />}
         </button>
 
-        {/* Notification Icon */}
-        <button
-          className="relative p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500"
-          aria-label="Notifications"
-        >
-          <Bell weight="fill" className="w-5 h-5" />
-          {/* Notification Indicator Dot */}
-          <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-orange-500 border-2 border-white dark:border-zinc-950"></span>
-          </span>
-        </button>
+        {/* Notification Bell with Dropdown */}
+        <NotificationBell />
 
         {/* Profile Dropdown Trigger */}
         <button
-          onClick={() => navigate('/settings')}
+          onClick={() => navigate('/profile')}
           className="ml-1 focus:outline-none focus:ring-2 focus:ring-orange-500 rounded-full transition-transform active:scale-95"
           aria-label="Open Profile Menu"
         >
-          <div className="w-9 h-9 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center text-white text-sm font-bold shadow-md hover:shadow-lg border-2 border-transparent hover:border-orange-200 dark:hover:border-orange-900 transition-all">
-            P
+          <div className={`w-9 h-9 rounded-full bg-gradient-to-br ${avatarGradient} flex items-center justify-center text-white text-sm font-bold shadow-md hover:shadow-lg border-2 border-transparent hover:border-orange-200 dark:hover:border-orange-900 transition-all`}>
+            {initials}
           </div>
         </button>
         

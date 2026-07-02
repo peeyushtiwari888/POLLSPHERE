@@ -1,38 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Bell } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 import NotificationDropdown from './NotificationDropdown';
-
-// Mock Data for frontend UI demonstration
-const mockNotifications = [
-  {
-    id: '1',
-    type: 'POLL_PUBLISHED',
-    title: 'Poll Published Successfully',
-    message: 'Your poll "Favorite Programming Language" is now live.',
-    isRead: false,
-    timeAgo: '2m ago'
-  },
-  {
-    id: '2',
-    type: 'RESPONSE_RECEIVED',
-    title: 'New Response',
-    message: 'Someone just responded to your poll "Lunch Options".',
-    isRead: false,
-    timeAgo: '1h ago'
-  },
-  {
-    id: '3',
-    type: 'POLL_EXPIRED',
-    title: 'Poll Expired',
-    message: 'Your poll "Weekend Trip Destination" has ended.',
-    isRead: true,
-    timeAgo: '1d ago'
-  },
-];
+import * as notificationApi from '../../api/notification.api';
 
 const NotificationBell = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [notifications, setNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -52,23 +26,62 @@ const NotificationBell = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [isOpen]);
 
-  // Mock UI Interactions
-  const handleMarkAsRead = (id) => {
-    setNotifications(prev => 
-      prev.map(n => n.id === id ? { ...n, isRead: true } : n)
-    );
+  // Fetch notifications from backend
+  const fetchNotifications = async () => {
+    try {
+      setIsLoading(true);
+      const res = await notificationApi.getNotifications({ page: 1, limit: 10 });
+      // The backend returns paginated results under res.data.notifications or similar
+      const rawNotifications = res.data?.notifications || res.notifications || [];
+      
+      const formatted = rawNotifications.map(n => ({
+        id: n._id,
+        type: n.type,
+        title: n.title,
+        message: n.message,
+        isRead: n.isRead,
+        timeAgo: n.createdAt ? formatDistanceToNow(new Date(n.createdAt), { addSuffix: true }) : 'just now'
+      }));
+      
+      setNotifications(formatted);
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleMarkAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+  // Fetch once on mount
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  const handleMarkAsRead = async (id) => {
+    try {
+      // Optimistic update
+      setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+      await notificationApi.markAsRead(id);
+    } catch (error) {
+      // Revert on failure (could be added)
+      console.error('Failed to mark as read:', error);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      // Optimistic update
+      setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+      await notificationApi.markAllAsRead();
+    } catch (error) {
+      console.error('Failed to mark all as read:', error);
+    }
   };
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
-    // Simulate initial loading state if opening
-    if (!isOpen && notifications.length > 0) {
-      setIsLoading(true);
-      setTimeout(() => setIsLoading(false), 500); // 500ms mock delay
+    // Refresh notifications when opened
+    if (!isOpen) {
+      fetchNotifications();
     }
   };
 

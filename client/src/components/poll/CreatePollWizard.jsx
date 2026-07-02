@@ -53,6 +53,7 @@ const CreatePollWizard = () => {
       settings: {
         isAnonymous: false,
         isResultsPublished: false,
+        status: 'DRAFT',
         expiryDate: '',
       }
     };
@@ -99,6 +100,7 @@ const CreatePollWizard = () => {
           settings: {
             isAnonymous: poll.isAnonymous || false,
             isResultsPublished: poll.isResultsPublished || false,
+            status: poll.status || 'DRAFT',
             expiryDate: poll.expiryDate ? format(new Date(poll.expiryDate), 'yyyy-MM-dd') : '',
             expiryTime: poll.expiryDate ? format(new Date(poll.expiryDate), 'HH:mm') : '',
           }
@@ -158,6 +160,7 @@ const CreatePollWizard = () => {
         description: formData.description,
         participationCode: formData.participationCode,
         isAnonymous: formData.settings.isAnonymous,
+        status: formData.settings.status || 'DRAFT',
         expiryDate: finalExpiryDate.toISOString(),
         questions: formData.questions.map(q => ({
           text: q.text,

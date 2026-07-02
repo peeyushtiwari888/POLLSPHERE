@@ -16,6 +16,7 @@ const notificationSchema = new mongoose.Schema(
         'RESPONSE_RECEIVED',
         'POLL_EXPIRED',
         'POLL_SHARED',
+        'SYSTEM_BROADCAST',
       ],
       required: [true, 'Notification type is required'],
     },

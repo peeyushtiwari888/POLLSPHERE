@@ -61,3 +61,11 @@ export const promoteToAdmin = async (userId, secret) => {
   const response = await api.post('/admin/promote', { userId, secret });
   return response.data;
 };
+
+/**
+ * Send a system broadcast to all users
+ */
+export const sendBroadcast = async (payload) => {
+  const response = await api.post('/admin/broadcast', payload);
+  return response.data;
+};

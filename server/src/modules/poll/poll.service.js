@@ -1,6 +1,7 @@
 import Poll from './poll.model.js';
 import sanitizeHtml from 'sanitize-html';
 import { emitLiveAnalyticsUpdate } from '../../emitters.js';
+import { emitPollStatusChanged } from '../../emitters.js';
 
 const sanitizeOptions = {
   allowedTags: [
@@ -50,10 +51,15 @@ export const getMyPolls = async (creatorId, queryParams = {}) => {
     switch (filter) {
       case 'Completed':
       case 'Expired': // Keep Expired for backward compatibility if needed
-        query.expiryDate = { $lt: now };
+        query.$or = [{ expiryDate: { $lt: now } }, { status: 'COMPLETED' }];
         break;
       case 'Published':
         query.status = 'PUBLISHED';
+        query.expiryDate = { $gt: now };
+        query.isArchived = { $ne: true };
+        break;
+      case 'LIVE':
+        query.status = 'LIVE';
         query.expiryDate = { $gt: now };
         query.isArchived = { $ne: true };
         break;
@@ -217,6 +223,7 @@ export const publishPoll = async (pollId, userId, publishData = {}) => {
   if (poll.status === 'PUBLISHED') {
     emitLiveAnalyticsUpdate(pollId);
   }
+  emitPollStatusChanged(pollId, poll.status);
 
   return poll;
 };
@@ -294,6 +301,7 @@ export const pausePoll = async (pollId, userId) => {
   await poll.save();
   
   emitLiveAnalyticsUpdate(pollId);
+  emitPollStatusChanged(pollId, poll.status);
   return poll;
 };
 
@@ -311,6 +319,7 @@ export const resumePoll = async (pollId, userId) => {
   await poll.save();
   
   emitLiveAnalyticsUpdate(pollId);
+  emitPollStatusChanged(pollId, poll.status);
   return poll;
 };
 
@@ -336,6 +345,7 @@ export const expirePoll = async (pollId, userId) => {
   
   // Emit socket event to notify all connected clients
   emitLiveAnalyticsUpdate(pollId);
+  emitPollStatusChanged(pollId, poll.status);
   
   return poll;
 };

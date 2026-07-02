@@ -74,3 +74,12 @@ export const emitActiveQuestionChanged = (pollId, activeQuestionData) => {
     console.error(`Socket error: Failed to emit active-question-changed for poll ${pollId}`, error);
   }
 };
+
+export const emitPollStatusChanged = (pollId, newStatus) => {
+  try {
+    const io = getSocketIo();
+    io.to(pollId).emit('poll-status-changed', { status: newStatus });
+  } catch (error) {
+    console.error(`Socket error: Failed to emit poll-status-changed for poll ${pollId}`, error);
+  }
+};

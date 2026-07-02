@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, MessageSquare, AlertCircle, Share2, PlusCircle, Check } from 'lucide-react';
+import { CheckCircle2, MessageSquare, AlertCircle, Share2, PlusCircle, Check, Megaphone } from 'lucide-react';
 
 const NotificationItem = ({ notification, onMarkAsRead }) => {
   const getIconConfig = (type) => {
@@ -14,6 +14,8 @@ const NotificationItem = ({ notification, onMarkAsRead }) => {
         return { icon: AlertCircle, color: 'text-red-500', bg: 'bg-red-50 dark:bg-red-500/10' };
       case 'POLL_SHARED':
         return { icon: Share2, color: 'text-orange-500', bg: 'bg-orange-50 dark:bg-orange-500/10' };
+      case 'SYSTEM_BROADCAST':
+        return { icon: Megaphone, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-500/10' };
       default:
         return { icon: AlertCircle, color: 'text-gray-500', bg: 'bg-gray-50 dark:bg-gray-500/10' };
     }
