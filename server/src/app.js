@@ -3,7 +3,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import mongoSanitize from 'express-mongo-sanitize';
-import xss from 'xss-clean';
+
 import rateLimit from 'express-rate-limit';
 
 import authRoutes from './modules/auth/auth.routes.js';
@@ -39,10 +39,13 @@ app.use(express.json({ limit: '10mb' })); // Parses incoming JSON payloads
 app.use(cookieParser()); // Parses cookies
 
 // Data sanitization against NoSQL query injection
-app.use(mongoSanitize());
+app.use((req, res, next) => {
+  if (req.body) mongoSanitize.sanitize(req.body);
+  if (req.query) mongoSanitize.sanitize(req.query);
+  if (req.params) mongoSanitize.sanitize(req.params);
+  next();
+});
 
-// Data sanitization against XSS
-app.use(xss());
 
 // Mount API Routes
 app.use('/api/auth', authRoutes);
