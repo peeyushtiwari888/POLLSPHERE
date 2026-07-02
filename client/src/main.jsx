@@ -7,6 +7,7 @@ import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { SocketProvider } from './socket/SocketProvider';
+import { SoundProvider } from './context/SoundContext';
 
 // Import global font
 import '@fontsource/outfit';
@@ -28,9 +29,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <ThemeProvider>
         <AuthProvider>
           <SocketProvider>
-            <App />
-            
-            {/* Toaster renders the global toast notifications (success/error popups) */}
+            <SoundProvider>
+              <App />
+              
+              {/* Toaster renders the global toast notifications (success/error popups) */}
             <Toaster 
               position="bottom-right"
               toastOptions={{
@@ -40,7 +42,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
                   borderRadius: '12px',
                 },
               }} 
-            />
+              />
+            </SoundProvider>
           </SocketProvider>
         </AuthProvider>
       </ThemeProvider>

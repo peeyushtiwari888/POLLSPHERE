@@ -11,12 +11,19 @@ export const register = async (req, res) => {
 
     logActivity(user._id, 'USER_REGISTER', `User ${user.username} registered.`);
 
+    // Set token in HTTP-only cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     // Return 201 Created status code for successful creation
     res.status(201).json({
       success: true,
       message: 'User registered successfully',
       data: user,
-      token, // The frontend will store this token (e.g., in localStorage)
     });
   } catch (error) {
     // Return 400 Bad Request if validation or business logic fails
@@ -39,12 +46,19 @@ export const login = async (req, res) => {
 
     logActivity(user._id, 'USER_LOGIN', `User ${user.username} logged in.`);
 
+    // Set token in HTTP-only cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+
     // Return 200 OK for successful login
     res.status(200).json({
       success: true,
       message: 'Logged in successfully',
       data: user,
-      token,
     });
   } catch (error) {
     // Return 401 Unauthorized for bad credentials
@@ -85,9 +99,12 @@ export const logout = async (req, res) => {
   try {
     const result = await authService.logoutUser();
 
-    // Note: In a stateless JWT setup where the token is in localStorage,
-    // actual logout happens on the frontend by deleting the token.
-    // If we used HTTP-only cookies, we would use res.clearCookie('token') here.
+    // Clear HTTP-only cookie
+    res.clearCookie('token', {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
+    });
 
     res.status(200).json({
       success: true,

@@ -10,14 +10,18 @@ import { getToken } from '../utils/token';
  */
 
 const api = axios.create({
-  // Use Vite environment variable for API URL. If not set, fallback to localhost.
-  // Note: Vite requires environment variables to be prefixed with VITE_
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api',
+  // Use Vite environment variable for API URL. If not set, fallback to the current hostname.
+  // This ensures that if the app is accessed via a local IP (e.g., from a mobile phone on the same WiFi),
+  // it will correctly route API requests to that same IP instead of failing on 'localhost'.
+  baseURL: import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`,
   
   // Common headers applied to all requests
   headers: {
     'Content-Type': 'application/json',
   },
+  
+  // Important for sending/receiving cookies (like our HTTP-only JWT)
+  withCredentials: true,
 });
 
 // ==========================================
@@ -26,16 +30,9 @@ const api = axios.create({
 // The request interceptor runs BEFORE every request is sent to the backend.
 api.interceptors.request.use(
   (config) => {
-    // Step 1: Retrieve the authentication token using our centralized utility
-    const token = getToken();
-    
-    // Step 2: If a token exists, attach it to the Authorization header
-    if (token) {
-      // The 'Bearer ' prefix is standard for JWT authentication
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    
-    // Step 3: Return the modified config so the request can proceed
+    // Note: Since we are using HTTP-only cookies, the browser automatically
+    // attaches the JWT cookie to every request. We no longer need to 
+    // manually attach it to the Authorization header here.
     return config;
   },
   (error) => {

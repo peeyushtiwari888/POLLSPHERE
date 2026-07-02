@@ -12,19 +12,21 @@ export const AuthProvider = ({ children }) => {
   // Initialize Authentication State on Mount
   useEffect(() => {
     const initializeAuth = async () => {
-      const token = getToken();
-      
-      if (token) {
-        try {
-          const response = await authApi.getCurrentUser();
-          setUser(response?.data || response || null);
+      try {
+        // With HTTP-only cookies, we just hit the endpoint. If the cookie is valid, it succeeds.
+        const response = await authApi.getCurrentUser();
+        if (response && (response.data || response.success)) {
+          setUser(response.data || response || null);
           setIsAuthenticated(true);
-        } catch (error) {
-          console.error('Failed to initialize session:', error.message);
-          removeToken();
+        } else {
           setUser(null);
           setIsAuthenticated(false);
         }
+      } catch (error) {
+        // 401 Unauthorized means no valid cookie
+        console.warn('No active session found.');
+        setUser(null);
+        setIsAuthenticated(false);
       }
       
       setIsLoading(false);
@@ -40,10 +42,6 @@ export const AuthProvider = ({ children }) => {
   const signup = async (userData) => {
     const response = await authApi.signup(userData);
     
-    if (response.token) {
-      saveToken(response.token);
-    }
-
     if (response.user || response.data) {
       setUser(response.user || response.data);
     } else {
@@ -62,10 +60,6 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     const response = await authApi.login(credentials);
     
-    if (response.token) {
-      saveToken(response.token);
-    }
-
     if (response.user || response.data) {
       setUser(response.user || response.data);
     } else {
@@ -87,7 +81,6 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.warn('Backend logout failed, proceeding with local cleanup.', error.message);
     } finally {
-      removeToken();
       setUser(null);
       setIsAuthenticated(false);
     }

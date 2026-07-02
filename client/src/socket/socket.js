@@ -9,8 +9,8 @@ import { io } from 'socket.io-client';
 
 // 1. Determine the backend URL
 // We read the VITE_API_URL from environment variables (e.g. 'http://localhost:5000/api')
-// Socket.io needs to connect to the root server, so we strip out the '/api' path if it exists.
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+// If not set, fallback to the current hostname.
+const API_URL = import.meta.env.VITE_API_URL || `http://${window.location.hostname}:5000/api`;
 const SOCKET_URL = API_URL.replace(/\/api\/?$/, '');
 
 // 2. Initialize the Socket instance
