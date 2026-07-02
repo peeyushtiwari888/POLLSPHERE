@@ -2,9 +2,8 @@ import React from 'react';
 import { HelpCircle, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import DOMPurify from 'dompurify';
-import { Volume2, VolumeX } from 'lucide-react';
-import { useContext } from 'react';
-import { SoundContext } from '../../context/SoundContext';
+
+
 
 /**
  * Public Poll Header
@@ -13,7 +12,6 @@ import { SoundContext } from '../../context/SoundContext';
  * Handles aesthetic presentation of title, description, and metadata.
  */
 const PublicPollHeader = ({ poll }) => {
-  const { isMuted, toggleMute } = useContext(SoundContext);
 
   if (!poll) return null;
 
@@ -53,16 +51,6 @@ const PublicPollHeader = ({ poll }) => {
       
       <div className="relative z-10 flex flex-col gap-5 sm:gap-6">
         
-        {/* Top Actions */}
-        <div className="flex justify-end w-full">
-          <button
-            onClick={toggleMute}
-            className="flex items-center justify-center p-2 rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors shadow-sm"
-            title={isMuted ? "Unmute sounds" : "Mute sounds"}
-          >
-            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-          </button>
-        </div>
 
         {/* Title & Description */}
         <div className="space-y-3">

@@ -8,10 +8,7 @@ import DOMPurify from 'dompurify';
 import useSocket from '../hooks/useSocket';
 import { getPollAnalytics } from '../api/analytics.api';
 import LeaderboardView from '../components/live/LeaderboardView';
-import { useAudio } from '../hooks/useAudio';
-import { SoundContext } from '../context/SoundContext';
-import { Volume2, VolumeX } from 'lucide-react';
-import { useContext } from 'react';
+
 
 /**
  * Poll Lobby Page (Presentation Screen)
@@ -31,20 +28,6 @@ const PollLobbyPage = () => {
 
   const publicLink = `${window.location.origin}/poll/${pollId}`;
   
-  const { isMuted, toggleMute } = useContext(SoundContext);
-  const { play: playLobby, stop: stopLobby } = useAudio('/sounds/lobby.wav', { loop: true, volume: 0.3 });
-
-  // Play lobby music when in lobby (no active question and not expired)
-  useEffect(() => {
-    if (analytics && analytics.poll) {
-      if (!analytics.poll.activeQuestionId && analytics.poll.status !== 'EXPIRED') {
-        playLobby();
-      } else {
-        stopLobby();
-      }
-    }
-    return () => stopLobby();
-  }, [analytics, playLobby, stopLobby]);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
@@ -146,14 +129,6 @@ const PollLobbyPage = () => {
         </button>
 
         <div className="flex items-center gap-4">
-          {/* Mute Toggle */}
-          <button
-            onClick={toggleMute}
-            className="p-2 rounded-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
-            title={isMuted ? "Unmute sounds" : "Mute sounds"}
-          >
-            {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-          </button>
 
           {/* Responses Counter Widget (Only if active question) */}
           {activeQuestion && (

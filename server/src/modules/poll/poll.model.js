@@ -33,7 +33,18 @@ const questionSchema = new mongoose.Schema({
     type: Number,
     default: 30, // seconds
     min: [5, 'Duration must be at least 5 seconds'],
-    max: [30, 'Duration cannot exceed 30 seconds'],
+    validate: {
+      validator: function (value) {
+        // Allow legacy polls that already have >30s duration to be saved (e.g. by cron jobs)
+        if (this && typeof this.isModified === 'function') {
+          if (!this.isNew && !this.isModified('duration')) {
+            return true;
+          }
+        }
+        return value <= 30;
+      },
+      message: 'Duration cannot exceed 30 seconds',
+    },
   },
   points: {
     type: Number,

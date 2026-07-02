@@ -3,7 +3,7 @@ import { Loader2, Send, Clock, CheckCircle2 } from 'lucide-react';
 import PublicQuestionCard from './PublicQuestionCard';
 import { submitLiveAnswer } from '../../api/publicPoll.api';
 import { toast } from 'react-hot-toast';
-import { useAudio } from '../../hooks/useAudio';
+
 
 /**
  * Public Question List (Live Presenter Mode)
@@ -18,10 +18,6 @@ const PublicQuestionList = ({ pollId, participantId, questions = [], answers = {
 
   const isLiveMode = pollStatus === 'PUBLISHED' || pollStatus === 'ACTIVE';
 
-  // Audio Hooks
-  const { play: playTickTock, stop: stopTickTock } = useAudio('/sounds/ticktock.wav', { volume: 0.5 });
-  const { play: playCorrect } = useAudio('/sounds/correct.wav', { volume: 0.8 });
-  const { play: playWrong } = useAudio('/sounds/wrong.wav', { volume: 0.8 });
 
   // Filter to find the active question
   const activeQuestionIndex = (questions && questions.length > 0) ? questions.findIndex(q => q._id === activeQuestionId) : -1;
@@ -48,15 +44,6 @@ const PublicQuestionList = ({ pollId, participantId, questions = [], answers = {
     return () => clearInterval(interval);
   }, [isLiveMode, activeQuestion, activeQuestionStartTime]);
 
-  // Audio effects for timer
-  useEffect(() => {
-    if (isLiveMode && timeLeft !== null && timeLeft <= 10 && timeLeft > 0) {
-      playTickTock();
-    } else {
-      stopTickTock();
-    }
-    return () => stopTickTock();
-  }, [timeLeft, isLiveMode, playTickTock, stopTickTock]);
 
   // Handler to safely update the answers dictionary in the parent page
   const handleAnswerChange = (questionId, value) => {
@@ -106,15 +93,9 @@ const PublicQuestionList = ({ pollId, participantId, questions = [], answers = {
       }));
       toast.success('Answer submitted successfully!');
       
-      // Play sound based on result (if isCorrect is undefined, assume correct/success)
-      if (isCorrect === false) {
-        playWrong();
-      } else {
-        playCorrect();
-      }
+
     } catch (err) {
       toast.error(err.message || 'Failed to submit answer');
-      playWrong();
     } finally {
       setIsSubmitting(false);
     }

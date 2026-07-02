@@ -2,17 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Clock, Trophy, Timer, Target } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { getParticipantStats } from '../../api/publicPoll.api';
-import { useAudio } from '../../hooks/useAudio';
+
 
 const PollExpired = ({ poll }) => {
   const [stats, setStats] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   
-  const { play: playApplause } = useAudio('/sounds/applause.wav', { volume: 0.7 });
-
-  useEffect(() => {
-    playApplause();
-  }, [playApplause]);
 
   useEffect(() => {
     const fetchStats = async () => {
