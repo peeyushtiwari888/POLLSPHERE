@@ -110,7 +110,13 @@ const pollSchema = new mongoose.Schema(
       required: [true, 'Poll must have an expiry date'],
       validate: {
         validator: function (value) {
-          // Ensure the expiry date is in the future when creating the poll
+          // Ensure the expiry date is in the future when creating or modifying the date.
+          // Skip validation if we are just saving/updating other fields of an existing poll.
+          if (this && typeof this.isModified === 'function') {
+            if (!this.isNew && !this.isModified('expiryDate')) {
+              return true;
+            }
+          }
           return value > new Date();
         },
         message: 'Expiry date must be in the future',
