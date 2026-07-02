@@ -117,8 +117,13 @@ const QuestionCard = ({ question, index, totalQuestions, onUpdate, onDelete }) =
                    <input 
                      type="number"
                      min="5"
+                     max="30"
                      value={question.duration}
-                     onChange={(e) => onUpdate({ duration: Number(e.target.value) })}
+                     onChange={(e) => {
+                       let val = Number(e.target.value);
+                       if (val > 30) val = 30;
+                       onUpdate({ duration: val });
+                     }}
                      className="w-full bg-transparent border-b border-gray-300 dark:border-gray-700 focus:border-gray-900 dark:focus:border-white focus:outline-none py-1 text-gray-900 dark:text-white"
                    />
                 </div>

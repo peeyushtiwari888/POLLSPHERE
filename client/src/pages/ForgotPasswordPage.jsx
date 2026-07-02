@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 import { Mail, Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { forgotPassword } from '../api/auth.api';
 import AuthCard from '../components/auth/AuthCard';
+import toast from 'react-hot-toast';
 
 const forgotPasswordSchema = z.object({
   email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
@@ -28,9 +29,7 @@ const ForgotPasswordPage = () => {
       await forgotPassword(data.email);
       setIsSubmitted(true);
     } catch (error) {
-      // In a real app we might show an error, but for security, 
-      // often we just pretend it succeeded to prevent email enumeration.
-      setIsSubmitted(true);
+      toast.error(error.message || 'Something went wrong. Please try again.');
     }
   };
 

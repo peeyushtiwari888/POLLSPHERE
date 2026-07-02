@@ -16,6 +16,9 @@ const questionValidation = z.object({
     .trim()
     .min(1, 'Question text cannot be empty'),
   isRequired: z.boolean().optional(),
+  duration: z.number().min(5, 'Duration must be at least 5 seconds').max(30, 'Duration cannot exceed 30 seconds').optional(),
+  points: z.number().min(0, 'Points cannot be negative').optional(),
+  questionType: z.enum(['SINGLE_CHOICE', 'MULTI_SELECT', 'WORD_CLOUD', 'OPEN_TEXT', 'RATING']).optional(),
   options: z
     .array(optionValidation)
     .min(2, 'Each question must have at least two options'),
