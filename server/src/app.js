@@ -32,7 +32,11 @@ app.use('/api', limiter);
 
 // Global Middlewares
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow dynamic origins for deployment flexibility, 
+    // reflecting the exact origin to support credentials (cookies)
+    callback(null, origin || true);
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' })); // Parses incoming JSON payloads
