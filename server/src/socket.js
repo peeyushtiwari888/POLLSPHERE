@@ -1,6 +1,6 @@
 import { Server } from 'socket.io';
 import { registerSocketEvents } from './socketEvents.js';
-import cookie from 'cookie';
+import * as cookie from 'cookie';
 import jwt from 'jsonwebtoken';
 import User from './modules/auth/auth.model.js';
 

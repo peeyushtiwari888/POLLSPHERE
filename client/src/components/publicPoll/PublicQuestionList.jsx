@@ -23,13 +23,9 @@ const PublicQuestionList = ({ pollId, participantId, questions = [], answers = {
   const { play: playCorrect } = useAudio('/sounds/correct.wav', { volume: 0.8 });
   const { play: playWrong } = useAudio('/sounds/wrong.wav', { volume: 0.8 });
 
-  if (!questions || questions.length === 0) {
-    return null;
-  }
-
   // Filter to find the active question
-  const activeQuestionIndex = questions.findIndex(q => q._id === activeQuestionId);
-  const activeQuestion = questions[activeQuestionIndex];
+  const activeQuestionIndex = (questions && questions.length > 0) ? questions.findIndex(q => q._id === activeQuestionId) : -1;
+  const activeQuestion = activeQuestionIndex >= 0 ? questions[activeQuestionIndex] : null;
 
   // Timer Logic
   useEffect(() => {
@@ -123,6 +119,10 @@ const PublicQuestionList = ({ pollId, participantId, questions = [], answers = {
       setIsSubmitting(false);
     }
   };
+
+  if (!questions || questions.length === 0) {
+    return null;
+  }
 
   // If no question is active, show the waiting screen
   if (!activeQuestionId) {
