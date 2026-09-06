@@ -64,17 +64,17 @@
 
 ```mermaid
 graph TD
-    Client[Client / Browser]
-    Vite[Frontend (React + Vite)]
-    Express[Backend (Node + Express)]
-    Mongo[(Database: MongoDB)]
-    Socket((Socket.io))
+    Client["Client / Browser"]
+    Vite["Frontend (React + Vite)"]
+    Express["Backend (Node + Express)"]
+    Mongo[("Database: MongoDB")]
+    Socket(("Socket.io"))
 
-    Client -->|HTTP/HTTPS| Vite
-    Vite -->|REST APIs| Express
-    Vite <-->|WebSockets| Socket
-    Express <-->|WebSockets| Socket
-    Express <-->|Mongoose ODM| Mongo
+    Client -->|"HTTP/HTTPS"| Vite
+    Vite -->|"REST APIs"| Express
+    Vite <-->|"WebSockets"| Socket
+    Express <-->|"WebSockets"| Socket
+    Express <-->|"Mongoose ODM"| Mongo
 ```
 
 ---
